@@ -5,12 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bf7c6109-2fba-4f95-acb8-11c54b38a465" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../bardview5-server/.eslintrc.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../bardview5-server/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../bardview5-server/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../bardview5-server/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../bardview5-server/tsconfig.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bardview5-server/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../bardview5-server/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bardview5-server/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../bardview5-server/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bardview5-server/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../bardview5-server/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,6 +25,10 @@
       <filtered-out-file-type name="TAG" />
       <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
     </file-type-list>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/../bardview5-server/package.json" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../bardview5-server/index.ts" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectId" id="1wQjKetz1YrBjP9vvjUkJz5uVPF" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -103,7 +105,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1628397643915</updated>
-      <workItem from="1628397646945" duration="1720000" />
+      <workItem from="1628397646945" duration="2894000" />
     </task>
     <servers />
   </component>
