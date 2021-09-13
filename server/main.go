@@ -1,31 +1,44 @@
 package main
 
-//go:generate genny -in=gen-api-models.go -out=api-models.go gen "ApiModel=string,int"
+//go:generate genny -in=models/gen-api-models.go -out=models/api-models.go gen "ApiModel=RPG,RPGList"
 
 import (
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/loopfz/gadgeto/tonic"
 	"github.com/wI2L/fizz"
 	"github.com/wI2L/fizz/openapi"
 	"net/http"
+	"server/models"
 )
 
-type RPG struct {
-	Id   string
-	Name string
-}
-
-var rpgs = []RPG{
-	{
-		"dnd5e",
-		"Dungeons & Dragons 5e",
-	},
-}
-
 // ListRPGs lists the available RPGs.
-func ListRPGs(c *gin.Context) ([]RPG, error) {
-	return rpgs, nil
+func ListRPGs(c *gin.Context) (models.RPGListResponseType, error) {
+	return models.RPGListResponseType{
+		Data: models.AllRPGs,
+	}, nil
+}
+
+type RPGQueryInput struct {
+	Id string `path:"id" validate:"required" description:"RPG Id"`
+}
+
+// GetRPG gets a single RPG.
+func GetRPG(c *gin.Context, in *RPGQueryInput) (models.RPGResponseType, error) {
+	for _, rpg := range models.AllRPGs {
+		if rpg.Id == in.Id {
+			return models.RPGResponseType{
+				Data: models.AllRPGs[0],
+			}, nil
+		}
+	}
+	c.Status(http.StatusNotFound)
+	return models.RPGResponseType{
+		Errors: map[string]interface{}{
+			"id": fmt.Sprintf("Id %v not found", in.Id),
+		},
+	}, nil
 }
 
 // Main function
@@ -58,6 +71,10 @@ func main() {
 		fizz.Summary("List the rpgs available"),
 		fizz.Response("400", "Bad request", nil, nil, nil),
 	}, tonic.Handler(ListRPGs, 200))
+	rpgsGroup.GET(":id", []fizz.OperationOption{
+		fizz.Summary("Gets a single RPG"),
+		fizz.Response("400", "Bad request", nil, nil, nil),
+	}, tonic.Handler(GetRPG, 200))
 
 	srv := &http.Server{
 		Addr:    ":4242",
