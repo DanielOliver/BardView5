@@ -1,14 +1,29 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from '@prisma/client';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { User } from './entities/User';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { ApiPrefix } from './globals';
+import { UserModel } from './api-models/usermodel.dto';
+import { Loaded } from '@mikro-orm/core';
 
-@Controller()
+@Controller(ApiPrefix)
+@ApiTags('Users')
 export class AppController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly em: EntityManager,
+  ) {}
 
   @Get()
-  getHello(): Promise<User[]> {
-    return this.userService.users({});
+  @ApiOperation({ summary: 'Fetches all users' })
+  async getUsers(): Promise<UserModel[]> {
+    return (await this.em.find(User, {})).map((user) => new UserModel(user));
   }
 
   @Get(':email')

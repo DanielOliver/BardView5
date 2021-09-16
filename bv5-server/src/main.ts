@@ -8,6 +8,7 @@ import {
   format as WinstonFormat,
   transports as WinstonTransports,
 } from 'winston';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -25,6 +26,16 @@ async function bootstrap() {
         }),
       ],
     }),
+  });
+
+  const config = new DocumentBuilder()
+    .setTitle('BardView5')
+    .setDescription('You want to play some table top RPGs?')
+    .setVersion('0.0.1')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('openapi', app, document, {
+    customSiteTitle: 'BardView5 Swagger',
   });
   await app.listen(3000);
 }
