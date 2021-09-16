@@ -2,17 +2,11 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { UserService } from './user.service';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from './entities/User';
-import {
-  ApiOkResponse,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { ApiPrefix } from './globals';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiPrefixV1 } from './globals';
 import { UserModel } from './api-models/usermodel.dto';
-import { Loaded } from '@mikro-orm/core';
 
-@Controller(ApiPrefix)
+@Controller(ApiPrefixV1 + '/user')
 @ApiTags('Users')
 export class AppController {
   constructor(

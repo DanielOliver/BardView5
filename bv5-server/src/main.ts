@@ -9,6 +9,7 @@ import {
   transports as WinstonTransports,
 } from 'winston';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ApiPrefixV1 } from './globals';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -34,7 +35,7 @@ async function bootstrap() {
     .setVersion('0.0.1')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('openapi', app, document, {
+  SwaggerModule.setup(ApiPrefixV1, app, document, {
     customSiteTitle: 'BardView5 Swagger',
   });
   await app.listen(3000);
