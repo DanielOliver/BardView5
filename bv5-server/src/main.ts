@@ -10,6 +10,7 @@ import {
 } from 'winston';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ApiPrefixV1 } from './globals';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -28,6 +29,7 @@ async function bootstrap() {
       ],
     }),
   });
+  app.useGlobalPipes(new ValidationPipe());
 
   const config = new DocumentBuilder()
     .setTitle('BardView5')
