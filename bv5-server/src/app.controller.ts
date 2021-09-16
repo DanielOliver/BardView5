@@ -1,17 +1,18 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { AppService } from './app.service';
+import { UserService } from './user.service';
+import { User } from '@prisma/client';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  getHello(): Promise<User[]> {
+    return this.userService.users({});
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string): string {
-    return `This action returns a #${id} cat`;
+  @Get(':email')
+  create(@Param('email') email: string) {
+    this.userService.createUser({ email: email, name: 'name2' });
   }
 }
