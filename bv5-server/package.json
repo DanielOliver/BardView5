@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@casl/ability": "^5.4.3",
+    "ksuid": "^2.0.0",
     "@mikro-orm/core": "^4.5.9",
     "@mikro-orm/nestjs": "^4.3.0",
     "@mikro-orm/postgresql": "^4.5.9",

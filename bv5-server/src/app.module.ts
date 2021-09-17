@@ -7,12 +7,22 @@ import { RoleAssignment } from './entities/RoleAssignment';
 import { RolePermission } from './entities/RolePermission';
 import { Role } from './entities/Role';
 import { RoleType } from './entities/RoleType';
+import { RoleAction } from './entities/RoleAction';
+import { RoleSubject } from './entities/RoleSubject';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MikroOrmModule.forRoot({
-      entities: [User, RoleAssignment, RolePermission, Role, RoleType],
+      entities: [
+        User,
+        RoleAssignment,
+        RolePermission,
+        Role,
+        RoleType,
+        RoleAction,
+        RoleSubject,
+      ],
       dbName: 'bardview5',
       type: 'postgresql',
       clientUrl: process.env.DATABASE_URL,

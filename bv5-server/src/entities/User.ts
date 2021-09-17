@@ -13,6 +13,9 @@ export class User {
   @PrimaryKey({ columnType: 'int8' })
   id!: string;
 
+  @Property({ length: 27, columnType: 'bpchar' })
+  uid!: string;
+
   @Property({
     columnType: 'timestamp',
     length: 6,
@@ -39,6 +42,9 @@ export class User {
 
   @Property({ columnType: 'text' })
   name!: string;
+
+  @Property()
+  tags!: string[];
 
   @OneToMany({
     entity: () => RoleAssignment,

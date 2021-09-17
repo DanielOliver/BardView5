@@ -1,37 +1,48 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { Role } from './Role';
+import { RoleAction } from './RoleAction';
+import { RoleSubject } from './RoleSubject';
 
 @Entity()
 export class RolePermission {
-
   @PrimaryKey({ columnType: 'int8' })
   id!: string;
 
-  @Property({ columnType: 'timestamp', length: 6, defaultRaw: `timezone('utc'::text, now())` })
+  @Property({ length: 27, columnType: 'bpchar' })
+  uid!: string;
+
+  @Property({
+    columnType: 'timestamp',
+    length: 6,
+    defaultRaw: `timezone('utc'::text, now())`,
+  })
   createdAt!: Date;
 
-  @Property({ columnType: 'timestamp', length: 6, defaultRaw: `timezone('utc'::text, now())` })
+  @Property({
+    columnType: 'timestamp',
+    length: 6,
+    defaultRaw: `timezone('utc'::text, now())`,
+  })
   effectiveDate!: Date;
 
   @Property({ columnType: 'timestamp', length: 6, nullable: true })
   endDate?: Date;
 
   @Property()
-  isActive: boolean = true;
+  isActive = true;
 
   @ManyToOne({ entity: () => Role })
   role!: Role;
 
-  @Property({ columnType: 'text[]' })
-  actions!: string[];
+  @ManyToOne({ entity: () => RoleAction, fieldName: 'action' })
+  action!: RoleAction;
 
-  @Property({ columnType: 'text' })
-  subject!: string;
+  @ManyToOne({ entity: () => RoleSubject, fieldName: 'subject' })
+  subject!: RoleSubject;
 
-  @Property({ nullable: true })
-  conditions?: object;
+  @Property()
+  conditions!: object;
 
   @Property({ columnType: 'text[]', nullable: true })
   fields?: string[];
-
 }

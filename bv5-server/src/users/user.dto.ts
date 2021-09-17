@@ -5,17 +5,19 @@ class UserBase {
   email!: string;
   @IsNotEmpty()
   name!: string;
+  tags: string[];
 }
 
 export class UserResponse extends UserBase {
-  id!: string;
+  uid!: string;
 
   public constructor(init?: Partial<UserResponse>) {
     super();
 
     this.email = init.email;
     this.name = init.name;
-    this.id = init.id;
+    this.uid = init.uid;
+    this.tags = init.tags;
   }
 }
 
