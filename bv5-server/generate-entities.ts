@@ -11,6 +11,7 @@ import * as dotenv from 'dotenv';
     dbName: 'bardview5',
     type: 'postgresql',
     clientUrl: process.env.DATABASE_URL,
+    propagateToOneOwner: true,
   });
   const generator = orm.getEntityGenerator();
   const dump = await generator.generate({

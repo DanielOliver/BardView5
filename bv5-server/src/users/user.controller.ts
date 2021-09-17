@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from '../entities/User';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -21,6 +21,26 @@ export class UserController {
   })
   async getUsers(): Promise<UserResponse[]> {
     return (await this.em.find(User, {})).map((user) => new UserResponse(user));
+  }
+
+  @Get(':id/roleassignments')
+  @ApiOperation({ summary: 'Fetches all roles assigned to user' })
+  @ApiOkResponse({
+    isArray: true,
+    type: UserResponse,
+  })
+  async getUserRoleAssignments(@Param('id') userId: string) {
+    return (
+      await this.em.findOne(
+        User,
+        { id: userId },
+        {
+          populate: {
+            roleAssignments: true,
+          },
+        },
+      )
+    ).roleAssignments;
   }
 
   @Post()
