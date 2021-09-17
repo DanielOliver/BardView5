@@ -46,6 +46,7 @@ async function bootstrap() {
   SwaggerModule.setup(ApiPrefixV1, app, document, {
     customSiteTitle: 'BardView5 Swagger',
   });
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
   await app.listen(3000);
 }
 
