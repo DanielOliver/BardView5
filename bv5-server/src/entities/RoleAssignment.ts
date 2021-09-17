@@ -1,7 +1,9 @@
-import { Entity, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { Role } from './Role';
+import { User } from './User';
 
 @Entity()
-export class User {
+export class RoleAssignment {
 
   @PrimaryKey({ columnType: 'int8' })
   id!: string;
@@ -18,11 +20,10 @@ export class User {
   @Property()
   isActive: boolean = true;
 
-  @Unique({ name: 'user_email_uindex' })
-  @Property({ columnType: 'text' })
-  email!: string;
+  @ManyToOne({ entity: () => Role })
+  role!: Role;
 
-  @Property({ columnType: 'text' })
-  name!: string;
+  @ManyToOne({ entity: () => User })
+  user!: User;
 
 }
