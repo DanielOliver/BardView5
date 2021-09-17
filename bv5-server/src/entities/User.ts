@@ -1,14 +1,19 @@
 import { Entity, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 
-@Entity({ collection: 'User' })
+@Entity()
 export class User {
-  @PrimaryKey()
-  id!: number;
 
-  @Unique({ name: 'User_email_key' })
+  @PrimaryKey({ columnType: 'int8' })
+  id!: string;
+
+  @Property({ columnType: 'timestamp', length: 6, defaultRaw: `timezone('utc'::text, now())` })
+  createdAt!: Date;
+
+  @Unique({ name: 'user_email_uindex' })
   @Property({ columnType: 'text' })
   email!: string;
 
-  @Property({ columnType: 'text', nullable: true })
-  name?: string;
+  @Property({ columnType: 'text' })
+  name!: string;
+
 }

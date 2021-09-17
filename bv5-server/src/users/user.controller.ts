@@ -22,7 +22,10 @@ export class UserController {
 
   @Post()
   @ApiOperation({ summary: 'Creates a new user' })
-  createUser(@Body() user: UserCreationRequest) {
-    return;
+  async createUser(@Body() user: UserCreationRequest) {
+    const newUser = new User();
+    newUser.name = user.name;
+    newUser.email = user.email;
+    await this.em.persistAndFlush([newUser]);
   }
 }

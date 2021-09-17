@@ -8,7 +8,7 @@ class UserBase {
 }
 
 export class UserResponse extends UserBase {
-  id!: number;
+  id!: string;
 
   public constructor(init?: Partial<UserResponse>) {
     super();

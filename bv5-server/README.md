@@ -22,7 +22,7 @@ $ npm run start:prod
 ## Running dependencies
 
 ```bash
-docker run --name bardview5 -p 5432:5432 --rm -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=bardview5 -d postgres
+docker run --name bardview5 -p 5432:5432 --rm -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=bardview5 -d postgres:13
 ```
 
 ## Test
