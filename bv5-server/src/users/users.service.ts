@@ -1,29 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { UserCreationRequest, UserResponse } from './users.dto';
 import KSUID from 'ksuid';
-import { User } from '../entities/User';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { QueryOrder, Reference } from '@mikro-orm/core';
 import { PG_CONNECTION } from '../const';
 import { Pool } from 'pg';
 import {
-  findUserByUid,
-  insertNewUser,
-  stringArray,
+  sqlUsersFindByUid,
+  sqlUsersGetPaginated,
+  sqlUsersUpsert,
 } from '../queries/user.queries';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly em: EntityManager,
-    @InjectRepository(User)
-    private readonly userRepository: EntityRepository<User>,
-    @Inject(PG_CONNECTION) private readonly pg: Pool,
-  ) {}
+  constructor(@Inject(PG_CONNECTION) private readonly pg: Pool) {}
 
   async getUserResponse(userUid: string): Promise<UserResponse> {
-    const user = await findUserByUid.run(
+    const user = await sqlUsersFindByUid.run(
       {
         uid: userUid,
       },
@@ -40,13 +31,9 @@ export class UsersService {
     limit: number,
   ): Promise<UserResponse[]> {
     return (
-      await this.userRepository.find(
-        {},
-        {
-          orderBy: { id: QueryOrder.ASC },
-          offset: offset,
-          limit: limit,
-        },
+      await sqlUsersGetPaginated.run(
+        { offset: offset.toString(), limit: limit.toString() },
+        this.pg,
       )
     ).map((x) => new UserResponse(x));
   }
@@ -58,8 +45,7 @@ export class UsersService {
     },
   ): Promise<string> {
     const userKsuid = await KSUID.random();
-    let tags: Array<string>;
-    const insertedIds = await insertNewUser.run(
+    const insertedIds = await sqlUsersUpsert.run(
       {
         users: [
           {
@@ -67,6 +53,7 @@ export class UsersService {
             name: newUser.name,
             email: newUser.email,
             tags: newUser.tags,
+            created_by: null,
           },
         ],
       },
