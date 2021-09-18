@@ -7,6 +7,7 @@ import {
   Property,
 } from '@mikro-orm/core';
 import { RoleType } from './RoleType';
+import { User } from './User';
 import { RoleAssignment } from './RoleAssignment';
 import { RolePermission } from './RolePermission';
 
@@ -17,6 +18,9 @@ export class Role {
 
   @Property({ length: 27, columnType: 'bpchar' })
   uid!: string;
+
+  @ManyToOne({ entity: () => User, fieldName: 'created_by', nullable: true })
+  createdBy?: User;
 
   @Property({
     columnType: 'timestamp',
@@ -44,7 +48,7 @@ export class Role {
   @ManyToOne({ entity: () => RoleType, nullable: true })
   roleType?: RoleType;
 
-  @Property()
+  @Property({ columnType: 'text[]' })
   tags!: string[];
 
   @OneToMany({

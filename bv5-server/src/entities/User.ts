@@ -1,6 +1,8 @@
 import {
   Collection,
   Entity,
+  IdentifiedReference,
+  ManyToOne,
   OneToMany,
   PrimaryKey,
   Property,
@@ -15,6 +17,14 @@ export class User {
 
   @Property({ length: 27, columnType: 'bpchar' })
   uid!: string;
+
+  @ManyToOne({
+    entity: () => User,
+    fieldName: 'created_by',
+    nullable: true,
+    wrappedReference: true,
+  })
+  createdBy?: IdentifiedReference<User>;
 
   @Property({
     columnType: 'timestamp',

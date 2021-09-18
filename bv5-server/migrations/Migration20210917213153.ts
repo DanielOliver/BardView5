@@ -9,13 +9,18 @@ create table "user"
         constraint user_pk
             primary key,
     uid            char(27)                                                       not null,
+    created_by     bigint                                                         null,
     created_at     timestamp without time zone default (now() at time zone 'utc') not null,
     effective_date timestamp without time zone default (now() at time zone 'utc') not null,
     end_date       timestamp without time zone                                    null,
     is_active      boolean                                                        not null default (true),
     email          text                                                           not null,
     name           text                                                           not null,
-    tags           text[]                                                         not null
+    tags           text[]                                                         not null,
+
+    CONSTRAINT fk_user_createdby
+        FOREIGN KEY (created_by)
+            REFERENCES "user" (id)
 );
 
 create unique index user_email_uindex on "user" (email);
@@ -39,6 +44,7 @@ create table "role"
         constraint role_pk
             primary key,
     uid            char(27)                                                       not null,
+    created_by     bigint                                                         null,
     created_at     timestamp without time zone default (now() at time zone 'utc') not null,
     effective_date timestamp without time zone default (now() at time zone 'utc') not null,
     end_date       timestamp without time zone                                    null,
@@ -49,7 +55,10 @@ create table "role"
 
     CONSTRAINT fk_role_roletype
         FOREIGN KEY (role_type_id)
-            REFERENCES role_type (id)
+            REFERENCES role_type (id),
+    CONSTRAINT fk_role_createdby
+        FOREIGN KEY (created_by)
+            REFERENCES "user" (id)
 );
 
 create table "role_assignment"
@@ -58,6 +67,7 @@ create table "role_assignment"
         constraint role_assignment_pk
             primary key,
     uid            char(27)                                                       not null,
+    created_by     bigint                                                         null,
     created_at     timestamp without time zone default (now() at time zone 'utc') not null,
     effective_date timestamp without time zone default (now() at time zone 'utc') not null,
     end_date       timestamp without time zone                                    null,
@@ -71,6 +81,9 @@ create table "role_assignment"
             REFERENCES role (id),
     CONSTRAINT fk_roleassignment_user
         FOREIGN KEY (user_id)
+            REFERENCES "user" (id),
+    CONSTRAINT fk_roleassignment_createdby
+        FOREIGN KEY (created_by)
             REFERENCES "user" (id)
 );
 
@@ -94,6 +107,7 @@ create table "role_permission"
         constraint role_permission_pk
             primary key,
     uid            char(27)                                                       not null,
+    created_by     bigint                                                         null,
     created_at     timestamp without time zone default (now() at time zone 'utc') not null,
     effective_date timestamp without time zone default (now() at time zone 'utc') not null,
     end_date       timestamp without time zone                                    null,
@@ -112,8 +126,12 @@ create table "role_permission"
             REFERENCES role_action (name),
     CONSTRAINT fk_rolepermission_subject
         FOREIGN KEY (subject)
-            REFERENCES role_subject (name)
-); 
+            REFERENCES role_subject (name),
+    CONSTRAINT fk_roleassignment_createdby
+        FOREIGN KEY (created_by)
+            REFERENCES "user" (id)
+
+);
     `);
   }
 }

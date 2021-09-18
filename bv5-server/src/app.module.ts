@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UserController } from './users/user.controller';
+import { UsersController } from './users/users.controller';
 import { ConfigModule } from '@nestjs/config';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { User } from './entities/User';
@@ -9,6 +9,7 @@ import { Role } from './entities/Role';
 import { RoleType } from './entities/RoleType';
 import { RoleAction } from './entities/RoleAction';
 import { RoleSubject } from './entities/RoleSubject';
+import { UsersService } from './users/users.service';
 
 @Module({
   imports: [
@@ -28,7 +29,9 @@ import { RoleSubject } from './entities/RoleSubject';
       clientUrl: process.env.DATABASE_URL,
       // autoLoadEntities: true,
     }),
+    MikroOrmModule.forFeature([User]),
   ],
-  controllers: [UserController],
+  controllers: [UsersController],
+  providers: [UsersService],
 })
 export class AppModule {}

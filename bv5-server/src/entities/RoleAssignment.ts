@@ -8,7 +8,10 @@ export class RoleAssignment {
   id!: string;
 
   @Property({ length: 27, columnType: 'bpchar' })
-  ksuid!: string;
+  uid!: string;
+
+  @ManyToOne({ entity: () => User, fieldName: 'created_by', nullable: true })
+  createdBy?: User;
 
   @Property({
     columnType: 'timestamp',
@@ -36,6 +39,6 @@ export class RoleAssignment {
   @ManyToOne({ entity: () => User })
   user!: User;
 
-  @Property()
+  @Property({ columnType: 'text[]' })
   tags!: string[];
 }
