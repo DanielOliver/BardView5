@@ -21,7 +21,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "orm:entities": "ts-node generate-entities",
     "orm:generate": "ts-node generate-migration.ts",
-    "orm:apply": "ts-node apply-migration.ts"
+    "orm:apply": "ts-node apply-migration.ts",
+    "pgtyped": "node -r dotenv/config node_modules/@pgtyped/cli -w -c pgtyped.json"
   },
   "dependencies": {
     "@casl/ability": "^5.4.3",
@@ -41,7 +42,9 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
     "swagger-ui-express": "^4.1.6",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "pg": "^8.7.1",
+    "@pgtyped/query": "^0.12.0"
   },
   "devDependencies": {
     "@mikro-orm/cli": "^4.5.9",
@@ -64,7 +67,9 @@
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
     "tsconfig-paths": "^3.10.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "@pgtyped/cli": "^0.12.0",
+    "@types/pg": "^8.6.1"
   },
   "jest": {
     "moduleFileExtensions": [

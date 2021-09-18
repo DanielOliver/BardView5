@@ -4,13 +4,18 @@ import { ApiPrefixV1 } from '../globals';
 import { UserResponse, UserCreationRequest } from './users.dto';
 import { Response } from 'express';
 import { UsersService } from './users.service';
+import { RoleAssignmentResponse } from '../roles/roles.dto';
+import { RolesService } from '../roles/roles.service';
 
 const UserPrefix = '/users';
 
 @Controller(ApiPrefixV1 + UserPrefix)
 @ApiTags('Users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly rolesService: RolesService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Fetches some users' })
@@ -23,6 +28,18 @@ export class UsersController {
     @Query('limit') limit: number,
   ): Promise<UserResponse[]> {
     return await this.usersService.getUserResponses(offset, limit);
+  }
+
+  @Get(':uid/roleassignments')
+  @ApiOperation({ summary: "Fetches a user's role assignments" })
+  @ApiOkResponse({
+    type: RoleAssignmentResponse,
+    isArray: true,
+  })
+  async getUserRoleAssignments(
+    @Param('uid') userUid: string,
+  ): Promise<RoleAssignmentResponse[]> {
+    return await this.rolesService.getRoleAssignmentResponseByUser(userUid);
   }
 
   @Get(':uid')

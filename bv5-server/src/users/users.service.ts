@@ -1,10 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { UserCreationRequest, UserResponse } from './users.dto';
 import KSUID from 'ksuid';
 import { User } from '../entities/User';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { QueryOrder, Reference } from '@mikro-orm/core';
+import { PG_CONNECTION } from '../const';
+import { Pool } from 'pg';
+import {
+  findUserByUid,
+  insertNewUser,
+  stringArray,
+} from '../queries/user.queries';
 
 @Injectable()
 export class UsersService {
@@ -12,12 +19,20 @@ export class UsersService {
     private readonly em: EntityManager,
     @InjectRepository(User)
     private readonly userRepository: EntityRepository<User>,
+    @Inject(PG_CONNECTION) private readonly pg: Pool,
   ) {}
 
   async getUserResponse(userUid: string): Promise<UserResponse> {
-    return new UserResponse(
-      await this.userRepository.findOne({ uid: userUid }),
+    const user = await findUserByUid.run(
+      {
+        uid: userUid,
+      },
+      this.pg,
     );
+    if (user.length > 0) {
+      return new UserResponse(user[0]);
+    }
+    return null;
   }
 
   async getUserResponses(
@@ -43,18 +58,23 @@ export class UsersService {
     },
   ): Promise<string> {
     const userKsuid = await KSUID.random();
-    const dbUser = new User();
-    dbUser.name = newUser.name;
-    dbUser.email = newUser.email;
-    dbUser.uid = userKsuid.string;
-    dbUser.isActive = true;
-    dbUser.tags = newUser.tags ?? [];
-    if (optional?.creatingUserId) {
-      dbUser.createdBy = Reference.create(
-        this.em.getReference(User, optional.creatingUserId),
-      );
+    let tags: Array<string>;
+    const insertedIds = await insertNewUser.run(
+      {
+        users: [
+          {
+            uid: userKsuid.string,
+            name: newUser.name,
+            email: newUser.email,
+            tags: newUser.tags,
+          },
+        ],
+      },
+      this.pg,
+    );
+    if (insertedIds.length < 1) {
+      return null;
     }
-    await this.em.persistAndFlush([dbUser]);
-    return dbUser.uid;
+    return insertedIds[0].uid;
   }
 }
