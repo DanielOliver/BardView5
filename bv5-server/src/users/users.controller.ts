@@ -1,9 +1,19 @@
-import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  Res,
+} from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiPrefixV1 } from '../globals';
 import { UserResponse, UserCreationRequest } from './users.dto';
 import { Response } from 'express';
 import { UsersService } from './users.service';
+import { SessionScope } from '../session/session';
 
 const UserPrefix = '/users';
 
@@ -22,20 +32,14 @@ export class UsersController {
     @Query('offset') offset: number,
     @Query('limit') limit: number,
   ): Promise<UserResponse[]> {
-    return await this.usersService.getUserResponses(offset, limit);
+    return await this.usersService.getUserResponses(
+      offset,
+      limit,
+      new SessionScope({
+        userId: '3',
+      }),
+    );
   }
-
-  // @Get(':uid/roleassignments')
-  // @ApiOperation({ summary: "Fetches a user's role assignments" })
-  // @ApiOkResponse({
-  //   type: RoleAssignmentResponse,
-  //   isArray: true,
-  // })
-  // async getUserRoleAssignments(
-  //   @Param('uid') userUid: string,
-  // ): Promise<RoleAssignmentResponse[]> {
-  //   return await this.rolesService.getRoleAssignmentResponseByUser(userUid);
-  // }
 
   @Get(':uid')
   @ApiOperation({ summary: 'Fetches a user' })
@@ -43,7 +47,16 @@ export class UsersController {
     type: UserResponse,
   })
   async getUser(@Param('uid') userUid: string): Promise<UserResponse> {
-    return await this.usersService.getUserResponse(userUid);
+    const result = await this.usersService.getUserResponse(
+      userUid,
+      new SessionScope({
+        userId: '3',
+      }),
+    );
+    if (result) {
+      return result;
+    }
+    throw new NotFoundException();
   }
 
   @Post()
@@ -52,7 +65,12 @@ export class UsersController {
     @Body() user: UserCreationRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const newUserUid = await this.usersService.createUser(user);
+    const newUserUid = await this.usersService.createUser(
+      user,
+      new SessionScope({
+        userId: null,
+      }),
+    );
     res.set('Location', '/' + ApiPrefixV1 + UserPrefix + '/' + newUserUid);
   }
 }

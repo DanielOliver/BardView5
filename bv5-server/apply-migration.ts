@@ -8,6 +8,9 @@ import { Migration20210917213153 } from './migrations/Migration20210917213153';
     dbName: 'bardview5',
     type: 'postgresql',
     clientUrl: process.env.DATABASE_URL,
+    discovery: {
+      warnWhenNoEntities: false,
+    },
     migrations: {
       path: './migrations',
       migrationsList: [
