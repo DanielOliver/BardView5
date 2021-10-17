@@ -62,7 +62,8 @@ class UserGet {
 	systemTags: string[] | null;
 	userTags: string[] | null;
 	lastModified: string;
-	userId: string;
+	userId: number;
+	version: number;
 
 	constructor(data?: any) {
 		const d: any = (data && typeof data === 'object') ? ToObject(data) : {};
@@ -71,11 +72,14 @@ class UserGet {
 		this.systemTags = ('systemTags' in d) ? d.systemTags as string[] : null;
 		this.userTags = ('userTags' in d) ? d.userTags as string[] : null;
 		this.lastModified = ('lastModified' in d) ? d.lastModified as string : '';
-		this.userId = ('userId' in d) ? d.userId as string : '';
+		this.userId = ('userId' in d) ? d.userId as number : 0;
+		this.version = ('version' in d) ? d.version as number : 0;
 	}
 
 	toObject(): any {
 		const cfg: any = {};
+		cfg.userId = 'number';
+		cfg.version = 'number';
 		return ToObject(this, cfg);
 	}
 }

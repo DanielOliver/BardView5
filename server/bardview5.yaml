@@ -8,7 +8,54 @@ servers:
   - url: http://localhost:8080
     description: localhost!
 components:
+  parameters:
+    UserId:
+      in: path
+      name: userId
+      schema:
+        type: integer
+        format: int64
+  requestBodies:
+    Patch:
+      description: JsonPatch
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PatchDocument'
+      required: true
+  responses:
+    UserGetOk:
+      description: UserGet
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserGet'
   schemas:
+    PatchDocument:
+      description: A JSONPatch document as defined by RFC 6902
+      required:
+        - "op"
+        - "path"
+      properties:
+        op:
+          type: string
+          description: The operation to be performed
+          enum:
+            - "add"
+            - "remove"
+            - "replace"
+            - "move"
+            - "copy"
+            - "test"
+        path:
+          type: string
+          description: A JSON-Pointer
+        value:
+          type: object
+          description: The value to be used within the operations.
+        from:
+          type: string
+          description: A string containing a JSON Pointer value.
     StringId:
       type: string
       maxLength: 27
@@ -25,13 +72,16 @@ components:
       title: LastModified
     Email:
       type: string
-      format: email
       minLength: 1
       maxLength: 512
       example: test@test.com
+      x-oapi-codegen-extra-tags:
+        validate: "required,email,min=1,max=512"
     SystemTags:
       type: array
       maxItems: 64
+      x-oapi-codegen-extra-tags:
+        validate: "required,max=64,dive,max=256"
       items:
         type: string
         maxLength: 256
@@ -39,6 +89,8 @@ components:
     UserTags:
       type: array
       maxItems: 64
+      x-oapi-codegen-extra-tags:
+        validate: "required,max=64,dive,max=256"
       items:
         type: string
         maxLength: 256
@@ -70,47 +122,65 @@ components:
         - type: object
           properties:
             userId:
-              $ref: '#/components/schemas/StringId'
+              type: integer
+              format: int64
             lastModified:
               $ref: '#/components/schemas/LastModified'
+            version:
+              type: integer
+              format: int64
           required:
             - userId
             - lastModified
-    UserPatch:
+            - version
+    UserPost:
       allOf:
         - $ref: '#/components/schemas/User'
         - type: object
           properties:
             userId:
-              $ref: '#/components/schemas/StringId'
-          required:
-            - userId
+              type: integer
+              format: int64
+            version:
+              type: integer
+              format: int64
 paths:
   /users/{userId}:
     get:
       summary: Returns a user by ID.
+      tags:
+        - user
       parameters:
-        - in: path
-          name: userId
-          required: true
-          schema:
-            $ref: '#/components/schemas/StringId'
+        - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserGet'
+          $ref: '#/components/responses/UserGetOk'
+    patch:
+      summary: Patches a user
+      tags:
+        - user
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        $ref: '#/components/requestBodies/Patch'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserGetOk'
+
   /users:
     post:
-      summary: Creates a new user.
+      summary: Creates a new user or updates a user.
+      tags:
+        - user
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'      # <-------
+              $ref: '#/components/schemas/UserPost'
       responses:
         '201':
           description: Created
+        '204':
+          description: Updated
+
