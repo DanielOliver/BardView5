@@ -9,21 +9,82 @@ servers:
     description: localhost!
 components:
   schemas:
+    StringId:
+      type: string
+      maxLength: 27
+      minLength: 27
+      example: 0ujsswThIGTUYm2K8FjOOfXtY1K
+      title: String Id
+      readOnly: true
+      description: A 27 character string representing an unique id
+    LastModified:
+      type: string
+      format: datetime
+      readOnly: true
+      description: The last modified time of this record
+      title: LastModified
+    Email:
+      type: string
+      format: email
+      minLength: 1
+      maxLength: 512
+      example: test@test.com
+    SystemTags:
+      type: array
+      maxItems: 64
+      items:
+        type: string
+        maxLength: 256
+        example: Player
+    UserTags:
+      type: array
+      maxItems: 64
+      items:
+        type: string
+        maxLength: 256
+        example: LookingForPlayers
     User:
       type: object
       properties:
-        id:
-          type: integer
-          example: 4
-          x-oapi-codegen-extra-tags:
-            validate: required
         name:
           type: string
           example: Arthur Dent
-      # Both properties are required
+          maxLength: 512
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            validate: "required,min=1,max=512"
+        email:
+          $ref: '#/components/schemas/Email'
+        userTags:
+          $ref: '#/components/schemas/UserTags'
+        systemTags:
+          $ref: '#/components/schemas/SystemTags'
       required:
-        - id
+        - systemTags
+        - userTags
+        - email
         - name
+    UserGet:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            userId:
+              $ref: '#/components/schemas/StringId'
+            lastModified:
+              $ref: '#/components/schemas/LastModified'
+          required:
+            - userId
+            - lastModified
+    UserPatch:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            userId:
+              $ref: '#/components/schemas/StringId'
+          required:
+            - userId
 paths:
   /users/{userId}:
     get:
@@ -33,16 +94,14 @@ paths:
           name: userId
           required: true
           schema:
-            type: integer
-            format: int64
-            minimum: 1
+            $ref: '#/components/schemas/StringId'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'    # <-------
+                $ref: '#/components/schemas/UserGet'
   /users:
     post:
       summary: Creates a new user.

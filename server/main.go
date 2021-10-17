@@ -1,7 +1,8 @@
 package main
 
 //go:generate genny -in=models/gen-api-models.go -out=models/api-models.go gen "ApiModel=RPG,RPGList"
-//go:generate oapi-codegen -o bardview5.go -package main -generate types,skip-prune bardview5.yaml
+//go:generate oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
+//go:generate struct2ts -o userget.ts api.UserGet api.User
 
 import (
 	"fmt"
