@@ -5,6 +5,7 @@ package main
 //go:generate struct2ts -o userget.ts api.UserGet api.User
 
 //docker-compose -f docker-compose-local.yml exec db "pg_dump -U postgres -s bardview5 > /sql_dump/snapshot.sql"
+//PowerShell: docker run --rm -v ${PWD}:/src -w /src kjconroy/sqlc generate
 
 import (
 	"fmt"
