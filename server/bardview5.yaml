@@ -1,0 +1,57 @@
+openapi: 3.0.3
+# oapi-codegen -o bardview5.go -generate types bardview5.yaml
+info:
+  title: BardView5
+  description: BardView5
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080
+    description: localhost!
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 4
+          x-oapi-codegen-extra-tags:
+            validate: required
+        name:
+          type: string
+          example: Arthur Dent
+      # Both properties are required
+      required:
+        - id
+        - name
+paths:
+  /users/{userId}:
+    get:
+      summary: Returns a user by ID.
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'    # <-------
+  /users:
+    post:
+      summary: Creates a new user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'      # <-------
+      responses:
+        '201':
+          description: Created
