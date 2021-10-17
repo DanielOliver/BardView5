@@ -4,6 +4,8 @@ package main
 //go:generate oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
 //go:generate struct2ts -o userget.ts api.UserGet api.User
 
+//docker-compose -f docker-compose-local.yml exec db "pg_dump -U postgres -s bardview5 > /sql_dump/snapshot.sql"
+
 import (
 	"fmt"
 	"github.com/gin-contrib/cors"
