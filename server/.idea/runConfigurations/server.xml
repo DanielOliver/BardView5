@@ -2,6 +2,7 @@
   <configuration default="false" name="server" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="server" />
     <working_directory value="$PROJECT_DIR$" />
+    <parameters value="--debug=true serve" />
     <kind value="PACKAGE" />
     <package value="server" />
     <directory value="$PROJECT_DIR$" />
