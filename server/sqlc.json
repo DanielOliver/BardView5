@@ -2,8 +2,8 @@
   "version": 1,
   "packages": [
     {
-      "path": "access",
-      "name": "access",
+      "path": "db",
+      "name": "db",
       "engine": "postgresql",
       "schema": "snapshot/snapshot.sql",
       "queries": "db/query.sql",
