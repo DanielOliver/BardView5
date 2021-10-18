@@ -1,7 +1,7 @@
 package main
 
 //go:generate genny -in=models/gen-api-models.go -out=models/api-models.go gen "ApiModel=RPG,RPGList"
-//go:generate oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
+//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
 //tqwerqwer go:generate go-bindata -pkg main migrations
 
 //struct2ts -o userget.ts api.UserGet api.User
@@ -86,8 +86,7 @@ var migrateCmd = &cobra.Command{
 	},
 }
 
-// Main function
-func main() {
+func configure() {
 	viper.SetConfigName("config") // name of config file (without extension)
 	viper.SetConfigType("yaml")   // REQUIRED if the config file does not have the extension in the name
 	viper.SetEnvPrefix("BARDVIEW5")
@@ -110,6 +109,11 @@ func main() {
 	viper.BindPFlag("connection", migrateCmd.Flags().Lookup("connection"))
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
+}
+
+// Main function
+func main() {
+	configure()
 
 	rootCmd.AddCommand(serveCmd)
 	rootCmd.AddCommand(migrateCmd)
