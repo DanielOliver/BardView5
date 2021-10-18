@@ -104,14 +104,12 @@ func main() {
 	}
 
 	pflag.BoolVarP(&debug, "debug", "D", false, "Debug mode")
+	serveCmd.Flags().IntP("port", "p", 8080, "Port to run Application server on")
+	viper.BindPFlag("port", serveCmd.Flags().Lookup("port"))
+	migrateCmd.Flags().StringP("connection", "c", "", "Connection string to migrate postgresql database at")
+	viper.BindPFlag("connection", migrateCmd.Flags().Lookup("connection"))
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
-
-	serveCmd.Flags().Int("port", 8080, "Port to run Application server on")
-	viper.BindPFlag("port", serveCmd.Flags().Lookup("port"))
-
-	migrateCmd.Flags().StringP("connection", "c", "", "Connection string to migrate postgresql database at")
-	viper.BindPFlag("port", migrateCmd.Flags().Lookup("connection"))
 
 	rootCmd.AddCommand(serveCmd)
 	rootCmd.AddCommand(migrateCmd)
