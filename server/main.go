@@ -1,8 +1,10 @@
 package main
 
+//aserwqerr go:generate go get github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
+//go:generate go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
 //go:generate genny -in=models/gen-api-models.go -out=models/api-models.go gen "ApiModel=RPG,RPGList"
 //go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
-//tqwerqwer go:generate go-bindata -pkg main migrations
+//go:generate go-bindata -pkg main migrations
 
 //struct2ts -o userget.ts api.UserGet api.User
 //docker-compose -f docker-compose-local.yml exec db "pg_dump -U postgres -s bardview5 > /sql_dump/snapshot.sql"
@@ -15,12 +17,17 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"net/http"
+	"server/bardlog"
 	"server/migrations"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/go_bindata"
 	_ "github.com/jteeuwen/go-bindata"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"os"
 )
 
@@ -43,14 +50,28 @@ var serveCmd = &cobra.Command{
 		if !debug {
 			gin.SetMode(gin.ReleaseMode)
 		}
-		router := gin.Default()
+		router := gin.New()
+		router.Use(gin.Recovery())
 		router.Use(cors.Default())
+		router.Use(bardlog.UseLoggingWithRequestId(log.Logger, []string{}, nil))
 		router.GET("/ping", func(c *gin.Context) {
+
+			logger := bardlog.GetLogger(c)
+			logger.Info().Msg("ping pong!")
 			c.JSON(200, gin.H{
 				"message": "pong",
 			})
 		})
-		fmt.Println("Port:", viper.GetInt("port"))
+		router.GET("/ping2", func(c *gin.Context) {
+			c.JSON(500, gin.H{
+				"message": "oh no!",
+			})
+		})
+		router.GET("/user/:name", func(c *gin.Context) {
+			name := c.Param("name")
+			c.String(http.StatusOK, "Hello %s", name)
+		})
+		log.Info().Int("port", viper.GetInt("port")).Msg("Running on port")
 		if err := router.Run(fmt.Sprintf(":%d", viper.GetInt("port"))); err != nil {
 			panic(err)
 		}
@@ -64,8 +85,7 @@ var migrateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		connectionString := viper.GetString("connection")
 		if connectionString == "" {
-			fmt.Println("Expected a connection string")
-			os.Exit(1)
+			log.Fatal().Msg ("Expected a connection string")
 		}
 		s := bindata.Resource(migrations.AssetNames(),
 			func(name string) ([]byte, error) {
@@ -73,15 +93,15 @@ var migrateCmd = &cobra.Command{
 			})
 		d, err := bindata.WithInstance(s)
 		if err != nil {
-			panic(err)
+			log.Fatal().Err(err).Msg("Failed to bindata.")
 		}
 		m, err := migrate.NewWithSourceInstance("go-bindata", d, connectionString)
 		if err != nil {
-			panic(err)
+			log.Fatal().Err(err).Msg("Failed to open migrations.")
 		}
 		err = m.Up()
 		if err != nil {
-			panic(err)
+			log.Fatal().Err(err).Msg("Failed to migrate.")
 		}
 	},
 }
@@ -111,17 +131,36 @@ func configure() {
 	viper.BindPFlags(pflag.CommandLine)
 }
 
+func setupLogging() {
+	hostname, _ := os.Hostname()
+	//zerolog.TimestampFieldName = "t"
+	//zerolog.LevelFieldName = "l"
+	//zerolog.MessageFieldName = "m"
+	//zerolog.ErrorFieldName = "e"
+
+	if debug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	} else {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+	log.Logger =
+		log.With().
+			Str("role", "bardview5").
+			Str("host", hostname).
+			Logger()
+}
+
 // Main function
 func main() {
 	configure()
+	setupLogging()
 
 	rootCmd.AddCommand(serveCmd)
 	rootCmd.AddCommand(migrateCmd)
 	if debug {
-		fmt.Println("Running in debug mode")
+		log.Info().Msg("Running in debug mode")
 	}
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		log.Fatal().Err(err).Msg("Failed")
 	}
 }
