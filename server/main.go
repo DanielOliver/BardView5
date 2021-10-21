@@ -4,7 +4,7 @@ package main
 //go:generate go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
 //go:generate genny -in=models/gen-api-models.go -out=models/api-models.go gen "ApiModel=RPG,RPGList"
 //go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
-//go:generate go-bindata -pkg main migrations
+//bjkasdfjk go:generate go-bindata -pkg main migrations
 
 //struct2ts -o userget.ts api.UserGet api.User
 //docker-compose -f docker-compose-local.yml exec db "pg_dump -U postgres -s bardview5 > /sql_dump/snapshot.sql"
@@ -12,18 +12,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"net/http"
-	"server/bardlog"
 	"server/migrations"
 
-	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	"github.com/golang-migrate/migrate/v4/source/go_bindata"
 	_ "github.com/jteeuwen/go-bindata"
 
 	"github.com/rs/zerolog"
@@ -47,34 +41,7 @@ var serveCmd = &cobra.Command{
 	Short: "The BardView5 website",
 	Long:  `The BardView5 website`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !debug {
-			gin.SetMode(gin.ReleaseMode)
-		}
-		router := gin.New()
-		router.Use(gin.Recovery())
-		router.Use(cors.Default())
-		router.Use(bardlog.UseLoggingWithRequestId(log.Logger, []string{}, nil))
-		router.GET("/ping", func(c *gin.Context) {
-
-			logger := bardlog.GetLogger(c)
-			logger.Info().Msg("ping pong!")
-			c.JSON(200, gin.H{
-				"message": "pong",
-			})
-		})
-		router.GET("/ping2", func(c *gin.Context) {
-			c.JSON(500, gin.H{
-				"message": "oh no!",
-			})
-		})
-		router.GET("/user/:name", func(c *gin.Context) {
-			name := c.Param("name")
-			c.String(http.StatusOK, "Hello %s", name)
-		})
-		log.Info().Int("port", viper.GetInt("port")).Msg("Running on port")
-		if err := router.Run(fmt.Sprintf(":%d", viper.GetInt("port"))); err != nil {
-			panic(err)
-		}
+		serve()
 	},
 }
 
@@ -87,24 +54,10 @@ var migrateCmd = &cobra.Command{
 		if connectionString == "" {
 			log.Fatal().Msg ("Expected a connection string")
 		}
-		s := bindata.Resource(migrations.AssetNames(),
-			func(name string) ([]byte, error) {
-				return migrations.Asset(name)
-			})
-		d, err := bindata.WithInstance(s)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to bindata.")
-		}
-		m, err := migrate.NewWithSourceInstance("go-bindata", d, connectionString)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to open migrations.")
-		}
-		err = m.Up()
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to migrate.")
-		}
+		migrations.Migrate(connectionString)
 	},
 }
+
 
 func configure() {
 	viper.SetConfigName("config") // name of config file (without extension)
