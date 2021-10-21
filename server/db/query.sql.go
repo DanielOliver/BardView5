@@ -11,12 +11,13 @@ import (
 )
 
 const userInsert = `-- name: UserInsert :execrows
-INSERT INTO "user" as u (uid, "name", email, tags, created_by)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO "user" as u (user_id, uid, "name", email, tags, created_by)
+VALUES ($1, $2, $3, $4, $5, $6)
 ON CONFLICT (email) DO NOTHING
 `
 
 type UserInsertParams struct {
+	UserID    int64         `db:"user_id"`
 	Uid       string        `db:"uid"`
 	Name      string        `db:"name"`
 	Email     string        `db:"email"`
@@ -26,6 +27,7 @@ type UserInsertParams struct {
 
 func (q *Queries) UserInsert(ctx context.Context, arg UserInsertParams) (int64, error) {
 	result, err := q.exec(ctx, q.userInsertStmt, userInsert,
+		arg.UserID,
 		arg.Uid,
 		arg.Name,
 		arg.Email,
@@ -39,10 +41,10 @@ func (q *Queries) UserInsert(ctx context.Context, arg UserInsertParams) (int64, 
 }
 
 const usersFindByUid = `-- name: UsersFindByUid :many
-SELECT DISTINCT u.id, u.uid, u.created_by, u.created_at, u.effective_date, u.end_date, u.is_active, u.email, u.name, u.tags
+SELECT DISTINCT u.user_id, u.uid, u.created_by, u.created_at, u.effective_date, u.end_date, u.is_active, u.email, u.name, u.tags
 FROM role_assignment ra
-         INNER JOIN role r on ra.role_id = r.id
-         INNER JOIN role_permission rp on r.id = rp.role_id
+         INNER JOIN role r on ra.role_id = r.role_id
+         INNER JOIN role_permission rp on r.role_id = rp.role_id
          INNER JOIN "user" u on evaluate_access_user(rp.conditions, $1::bigint, u.id)
 WHERE ra.user_id = $1::bigint
   AND rp.subject = 'user'
@@ -50,7 +52,7 @@ WHERE ra.user_id = $1::bigint
   AND ra.is_active = true
   AND r.is_active = true
   AND u.uid = $2
-ORDER BY u.id
+ORDER BY u.user_id
 `
 
 type UsersFindByUidParams struct {
@@ -68,7 +70,7 @@ func (q *Queries) UsersFindByUid(ctx context.Context, arg UsersFindByUidParams) 
 	for rows.Next() {
 		var i User
 		if err := rows.Scan(
-			&i.ID,
+			&i.UserID,
 			&i.Uid,
 			&i.CreatedBy,
 			&i.CreatedAt,

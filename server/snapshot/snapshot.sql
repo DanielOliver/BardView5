@@ -23,8 +23,8 @@ SET row_security = off;
 CREATE FUNCTION public.evaluate_access_user(condition jsonb, session_id bigint, user_id bigint) RETURNS boolean
     LANGUAGE sql
     AS $$
-select (condition ->> 'id')::bigint = user_id
-           OR ((condition ->> 'id:eq') = 'session_id'
+select (condition -> 'id' ->> 'value')::bigint = user_id
+           OR ((condition -> 'id' ->> 'field') = 'session_id'
         AND user_id = session_id)
 $$;
 
@@ -39,9 +39,9 @@ CREATE FUNCTION public.generate_ksuid() RETURNS character
     LANGUAGE sql
     AS $$
 select substring(
-         replace(to_char(clock_timestamp(),'yyyymmddhh24missus')
-                     || (to_char(random()*1e9,'000000000')
-                     ),' ',''),1,27)::char(27);
+               replace(to_char(clock_timestamp(), 'yyyymmddhh24missus')
+                           || (to_char(random() * 1e9, '000000000')
+                           ), ' ', ''), 1, 27)::char(27);
 $$;
 
 
@@ -53,7 +53,11 @@ ALTER FUNCTION public.generate_ksuid() OWNER TO postgres;
 
 CREATE FUNCTION public.get_user_role_global_type_id() RETURNS bigint
     LANGUAGE sql
-    AS $$ SELECT Id FROM "role_type" WHERE name = 'User Role, Global' $$;
+    AS $$
+SELECT role_type_id
+FROM "role_type"
+WHERE name = 'User Role, Global'
+$$;
 
 
 ALTER FUNCTION public.get_user_role_global_type_id() OWNER TO postgres;
@@ -64,7 +68,11 @@ ALTER FUNCTION public.get_user_role_global_type_id() OWNER TO postgres;
 
 CREATE FUNCTION public.get_user_role_type_id() RETURNS bigint
     LANGUAGE sql
-    AS $$ SELECT Id FROM "role_type" WHERE name = 'User Role' $$;
+    AS $$
+SELECT role_type_id
+FROM "role_type"
+WHERE name = 'User Role'
+$$;
 
 
 ALTER FUNCTION public.get_user_role_type_id() OWNER TO postgres;
@@ -78,8 +86,7 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE public.role (
-    id bigint NOT NULL,
-    uid character(27) NOT NULL,
+    role_id bigint NOT NULL,
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     effective_date timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -110,8 +117,7 @@ ALTER TABLE public.role_action OWNER TO postgres;
 --
 
 CREATE TABLE public.role_assignment (
-    id bigint NOT NULL,
-    uid character(27) NOT NULL,
+    role_assignment_id bigint NOT NULL,
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     effective_date timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -126,54 +132,11 @@ CREATE TABLE public.role_assignment (
 ALTER TABLE public.role_assignment OWNER TO postgres;
 
 --
--- Name: role_assignment_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.role_assignment_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.role_assignment_id_seq OWNER TO postgres;
-
---
--- Name: role_assignment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.role_assignment_id_seq OWNED BY public.role_assignment.id;
-
-
---
--- Name: role_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.role_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.role_id_seq OWNER TO postgres;
-
---
--- Name: role_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.role_id_seq OWNED BY public.role.id;
-
-
---
 -- Name: role_permission; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.role_permission (
-    id bigint NOT NULL,
-    uid character(27) NOT NULL,
+    role_permission_id bigint NOT NULL,
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     effective_date timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -188,27 +151,6 @@ CREATE TABLE public.role_permission (
 
 
 ALTER TABLE public.role_permission OWNER TO postgres;
-
---
--- Name: role_permission_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.role_permission_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.role_permission_id_seq OWNER TO postgres;
-
---
--- Name: role_permission_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.role_permission_id_seq OWNED BY public.role_permission.id;
-
 
 --
 -- Name: role_subject; Type: TABLE; Schema: public; Owner: postgres
@@ -227,7 +169,7 @@ ALTER TABLE public.role_subject OWNER TO postgres;
 --
 
 CREATE TABLE public.role_type (
-    id bigint NOT NULL,
+    role_type_id bigint NOT NULL,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     name text NOT NULL,
     multiple_assignments_allowed boolean NOT NULL,
@@ -238,32 +180,23 @@ CREATE TABLE public.role_type (
 ALTER TABLE public.role_type OWNER TO postgres;
 
 --
--- Name: role_type_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: schema_migrations; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.role_type_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+CREATE TABLE public.schema_migrations (
+    version bigint NOT NULL,
+    dirty boolean NOT NULL
+);
 
 
-ALTER TABLE public.role_type_id_seq OWNER TO postgres;
-
---
--- Name: role_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.role_type_id_seq OWNED BY public.role_type.id;
-
+ALTER TABLE public.schema_migrations OWNER TO postgres;
 
 --
 -- Name: user; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public."user" (
-    id bigint NOT NULL,
+    user_id bigint NOT NULL,
     uid character(27) NOT NULL,
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -279,62 +212,6 @@ CREATE TABLE public."user" (
 ALTER TABLE public."user" OWNER TO postgres;
 
 --
--- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.user_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.user_id_seq OWNER TO postgres;
-
---
--- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.user_id_seq OWNED BY public."user".id;
-
-
---
--- Name: role id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.role ALTER COLUMN id SET DEFAULT nextval('public.role_id_seq'::regclass);
-
-
---
--- Name: role_assignment id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.role_assignment ALTER COLUMN id SET DEFAULT nextval('public.role_assignment_id_seq'::regclass);
-
-
---
--- Name: role_permission id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.role_permission ALTER COLUMN id SET DEFAULT nextval('public.role_permission_id_seq'::regclass);
-
-
---
--- Name: role_type id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.role_type ALTER COLUMN id SET DEFAULT nextval('public.role_type_id_seq'::regclass);
-
-
---
--- Name: user id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."user" ALTER COLUMN id SET DEFAULT nextval('public.user_id_seq'::regclass);
-
-
---
 -- Name: role_action role_action_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -347,7 +224,7 @@ ALTER TABLE ONLY public.role_action
 --
 
 ALTER TABLE ONLY public.role_assignment
-    ADD CONSTRAINT role_assignment_pk PRIMARY KEY (id);
+    ADD CONSTRAINT role_assignment_pk PRIMARY KEY (role_assignment_id);
 
 
 --
@@ -355,7 +232,7 @@ ALTER TABLE ONLY public.role_assignment
 --
 
 ALTER TABLE ONLY public.role_permission
-    ADD CONSTRAINT role_permission_pk PRIMARY KEY (id);
+    ADD CONSTRAINT role_permission_pk PRIMARY KEY (role_permission_id);
 
 
 --
@@ -363,7 +240,7 @@ ALTER TABLE ONLY public.role_permission
 --
 
 ALTER TABLE ONLY public.role
-    ADD CONSTRAINT role_pk PRIMARY KEY (id);
+    ADD CONSTRAINT role_pk PRIMARY KEY (role_id);
 
 
 --
@@ -379,7 +256,15 @@ ALTER TABLE ONLY public.role_subject
 --
 
 ALTER TABLE ONLY public.role_type
-    ADD CONSTRAINT role_type_pk PRIMARY KEY (id);
+    ADD CONSTRAINT role_type_pk PRIMARY KEY (role_type_id);
+
+
+--
+-- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.schema_migrations
+    ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
 
 
 --
@@ -387,28 +272,7 @@ ALTER TABLE ONLY public.role_type
 --
 
 ALTER TABLE ONLY public."user"
-    ADD CONSTRAINT user_pk PRIMARY KEY (id);
-
-
---
--- Name: role_uid_uindex; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE UNIQUE INDEX role_uid_uindex ON public.role USING btree (uid);
-
-
---
--- Name: roleassignment_uid_uindex; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE UNIQUE INDEX roleassignment_uid_uindex ON public.role_assignment USING btree (uid);
-
-
---
--- Name: rolepermission_uid_uindex; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE UNIQUE INDEX rolepermission_uid_uindex ON public.role_permission USING btree (uid);
+    ADD CONSTRAINT user_pk PRIMARY KEY (user_id);
 
 
 --
@@ -437,7 +301,7 @@ CREATE UNIQUE INDEX user_uid_uindex ON public."user" USING btree (uid);
 --
 
 ALTER TABLE ONLY public.role
-    ADD CONSTRAINT fk_role_createdby FOREIGN KEY (created_by) REFERENCES public."user"(id);
+    ADD CONSTRAINT fk_role_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
 
 
 --
@@ -445,7 +309,7 @@ ALTER TABLE ONLY public.role
 --
 
 ALTER TABLE ONLY public.role
-    ADD CONSTRAINT fk_role_roletype FOREIGN KEY (role_type_id) REFERENCES public.role_type(id);
+    ADD CONSTRAINT fk_role_roletype FOREIGN KEY (role_type_id) REFERENCES public.role_type(role_type_id);
 
 
 --
@@ -453,7 +317,7 @@ ALTER TABLE ONLY public.role
 --
 
 ALTER TABLE ONLY public.role_assignment
-    ADD CONSTRAINT fk_roleassignment_createdby FOREIGN KEY (created_by) REFERENCES public."user"(id);
+    ADD CONSTRAINT fk_roleassignment_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
 
 
 --
@@ -461,7 +325,7 @@ ALTER TABLE ONLY public.role_assignment
 --
 
 ALTER TABLE ONLY public.role_permission
-    ADD CONSTRAINT fk_roleassignment_createdby FOREIGN KEY (created_by) REFERENCES public."user"(id);
+    ADD CONSTRAINT fk_roleassignment_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
 
 
 --
@@ -469,7 +333,7 @@ ALTER TABLE ONLY public.role_permission
 --
 
 ALTER TABLE ONLY public.role_assignment
-    ADD CONSTRAINT fk_roleassignment_role FOREIGN KEY (role_id) REFERENCES public.role(id);
+    ADD CONSTRAINT fk_roleassignment_role FOREIGN KEY (role_id) REFERENCES public.role(role_id);
 
 
 --
@@ -477,7 +341,7 @@ ALTER TABLE ONLY public.role_assignment
 --
 
 ALTER TABLE ONLY public.role_assignment
-    ADD CONSTRAINT fk_roleassignment_user FOREIGN KEY (user_id) REFERENCES public."user"(id);
+    ADD CONSTRAINT fk_roleassignment_user FOREIGN KEY (user_id) REFERENCES public."user"(user_id);
 
 
 --
@@ -493,7 +357,7 @@ ALTER TABLE ONLY public.role_permission
 --
 
 ALTER TABLE ONLY public.role_permission
-    ADD CONSTRAINT fk_rolepermission_role FOREIGN KEY (role_id) REFERENCES public.role(id);
+    ADD CONSTRAINT fk_rolepermission_role FOREIGN KEY (role_id) REFERENCES public.role(role_id);
 
 
 --
@@ -509,7 +373,7 @@ ALTER TABLE ONLY public.role_permission
 --
 
 ALTER TABLE ONLY public."user"
-    ADD CONSTRAINT fk_user_createdby FOREIGN KEY (created_by) REFERENCES public."user"(id);
+    ADD CONSTRAINT fk_user_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
 
 
 --

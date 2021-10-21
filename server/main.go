@@ -1,14 +1,14 @@
 package main
 
 //aserwqerr go:generate go get github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
-//go:generate go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
+//asdfasdf go:generate go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
 //go:generate genny -in=models/gen-api-models.go -out=models/api-models.go gen "ApiModel=RPG,RPGList"
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
+//asdfasdf go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
 //bjkasdfjk go:generate go-bindata -pkg main migrations
 
 //struct2ts -o userget.ts api.UserGet api.User
-//docker-compose -f docker-compose-local.yml exec db "pg_dump -U postgres -s bardview5 > /sql_dump/snapshot.sql"
 //PowerShell: docker run --rm -v ${PWD}:/src -w /src kjconroy/sqlc generate
+//docker-compose -f docker-compose-local.yml exec db /bin/bash -c 'pg_dump -U postgres -s bardview5 > /sql_dump/snapshot.sql'
 
 import (
 	"fmt"

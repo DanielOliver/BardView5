@@ -7,6 +7,8 @@ $env:BARDVIEW5_CONNECTION="postgresql://postgres:mysecretpassword@localhost/bard
 go run . migrate
 $Env:BARDVIEW5_CONNECTION=""
 echo "migrated"
+docker-compose -f docker-compose-local.yml exec db /bin/bash -c 'pg_dump -U postgres -s bardview5 > /sql_dump/snapshot.sql'
+echo "pg_dumped"
 docker run --rm -v ${PWD}:/src -w /src kjconroy/sqlc generate
 echo "sqlc generated"
 # go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest

@@ -8,10 +8,14 @@ import (
 	"github.com/spf13/viper"
 	"net/http"
 	"server/bardlog"
+	"server/bardlogic"
 	"server/bardmetric"
 )
 
+
 func serve() {
+	bardlogic.Init()
+
 	if !debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
