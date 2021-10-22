@@ -96,6 +96,10 @@ func NewPrometheus(subsystem string, customMetricsList ...[]*Metric) *GinPrometh
 	return p
 }
 
+func (g *GinPrometheus) MustRegister(c prometheus.Collector) {
+	prometheus.MustRegister(c)
+}
+
 func NewMetric(m *Metric, subsystem string) prometheus.Collector {
 	var metric prometheus.Collector
 	switch m.Type {

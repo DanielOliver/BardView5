@@ -3,6 +3,9 @@
     <module name="server" />
     <working_directory value="$PROJECT_DIR$" />
     <parameters value="serve" />
+    <envs>
+      <env name="BARDVIEW5_CONNECTION" value="postgresql://postgres:mysecretpassword@localhost/bardview5?sslmode=disable" />
+    </envs>
     <kind value="PACKAGE" />
     <package value="server" />
     <directory value="$PROJECT_DIR$" />
