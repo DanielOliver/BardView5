@@ -6,6 +6,7 @@ import (
 	"github.com/dlmiddlecote/sqlstats"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"net/http"
@@ -38,7 +39,7 @@ func serve() {
 		logger := bardlog.GetLogger(c)
 		logger.Info().Msg("ping pong!")
 
-		users, err := bardView5.Querier().UsersFindByUid(context.Background(), db.UsersFindByUidParams{SessionID: 322, Uid: "2"})
+		users, err := bardView5.Querier().UsersFindByUid(context.Background(), db.UsersFindByUidParams{SessionID: 322, Uuid: uuid.New()})
 		if err != nil {
 			logger.Err(err).Msg("can't find users")
 		} else {
@@ -54,12 +55,15 @@ func serve() {
 			"message": "oh no!",
 		})
 	})
+	router.GET("/users/:user_id/acls/:subject", bardView5.GetUserAcl)
+	router.POST("/users", bardView5.CreateNewUser)
+
 	router.GET("/user/:name", func(c *gin.Context) {
 		name := c.Param("name")
 		c.String(http.StatusOK, "Hello %s", name)
 	})
 	log.Info().Int("port", viper.GetInt("port")).Msg("Running on port")
 	if err := router.Run(fmt.Sprintf(":%d", viper.GetInt("port"))); err != nil {
-		panic(err)
+		log.Fatal().Err(err).Msg("Failed to create http")
 	}
 }

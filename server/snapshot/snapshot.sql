@@ -145,6 +145,7 @@ CREATE TABLE public.role_permission (
     role_id bigint NOT NULL,
     action text NOT NULL,
     subject text NOT NULL,
+    subject_id bigint,
     conditions jsonb NOT NULL,
     fields text[]
 );
@@ -197,7 +198,7 @@ ALTER TABLE public.schema_migrations OWNER TO postgres;
 
 CREATE TABLE public."user" (
     user_id bigint NOT NULL,
-    uid character(27) NOT NULL,
+    uuid uuid NOT NULL,
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     effective_date timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -290,10 +291,10 @@ CREATE UNIQUE INDEX user_email_uindex ON public."user" USING btree (email);
 
 
 --
--- Name: user_uid_uindex; Type: INDEX; Schema: public; Owner: postgres
+-- Name: user_uuid_uindex; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE UNIQUE INDEX user_uid_uindex ON public."user" USING btree (uid);
+CREATE UNIQUE INDEX user_uuid_uindex ON public."user" USING btree (uuid);
 
 
 --

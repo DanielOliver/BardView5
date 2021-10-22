@@ -6,6 +6,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Role struct {
@@ -47,6 +49,7 @@ type RolePermission struct {
 	RoleID           int64           `db:"role_id"`
 	Action           string          `db:"action"`
 	Subject          string          `db:"subject"`
+	SubjectID        sql.NullInt64   `db:"subject_id"`
 	Conditions       json.RawMessage `db:"conditions"`
 	Fields           []string        `db:"fields"`
 }
@@ -71,7 +74,7 @@ type SchemaMigration struct {
 
 type User struct {
 	UserID        int64         `db:"user_id"`
-	Uid           string        `db:"uid"`
+	Uuid          uuid.UUID     `db:"uuid"`
 	CreatedBy     sql.NullInt64 `db:"created_by"`
 	CreatedAt     time.Time     `db:"created_at"`
 	EffectiveDate time.Time     `db:"effective_date"`

@@ -3,7 +3,7 @@ create table "user"
     user_id        bigint
         constraint user_pk
             primary key,
-    uid            char(27)                                                       not null,
+    uuid           uuid                                                           not null,
     created_by     bigint                                                         null,
     created_at     timestamp without time zone default (now() at time zone 'utc') not null,
     effective_date timestamp without time zone default (now() at time zone 'utc') not null,
@@ -107,6 +107,7 @@ create table "role_permission"
     role_id            bigint                                                         not null,
     action             text                                                           not null,
     subject            text                                                           not null,
+    subject_id         bigint                                                         null,
     conditions         jsonb                                                          not null,
     fields             text[]                                                         null,
 
@@ -151,8 +152,8 @@ WHERE name = 'User Role, Global'
 $$
     LANGUAGE SQL;
 
-create unique index user_uid_uindex
-    on "user" (uid);
+create unique index user_uuid_uindex
+    on "user" (uuid);
 
 create or replace function generate_ksuid()
     returns char(27)
