@@ -102,7 +102,7 @@ SELECT DISTINCT u.user_id, u.uuid, u.created_by, u.created_at, u.effective_date,
 FROM role_assignment ra
          INNER JOIN role r on ra.role_id = r.role_id
          INNER JOIN role_permission rp on r.role_id = rp.role_id
-         INNER JOIN "user" u on evaluate_access_user(rp.conditions, $1::bigint, u.id)
+         INNER JOIN "user" u on evaluate_access_user(rp.conditions, $1::bigint, u.user_id)
 WHERE ra.user_id = $1::bigint
   AND rp.subject = 'user'
   AND rp.is_active = true
