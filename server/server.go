@@ -26,6 +26,9 @@ func serve() {
 	collector := sqlstats.NewStatsCollector("bardview5", bardView5.DB())
 	prometheus := bardmetric.NewPrometheus("bv5")
 	prometheus.MustRegister(collector)
+	for _, metric := range bardView5.Metrics() {
+		prometheus.MustRegister(metric)
+	}
 
 	if !debug {
 		gin.SetMode(gin.ReleaseMode)

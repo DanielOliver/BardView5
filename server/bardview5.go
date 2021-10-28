@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	"net/http"
 	"server/api"
@@ -21,6 +22,7 @@ type BardView5 struct {
 	db         *sql.DB
 	querier    db.Querier
 	generators *Generators
+	dbMetrics  *db.WithDbMetrics
 }
 
 func NewBardView5() (bv5 *BardView5, err error) {
@@ -32,16 +34,22 @@ func NewBardView5() (bv5 *BardView5, err error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to open bardview5 connection string")
 	}
+	metricsPg := db.NewDbMetrics(pgConnection, "bardview5")
 
 	userNode, err := snowflake.NewNode(1)
 
 	return &BardView5{
 		db:      pgConnection,
-		querier: db.New(pgConnection),
+		querier: db.New(metricsPg),
 		generators: &Generators{
 			userNode: userNode,
 		},
+		dbMetrics: metricsPg,
 	}, nil
+}
+
+func (b *BardView5) Metrics() []prometheus.Collector {
+	return b.dbMetrics.Collectors()
 }
 
 func (b *BardView5) DB() *sql.DB {
