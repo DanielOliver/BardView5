@@ -13,7 +13,6 @@ require (
 	github.com/gin-gonic/gin v1.7.4
 	github.com/golang-migrate/migrate/v4 v4.15.1
 	github.com/google/uuid v1.3.0
-	github.com/jteeuwen/go-bindata v3.0.7+incompatible
 	github.com/kevinburke/go-bindata v3.22.0+incompatible
 	github.com/lib/pq v1.10.3
 	github.com/pkg/errors v0.9.1

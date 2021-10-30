@@ -12,7 +12,6 @@ package main
 import (
 	"fmt"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/jteeuwen/go-bindata"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
