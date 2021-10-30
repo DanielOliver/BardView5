@@ -9,6 +9,7 @@ create table "user"
     effective_date timestamp without time zone default (now() at time zone 'utc') not null,
     end_date       timestamp without time zone                                    null,
     is_active      boolean                                                        not null default (true),
+    common_access  text                                                           not null,
     email          text                                                           not null,
     name           text                                                           not null,
     tags           text[]                                                         not null,

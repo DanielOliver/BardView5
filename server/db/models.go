@@ -83,4 +83,5 @@ type User struct {
 	Email         string        `db:"email"`
 	Name          string        `db:"name"`
 	Tags          []string      `db:"tags"`
+	CommonAccess  string        `db:"common_access"`
 }

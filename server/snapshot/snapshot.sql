@@ -206,7 +206,8 @@ CREATE TABLE public."user" (
     is_active boolean DEFAULT true NOT NULL,
     email text NOT NULL,
     name text NOT NULL,
-    tags text[] NOT NULL
+    tags text[] NOT NULL,
+    common_access text DEFAULT 'private'::text NOT NULL
 );
 
 

@@ -62,7 +62,7 @@ func serve() {
 			"message": "oh no!",
 		})
 	})
-	router.GET("/users/:user_id/acls/:subject", bardView5.GetUserAcl)
+	router.GET("/users/:user_id/acls/:subject", bardView5.GetUser)
 	router.GET("/users/:user_id/acls/:subject/:subject_id", bardView5.GetUserAclEvaluate)
 	router.POST("/users", bardView5.CreateNewUser)
 

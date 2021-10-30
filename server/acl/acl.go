@@ -5,10 +5,16 @@ import (
 	"encoding/json"
 	"server/bv5"
 	"server/db"
+	"strconv"
 )
 
 type sessionCriteria struct {
 	AvailableFields map[string]string
+	sessionId       int64
+}
+
+func (s *sessionCriteria) SessionId() int64 {
+	return s.sessionId
 }
 
 type aclEvaluation struct {
@@ -23,10 +29,13 @@ type aclCondition struct {
 }
 
 func NewSessionCriteria(context context.Context) *sessionCriteria {
+	sessionIdStr := context.Value(bv5.SessionId).(string)
+	sessionId, _ := strconv.ParseInt(sessionIdStr, 10, 64)
 	return &sessionCriteria{
 		map[string]string{
-			bv5.SessionId: context.Value(bv5.SessionId).(string),
+			bv5.SessionId: sessionIdStr,
 		},
+		sessionId,
 	}
 }
 
@@ -38,6 +47,7 @@ func (s *sessionCriteria) Evaluate(object *bv5.AclObjectMetadata, acl []db.GetAc
 	}
 	actions := make(map[string]bool)
 	for _, row := range acl {
+
 		if row.Subject != object.ObjectName {
 			continue
 		}

@@ -79,7 +79,7 @@ func (q *Queries) GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams
 }
 
 const userFindById = `-- name: UserFindById :one
-SELECT user_id, uuid, created_by, created_at, effective_date, end_date, is_active, email, name, tags FROM "user" u WHERE u.user_id = $1
+SELECT user_id, uuid, created_by, created_at, effective_date, end_date, is_active, email, name, tags, common_access FROM "user" u WHERE u.user_id = $1
 `
 
 func (q *Queries) UserFindById(ctx context.Context, userID int64) (User, error) {
@@ -96,6 +96,7 @@ func (q *Queries) UserFindById(ctx context.Context, userID int64) (User, error) 
 		&i.Email,
 		&i.Name,
 		pq.Array(&i.Tags),
+		&i.CommonAccess,
 	)
 	return i, err
 }
@@ -131,7 +132,7 @@ func (q *Queries) UserInsert(ctx context.Context, arg UserInsertParams) (int64, 
 }
 
 const usersFindByUid = `-- name: UsersFindByUid :many
-SELECT DISTINCT u.user_id, u.uuid, u.created_by, u.created_at, u.effective_date, u.end_date, u.is_active, u.email, u.name, u.tags
+SELECT DISTINCT u.user_id, u.uuid, u.created_by, u.created_at, u.effective_date, u.end_date, u.is_active, u.email, u.name, u.tags, u.common_access
 FROM role_assignment ra
          INNER JOIN role r on ra.role_id = r.role_id
          INNER JOIN role_permission rp on r.role_id = rp.role_id
@@ -170,6 +171,7 @@ func (q *Queries) UsersFindByUid(ctx context.Context, arg UsersFindByUidParams) 
 			&i.Email,
 			&i.Name,
 			pq.Array(&i.Tags),
+			&i.CommonAccess,
 		); err != nil {
 			return nil, err
 		}

@@ -93,21 +93,22 @@ type TGetUserAcl struct {
 	SubjectId *int64 `json:"subject_id" uri:"subject_id"`
 }
 
-func (b *BardView5) GetUserAcl(context *gin.Context) {
+func (b *BardView5) GetUser(context *gin.Context) {
 	uri := &TGetUserAcl{}
 	if err := context.BindUri(&uri); err != nil {
 		context.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	acls, err := b.Querier().GetAclBySubject(context, db.GetAclBySubjectParams{
-		Subject:   uri.Subject,
-		SubjectID: sql.NullInt64{},
-		UserID:    uri.UserId,
-	})
-	if err != nil {
-		context.AbortWithError(http.StatusInternalServerError, err)
+	context.Set(bv5.SessionId, strconv.FormatInt(uri.UserId, 10))
+	user, err := b.Querier().UserFindById(context, uri.UserId)
+	if err != nil  {
+		context.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
-	context.JSON(http.StatusOK, acls)
+	session := acl.NewSessionCriteria(context)
+	actions := user.SystemEvaluate(session)
+
+	context.JSON(http.StatusOK, actions)
 }
 
 func (b *BardView5) GetUserAclEvaluate(context *gin.Context) {
