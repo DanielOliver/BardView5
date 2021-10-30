@@ -1,10 +1,9 @@
 package main
 
-//aserwqerr go:generate go get github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
-//asdfasdf go:generate go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
+//ignore_me go:generate go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen
 //go:generate genny -in=models/gen-api-models.go -out=models/api-models.go gen "ApiModel=RPG,RPGList"
-//asdfasdf go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
-//bjkasdfjk go:generate go-bindata -pkg main migrations
+//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
+//go:generate go run github.com/kevinburke/go-bindata/go-bindata -o db/bindata.go -pkg db migrations
 
 //struct2ts -o userget.ts api.UserGet api.User
 //PowerShell: docker run --rm -v ${PWD}:/src -w /src kjconroy/sqlc generate
@@ -12,13 +11,12 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/jteeuwen/go-bindata"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"server/migrations"
-
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/jteeuwen/go-bindata"
+	"server/db"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -54,7 +52,7 @@ var migrateCmd = &cobra.Command{
 		if connectionString == "" {
 			log.Fatal().Msg ("Expected a connection string")
 		}
-		migrations.Migrate(connectionString)
+		db.Migrate(connectionString)
 	},
 }
 

@@ -1,4 +1,4 @@
-package migrations
+package db
 
 import (
 	"github.com/golang-migrate/migrate/v4"
@@ -7,7 +7,7 @@ import (
 	"server/bardlog"
 )
 
-//go:generate go-bindata -pkg migrations .
+//ignore_me go:generate go-bindata -pkg migrations .
 
 const (
 	MigrationType       = "Migration"
