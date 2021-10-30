@@ -1,6 +1,5 @@
 $ErrorActionPreference = "Stop"
 docker-compose -f docker-compose-local.yml up -d
-$env:BARDVIEW5_CONNECTION="postgresql://postgres:mysecretpassword@localhost/bardview5?sslmode=disable"
 echo "sleeping 8"
 Sleep 8
 $env:BARDVIEW5_CONNECTION="postgresql://postgres:mysecretpassword@localhost/bardview5?sslmode=disable"
