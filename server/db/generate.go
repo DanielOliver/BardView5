@@ -7,7 +7,7 @@ import (
 	"server/bardlog"
 )
 
-//ignore_me go:generate go-bindata -pkg migrations .
+//go:generate go run github.com/kevinburke/go-bindata/go-bindata -o ../db/bindata.go -pkg db -prefix "../migrations/" ../migrations
 
 const (
 	MigrationType       = "Migration"

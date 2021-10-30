@@ -10,8 +10,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	"net/http"
+	"server/acl"
 	"server/api"
+	"server/bv5"
 	"server/db"
+	"strconv"
 )
 
 type Generators struct {
@@ -87,6 +90,7 @@ func (b *BardView5) CreateNewUser(context *gin.Context) {
 type TGetUserAcl struct {
 	UserId  int64  `json:"user_id" uri:"user_id"`
 	Subject string `json:"subject" uri:"subject"`
+	SubjectId *int64 `json:"subject_id" uri:"subject_id"`
 }
 
 func (b *BardView5) GetUserAcl(context *gin.Context) {
@@ -95,7 +99,7 @@ func (b *BardView5) GetUserAcl(context *gin.Context) {
 		context.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	acls, err := b.Querier().GetAcl(context, db.GetAclParams{
+	acls, err := b.Querier().GetAclBySubject(context, db.GetAclBySubjectParams{
 		Subject:   uri.Subject,
 		SubjectID: sql.NullInt64{},
 		UserID:    uri.UserId,
@@ -104,4 +108,35 @@ func (b *BardView5) GetUserAcl(context *gin.Context) {
 		context.AbortWithError(http.StatusInternalServerError, err)
 	}
 	context.JSON(http.StatusOK, acls)
+}
+
+func (b *BardView5) GetUserAclEvaluate(context *gin.Context) {
+	uri := &TGetUserAcl{}
+	if err := context.BindUri(&uri); err != nil {
+		context.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	context.Set(bv5.SessionId, strconv.FormatInt(uri.UserId, 10))
+
+	acls, err := b.Querier().GetAclBySubject(context, db.GetAclBySubjectParams{
+		Subject:   uri.Subject,
+		SubjectID: sql.NullInt64{
+			Int64: *uri.SubjectId,
+			Valid: true,
+		},
+		UserID:    uri.UserId,
+	})
+	user, err := b.Querier().UserFindById(context, *uri.SubjectId)
+	if err != nil  {
+		context.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	session := acl.NewSessionCriteria(context)
+	evaluation := session.Evaluate(user.GetAclMetadata(), acls, session)
+
+	if err != nil {
+		context.AbortWithError(http.StatusInternalServerError, err)
+	}
+	context.JSON(http.StatusOK, evaluation)
 }

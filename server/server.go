@@ -13,6 +13,7 @@ import (
 	"server/bardlog"
 	"server/bardlogic"
 	"server/bardmetric"
+	"server/bv5"
 	"server/db"
 )
 
@@ -37,6 +38,9 @@ func serve() {
 	router.Use(gin.Recovery())
 	router.Use(cors.Default())
 	prometheus.Use(router)
+	router.Use(func(c *gin.Context) {
+		c.Set(bv5.SessionId, "1")
+	})
 	router.Use(bardlog.UseLoggingWithRequestId(log.Logger, []string{}, nil))
 	router.GET("/ping", func(c *gin.Context) {
 		logger := bardlog.GetLogger(c)
@@ -59,6 +63,7 @@ func serve() {
 		})
 	})
 	router.GET("/users/:user_id/acls/:subject", bardView5.GetUserAcl)
+	router.GET("/users/:user_id/acls/:subject/:subject_id", bardView5.GetUserAclEvaluate)
 	router.POST("/users", bardView5.CreateNewUser)
 
 	router.GET("/user/:name", func(c *gin.Context) {

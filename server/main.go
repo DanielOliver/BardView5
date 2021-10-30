@@ -3,7 +3,7 @@ package main
 //ignore_me go:generate go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen
 //go:generate genny -in=models/gen-api-models.go -out=models/api-models.go gen "ApiModel=RPG,RPGList"
 //go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
-//go:generate go run github.com/kevinburke/go-bindata/go-bindata -o db/bindata.go -pkg db migrations
+//ignore_me go:generate go run github.com/kevinburke/go-bindata/go-bindata -o db/bindata.go -pkg db migrations
 
 //struct2ts -o userget.ts api.UserGet api.User
 //PowerShell: docker run --rm -v ${PWD}:/src -w /src kjconroy/sqlc generate
@@ -12,14 +12,13 @@ package main
 import (
 	"fmt"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"server/db"
-
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"os"
+	"server/db"
 )
 
 var debug = false

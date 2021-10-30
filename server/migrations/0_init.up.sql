@@ -176,7 +176,7 @@ VALUES ('manage');
 
 INSERT INTO role_permission(role_permission_id, role_id, action, subject, conditions)
 VALUES (1, (SELECT role_id FROM "role" WHERE name = 'User Role, Global'), 'manage', 'user', '{
-  "id": {
+  "user_id": {
     "op": "eq",
     "field": "session_id"
   }

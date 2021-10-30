@@ -12,47 +12,58 @@ import (
 	"github.com/lib/pq"
 )
 
-const getAcl = `-- name: GetAcl :many
-SELECT DISTINCT rp.action
-              , rp.subject
-              , rp.conditions
-              , u.user_id
-FROM "user" u
-         INNER JOIN role_assignment ra ON u.user_id = ra.user_id AND ra.is_active = true
+const getAclBySubject = `-- name: GetAclBySubject :many
+SELECT
+    ra.user_id
+     ,rp.subject
+     ,rp.conditions
+     ,rp.action
+     ,rp.subject_id
+     ,r.name "role_name"
+     ,r.role_id
+FROM "role_assignment" ra
          INNER JOIN role r on ra.role_id = r.role_id AND r.is_active = true
          INNER JOIN role_permission rp on r.role_id = rp.role_id AND rp.is_active = true
 WHERE rp.subject = $1
-  AND (rp.subject_id = $2 OR rp.subject_id IS NULL)
-  AND u.user_id = $3
+    AND (  rp.subject_id IS NULL
+        OR rp.subject_id = $2)
+    AND ra.user_id = $3
+    AND ra.is_active = true
 `
 
-type GetAclParams struct {
+type GetAclBySubjectParams struct {
 	Subject   string        `db:"subject"`
 	SubjectID sql.NullInt64 `db:"subject_id"`
 	UserID    int64         `db:"user_id"`
 }
 
-type GetAclRow struct {
-	Action     string          `db:"action"`
+type GetAclBySubjectRow struct {
+	UserID     int64           `db:"user_id"`
 	Subject    string          `db:"subject"`
 	Conditions json.RawMessage `db:"conditions"`
-	UserID     int64           `db:"user_id"`
+	Action     string          `db:"action"`
+	SubjectID  sql.NullInt64   `db:"subject_id"`
+	RoleName   string          `db:"role_name"`
+	RoleID     int64           `db:"role_id"`
 }
 
-func (q *Queries) GetAcl(ctx context.Context, arg GetAclParams) ([]GetAclRow, error) {
-	rows, err := q.query(ctx, q.getAclStmt, getAcl, arg.Subject, arg.SubjectID, arg.UserID)
+func (q *Queries) GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams) ([]GetAclBySubjectRow, error) {
+	rows, err := q.query(ctx, q.getAclBySubjectStmt, getAclBySubject, arg.Subject, arg.SubjectID, arg.UserID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetAclRow{}
+	items := []GetAclBySubjectRow{}
 	for rows.Next() {
-		var i GetAclRow
+		var i GetAclBySubjectRow
 		if err := rows.Scan(
-			&i.Action,
+			&i.UserID,
 			&i.Subject,
 			&i.Conditions,
-			&i.UserID,
+			&i.Action,
+			&i.SubjectID,
+			&i.RoleName,
+			&i.RoleID,
 		); err != nil {
 			return nil, err
 		}
@@ -65,6 +76,28 @@ func (q *Queries) GetAcl(ctx context.Context, arg GetAclParams) ([]GetAclRow, er
 		return nil, err
 	}
 	return items, nil
+}
+
+const userFindById = `-- name: UserFindById :one
+SELECT user_id, uuid, created_by, created_at, effective_date, end_date, is_active, email, name, tags FROM "user" u WHERE u.user_id = $1
+`
+
+func (q *Queries) UserFindById(ctx context.Context, userID int64) (User, error) {
+	row := q.queryRow(ctx, q.userFindByIdStmt, userFindById, userID)
+	var i User
+	err := row.Scan(
+		&i.UserID,
+		&i.Uuid,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.EffectiveDate,
+		&i.EndDate,
+		&i.IsActive,
+		&i.Email,
+		&i.Name,
+		pq.Array(&i.Tags),
+	)
+	return i, err
 }
 
 const userInsert = `-- name: UserInsert :execrows
