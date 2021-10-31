@@ -68,15 +68,6 @@ type UserGet struct {
 	Version      int64        `json:"version"`
 }
 
-// UserPost defines model for UserPost.
-type UserPost struct {
-	// Embedded struct due to allOf(#/components/schemas/User)
-	User `yaml:",inline"`
-	// Embedded fields due to inline allOf schema
-	UserId  *int64 `json:"userId,omitempty"`
-	Version *int64 `json:"version,omitempty"`
-}
-
 // UserTags defines model for UserTags.
 type UserTags []string
 
@@ -90,7 +81,7 @@ type UserGetOk UserGet
 type Patch PatchDocument
 
 // PostUsersJSONBody defines parameters for PostUsers.
-type PostUsersJSONBody UserPost
+type PostUsersJSONBody User
 
 // PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
 type PostUsersJSONRequestBody PostUsersJSONBody

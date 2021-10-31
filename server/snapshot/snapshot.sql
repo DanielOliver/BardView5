@@ -213,6 +213,7 @@ CREATE TABLE public."user" (
     uuid uuid NOT NULL,
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    version bigint DEFAULT 0 NOT NULL,
     effective_date timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     end_date timestamp without time zone,
     is_active boolean DEFAULT true NOT NULL,

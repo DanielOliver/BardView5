@@ -82,6 +82,7 @@ type User struct {
 	Uuid          uuid.UUID     `db:"uuid"`
 	CreatedBy     sql.NullInt64 `db:"created_by"`
 	CreatedAt     time.Time     `db:"created_at"`
+	Version       int64         `db:"version"`
 	EffectiveDate time.Time     `db:"effective_date"`
 	EndDate       sql.NullTime  `db:"end_date"`
 	IsActive      bool          `db:"is_active"`

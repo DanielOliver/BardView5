@@ -141,17 +141,6 @@ components:
             - userId
             - lastModified
             - version
-    UserPost:
-      allOf:
-        - $ref: '#/components/schemas/User'
-        - type: object
-          properties:
-            userId:
-              type: integer
-              format: int64
-            version:
-              type: integer
-              format: int64
 paths:
   /users/{userId}:
     get:
@@ -185,10 +174,46 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserPost'
+              $ref: '#/components/schemas/User'
       responses:
         '201':
           description: Created
-        '204':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                  version:
+                    type: integer
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: Current version
+            Location:
+              schema:
+                type: string
+              description: Known Location
+        '200':
           description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                  version:
+                    type: integer
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: Current version
+            Location:
+              schema:
+                type: string
+              description: Known Location
 
