@@ -4,7 +4,7 @@
     <working_directory value="$PROJECT_DIR$" />
     <parameters value="--debug=true migrate" />
     <envs>
-      <env name="BARDVIEW5_connection" value="postgresql://postgres:mysecretpassword@localhost/bardview5?sslmode=disable" />
+      <env name="BARDVIEW5_CONNECTION" value="postgresql://postgres:mysecretpassword@localhost/bardview5?sslmode=disable" />
     </envs>
     <kind value="DIRECTORY" />
     <package value="server" />
