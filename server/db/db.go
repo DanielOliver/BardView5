@@ -25,8 +25,8 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getAclBySubjectStmt, err = db.PrepareContext(ctx, getAclBySubject); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAclBySubject: %w", err)
 	}
-	if q.userFindByIdStmt, err = db.PrepareContext(ctx, userFindById); err != nil {
-		return nil, fmt.Errorf("error preparing query UserFindById: %w", err)
+	if q.userFindByIdOrEmailOrUuidStmt, err = db.PrepareContext(ctx, userFindByIdOrEmailOrUuid); err != nil {
+		return nil, fmt.Errorf("error preparing query UserFindByIdOrEmailOrUuid: %w", err)
 	}
 	if q.userInsertStmt, err = db.PrepareContext(ctx, userInsert); err != nil {
 		return nil, fmt.Errorf("error preparing query UserInsert: %w", err)
@@ -44,9 +44,9 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getAclBySubjectStmt: %w", cerr)
 		}
 	}
-	if q.userFindByIdStmt != nil {
-		if cerr := q.userFindByIdStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing userFindByIdStmt: %w", cerr)
+	if q.userFindByIdOrEmailOrUuidStmt != nil {
+		if cerr := q.userFindByIdOrEmailOrUuidStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing userFindByIdOrEmailOrUuidStmt: %w", cerr)
 		}
 	}
 	if q.userInsertStmt != nil {
@@ -96,21 +96,21 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                  DBTX
-	tx                  *sql.Tx
-	getAclBySubjectStmt *sql.Stmt
-	userFindByIdStmt    *sql.Stmt
-	userInsertStmt      *sql.Stmt
-	usersFindByUidStmt  *sql.Stmt
+	db                            DBTX
+	tx                            *sql.Tx
+	getAclBySubjectStmt           *sql.Stmt
+	userFindByIdOrEmailOrUuidStmt *sql.Stmt
+	userInsertStmt                *sql.Stmt
+	usersFindByUidStmt            *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                  tx,
-		tx:                  tx,
-		getAclBySubjectStmt: q.getAclBySubjectStmt,
-		userFindByIdStmt:    q.userFindByIdStmt,
-		userInsertStmt:      q.userInsertStmt,
-		usersFindByUidStmt:  q.usersFindByUidStmt,
+		db:                            tx,
+		tx:                            tx,
+		getAclBySubjectStmt:           q.getAclBySubjectStmt,
+		userFindByIdOrEmailOrUuidStmt: q.userFindByIdOrEmailOrUuidStmt,
+		userInsertStmt:                q.userInsertStmt,
+		usersFindByUidStmt:            q.usersFindByUidStmt,
 	}
 }

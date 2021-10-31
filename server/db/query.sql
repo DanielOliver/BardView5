@@ -16,8 +16,10 @@ WHERE rp.subject = @subject
     AND ra.user_id = @user_id
     AND ra.is_active = true;
 
--- name: UserFindById :one
-SELECT * FROM "user" u WHERE u.user_id = @user_id;
+-- name: UserFindByIdOrEmailOrUuid :many
+SELECT * FROM "user" u
+WHERE u.user_id = @user_id OR u.email = @email or u.uuid = @uuid
+ORDER BY CASE WHEN u.user_id = @user_id THEN 0 ELSE 1 END;
 
 -- name: UsersFindByUid :many
 SELECT DISTINCT u.*
@@ -34,8 +36,8 @@ WHERE ra.user_id = @session_id::bigint
 ORDER BY u.user_id;
 
 -- name: UserInsert :execrows
-INSERT INTO "user" as u (user_id, uuid, "name", email, tags, created_by)
-VALUES (@user_id, @uuid, @name, @email, @tags, @created_by)
+INSERT INTO "user" as u (user_id, uuid, "name", email, user_tags, system_tags, created_by, common_access)
+VALUES (@user_id, @uuid, @name, @email, @user_tags, @system_tags, @created_by, @common_access)
 ON CONFLICT (email) DO NOTHING;
 
 

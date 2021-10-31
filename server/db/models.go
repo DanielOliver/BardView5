@@ -10,6 +10,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type CommonAccess struct {
+	Name      string    `db:"name"`
+	CreatedAt time.Time `db:"created_at"`
+}
+
 type Role struct {
 	RoleID        int64         `db:"role_id"`
 	CreatedBy     sql.NullInt64 `db:"created_by"`
@@ -80,8 +85,9 @@ type User struct {
 	EffectiveDate time.Time     `db:"effective_date"`
 	EndDate       sql.NullTime  `db:"end_date"`
 	IsActive      bool          `db:"is_active"`
+	CommonAccess  string        `db:"common_access"`
 	Email         string        `db:"email"`
 	Name          string        `db:"name"`
-	Tags          []string      `db:"tags"`
-	CommonAccess  string        `db:"common_access"`
+	UserTags      []string      `db:"user_tags"`
+	SystemTags    []string      `db:"system_tags"`
 }

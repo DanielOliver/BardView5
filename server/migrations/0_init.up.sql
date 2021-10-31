@@ -1,22 +1,34 @@
+create table "common_access"
+(
+    name       text
+        constraint common_access_pk primary key,
+    created_at timestamp without time zone default (now() at time zone 'utc') not null
+);
+
 create table "user"
 (
     user_id        bigint
         constraint user_pk
             primary key,
-    uuid           uuid                                                           not null,
-    created_by     bigint                                                         null,
-    created_at     timestamp without time zone default (now() at time zone 'utc') not null,
-    effective_date timestamp without time zone default (now() at time zone 'utc') not null,
-    end_date       timestamp without time zone                                    null,
-    is_active      boolean                                                        not null default (true),
-    common_access  text                                                           not null,
-    email          text                                                           not null,
-    name           text                                                           not null,
-    tags           text[]                                                         not null,
+    uuid           uuid                        not null,
+    created_by     bigint                      null,
+    created_at     timestamp without time zone          default (now() at time zone 'utc') not null,
+    version        bigint                      not null default (0),
+    effective_date timestamp without time zone          default (now() at time zone 'utc') not null,
+    end_date       timestamp without time zone null,
+    is_active      boolean                     not null default (true),
+    common_access  text                        not null,
+    email          text                        not null,
+    name           text                        not null,
+    user_tags      text[]                      not null,
+    system_tags    text[]                      not null,
 
     CONSTRAINT fk_user_createdby
         FOREIGN KEY (created_by)
-            REFERENCES "user" (user_id)
+            REFERENCES "user" (user_id),
+    CONSTRAINT fk_user_commonaccess
+        FOREIGN KEY (common_access)
+            REFERENCES common_access (name)
 );
 
 create unique index user_email_uindex on "user" (email);
@@ -172,8 +184,22 @@ VALUES (1, 'User Role, Global', get_user_role_global_type_id(), '{}');
 
 INSERT INTO role_subject (name)
 VALUES ('user');
+
 INSERT INTO role_action (name)
 VALUES ('manage');
+INSERT INTO role_action (name)
+VALUES ('owner');
+INSERT INTO role_action (name)
+VALUES ('view');
+INSERT INTO role_action (name)
+VALUES ('create');
+INSERT INTO role_action (name)
+VALUES ('public_view');
+
+INSERT INTO common_access (name)
+VALUES ('private');
+INSERT INTO common_access (name)
+VALUES ('public');
 
 INSERT INTO role_permission(role_permission_id, role_id, action, subject, conditions)
 VALUES (1, (SELECT role_id FROM "role" WHERE name = 'User Role, Global'), 'manage', 'user', '{

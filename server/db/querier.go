@@ -8,7 +8,7 @@ import (
 
 type Querier interface {
 	GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams) ([]GetAclBySubjectRow, error)
-	UserFindById(ctx context.Context, userID int64) (User, error)
+	UserFindByIdOrEmailOrUuid(ctx context.Context, arg UserFindByIdOrEmailOrUuidParams) ([]User, error)
 	UserInsert(ctx context.Context, arg UserInsertParams) (int64, error)
 	UsersFindByUid(ctx context.Context, arg UsersFindByUidParams) ([]User, error)
 }

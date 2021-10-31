@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.4 (Debian 13.4-4.pgdg110+1)
--- Dumped by pg_dump version 13.4 (Debian 13.4-4.pgdg110+1)
+-- Dumped from database version 13.4 (Debian 13.4-1.pgdg100+1)
+-- Dumped by pg_dump version 13.4 (Debian 13.4-1.pgdg100+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -80,6 +80,18 @@ ALTER FUNCTION public.get_user_role_type_id() OWNER TO postgres;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: common_access; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.common_access (
+    name text NOT NULL,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+
+ALTER TABLE public.common_access OWNER TO postgres;
 
 --
 -- Name: role; Type: TABLE; Schema: public; Owner: postgres
@@ -204,14 +216,23 @@ CREATE TABLE public."user" (
     effective_date timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     end_date timestamp without time zone,
     is_active boolean DEFAULT true NOT NULL,
+    common_access text NOT NULL,
     email text NOT NULL,
     name text NOT NULL,
-    tags text[] NOT NULL,
-    common_access text DEFAULT 'private'::text NOT NULL
+    user_tags text[] NOT NULL,
+    system_tags text[] NOT NULL
 );
 
 
 ALTER TABLE public."user" OWNER TO postgres;
+
+--
+-- Name: common_access common_access_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.common_access
+    ADD CONSTRAINT common_access_pk PRIMARY KEY (name);
+
 
 --
 -- Name: role_action role_action_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
@@ -368,6 +389,14 @@ ALTER TABLE ONLY public.role_permission
 
 ALTER TABLE ONLY public.role_permission
     ADD CONSTRAINT fk_rolepermission_subject FOREIGN KEY (subject) REFERENCES public.role_subject(name);
+
+
+--
+-- Name: user fk_user_commonaccess; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."user"
+    ADD CONSTRAINT fk_user_commonaccess FOREIGN KEY (common_access) REFERENCES public.common_access(name);
 
 
 --

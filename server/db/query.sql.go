@@ -78,42 +78,69 @@ func (q *Queries) GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams
 	return items, nil
 }
 
-const userFindById = `-- name: UserFindById :one
-SELECT user_id, uuid, created_by, created_at, effective_date, end_date, is_active, email, name, tags, common_access FROM "user" u WHERE u.user_id = $1
+const userFindByIdOrEmailOrUuid = `-- name: UserFindByIdOrEmailOrUuid :many
+SELECT user_id, uuid, created_by, created_at, effective_date, end_date, is_active, common_access, email, name, user_tags, system_tags FROM "user" u
+WHERE u.user_id = $1 OR u.email = $2 or u.uuid = $3
+ORDER BY CASE WHEN u.user_id = $1 THEN 0 ELSE 1 END
 `
 
-func (q *Queries) UserFindById(ctx context.Context, userID int64) (User, error) {
-	row := q.queryRow(ctx, q.userFindByIdStmt, userFindById, userID)
-	var i User
-	err := row.Scan(
-		&i.UserID,
-		&i.Uuid,
-		&i.CreatedBy,
-		&i.CreatedAt,
-		&i.EffectiveDate,
-		&i.EndDate,
-		&i.IsActive,
-		&i.Email,
-		&i.Name,
-		pq.Array(&i.Tags),
-		&i.CommonAccess,
-	)
-	return i, err
+type UserFindByIdOrEmailOrUuidParams struct {
+	UserID int64     `db:"user_id"`
+	Email  string    `db:"email"`
+	Uuid   uuid.UUID `db:"uuid"`
+}
+
+func (q *Queries) UserFindByIdOrEmailOrUuid(ctx context.Context, arg UserFindByIdOrEmailOrUuidParams) ([]User, error) {
+	rows, err := q.query(ctx, q.userFindByIdOrEmailOrUuidStmt, userFindByIdOrEmailOrUuid, arg.UserID, arg.Email, arg.Uuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Uuid,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.EffectiveDate,
+			&i.EndDate,
+			&i.IsActive,
+			&i.CommonAccess,
+			&i.Email,
+			&i.Name,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const userInsert = `-- name: UserInsert :execrows
-INSERT INTO "user" as u (user_id, uuid, "name", email, tags, created_by)
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO "user" as u (user_id, uuid, "name", email, user_tags, system_tags, created_by, common_access)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 ON CONFLICT (email) DO NOTHING
 `
 
 type UserInsertParams struct {
-	UserID    int64         `db:"user_id"`
-	Uuid      uuid.UUID     `db:"uuid"`
-	Name      string        `db:"name"`
-	Email     string        `db:"email"`
-	Tags      []string      `db:"tags"`
-	CreatedBy sql.NullInt64 `db:"created_by"`
+	UserID       int64         `db:"user_id"`
+	Uuid         uuid.UUID     `db:"uuid"`
+	Name         string        `db:"name"`
+	Email        string        `db:"email"`
+	UserTags     []string      `db:"user_tags"`
+	SystemTags   []string      `db:"system_tags"`
+	CreatedBy    sql.NullInt64 `db:"created_by"`
+	CommonAccess string        `db:"common_access"`
 }
 
 func (q *Queries) UserInsert(ctx context.Context, arg UserInsertParams) (int64, error) {
@@ -122,8 +149,10 @@ func (q *Queries) UserInsert(ctx context.Context, arg UserInsertParams) (int64, 
 		arg.Uuid,
 		arg.Name,
 		arg.Email,
-		pq.Array(arg.Tags),
+		pq.Array(arg.UserTags),
+		pq.Array(arg.SystemTags),
 		arg.CreatedBy,
+		arg.CommonAccess,
 	)
 	if err != nil {
 		return 0, err
@@ -132,7 +161,7 @@ func (q *Queries) UserInsert(ctx context.Context, arg UserInsertParams) (int64, 
 }
 
 const usersFindByUid = `-- name: UsersFindByUid :many
-SELECT DISTINCT u.user_id, u.uuid, u.created_by, u.created_at, u.effective_date, u.end_date, u.is_active, u.email, u.name, u.tags, u.common_access
+SELECT DISTINCT u.user_id, u.uuid, u.created_by, u.created_at, u.effective_date, u.end_date, u.is_active, u.common_access, u.email, u.name, u.user_tags, u.system_tags
 FROM role_assignment ra
          INNER JOIN role r on ra.role_id = r.role_id
          INNER JOIN role_permission rp on r.role_id = rp.role_id
@@ -168,10 +197,11 @@ func (q *Queries) UsersFindByUid(ctx context.Context, arg UsersFindByUidParams) 
 			&i.EffectiveDate,
 			&i.EndDate,
 			&i.IsActive,
+			&i.CommonAccess,
 			&i.Email,
 			&i.Name,
-			pq.Array(&i.Tags),
-			&i.CommonAccess,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
 		); err != nil {
 			return nil, err
 		}

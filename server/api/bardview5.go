@@ -50,10 +50,11 @@ type SystemTags []string
 
 // User defines model for User.
 type User struct {
-	Email      Email      `json:"email" validate:"required,email,min=1,max=512"`
-	Name       string     `json:"name" validate:"required,min=1,max=512"`
-	SystemTags SystemTags `json:"systemTags" validate:"required,max=64,dive,max=256"`
-	UserTags   UserTags   `json:"userTags" validate:"required,max=64,dive,max=256"`
+	CommonAccess string     `binding:"required,oneof=private public" json:"common_access"`
+	Email        Email      `binding:"required,email,min=1,max=512" json:"email"`
+	Name         string     `binding:"required,min=1,max=512" json:"name"`
+	SystemTags   SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags"`
+	UserTags     UserTags   `binding:"required,max=64,dive,max=256" json:"userTags"`
 }
 
 // UserGet defines model for UserGet.
