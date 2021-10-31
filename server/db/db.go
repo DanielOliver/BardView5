@@ -28,17 +28,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.userFindByEmailStmt, err = db.PrepareContext(ctx, userFindByEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query UserFindByEmail: %w", err)
 	}
-	if q.userFindByIdOrEmailOrUuidStmt, err = db.PrepareContext(ctx, userFindByIdOrEmailOrUuid); err != nil {
-		return nil, fmt.Errorf("error preparing query UserFindByIdOrEmailOrUuid: %w", err)
+	if q.userFindByIdStmt, err = db.PrepareContext(ctx, userFindById); err != nil {
+		return nil, fmt.Errorf("error preparing query UserFindById: %w", err)
 	}
 	if q.userInsertStmt, err = db.PrepareContext(ctx, userInsert); err != nil {
 		return nil, fmt.Errorf("error preparing query UserInsert: %w", err)
 	}
 	if q.userUpdateStmt, err = db.PrepareContext(ctx, userUpdate); err != nil {
 		return nil, fmt.Errorf("error preparing query UserUpdate: %w", err)
-	}
-	if q.usersFindByUidStmt, err = db.PrepareContext(ctx, usersFindByUid); err != nil {
-		return nil, fmt.Errorf("error preparing query UsersFindByUid: %w", err)
 	}
 	return &q, nil
 }
@@ -55,9 +52,9 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing userFindByEmailStmt: %w", cerr)
 		}
 	}
-	if q.userFindByIdOrEmailOrUuidStmt != nil {
-		if cerr := q.userFindByIdOrEmailOrUuidStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing userFindByIdOrEmailOrUuidStmt: %w", cerr)
+	if q.userFindByIdStmt != nil {
+		if cerr := q.userFindByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing userFindByIdStmt: %w", cerr)
 		}
 	}
 	if q.userInsertStmt != nil {
@@ -68,11 +65,6 @@ func (q *Queries) Close() error {
 	if q.userUpdateStmt != nil {
 		if cerr := q.userUpdateStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing userUpdateStmt: %w", cerr)
-		}
-	}
-	if q.usersFindByUidStmt != nil {
-		if cerr := q.usersFindByUidStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing usersFindByUidStmt: %w", cerr)
 		}
 	}
 	return err
@@ -112,25 +104,23 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                            DBTX
-	tx                            *sql.Tx
-	getAclBySubjectStmt           *sql.Stmt
-	userFindByEmailStmt           *sql.Stmt
-	userFindByIdOrEmailOrUuidStmt *sql.Stmt
-	userInsertStmt                *sql.Stmt
-	userUpdateStmt                *sql.Stmt
-	usersFindByUidStmt            *sql.Stmt
+	db                  DBTX
+	tx                  *sql.Tx
+	getAclBySubjectStmt *sql.Stmt
+	userFindByEmailStmt *sql.Stmt
+	userFindByIdStmt    *sql.Stmt
+	userInsertStmt      *sql.Stmt
+	userUpdateStmt      *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                            tx,
-		tx:                            tx,
-		getAclBySubjectStmt:           q.getAclBySubjectStmt,
-		userFindByEmailStmt:           q.userFindByEmailStmt,
-		userFindByIdOrEmailOrUuidStmt: q.userFindByIdOrEmailOrUuidStmt,
-		userInsertStmt:                q.userInsertStmt,
-		userUpdateStmt:                q.userUpdateStmt,
-		usersFindByUidStmt:            q.usersFindByUidStmt,
+		db:                  tx,
+		tx:                  tx,
+		getAclBySubjectStmt: q.getAclBySubjectStmt,
+		userFindByEmailStmt: q.userFindByEmailStmt,
+		userFindByIdStmt:    q.userFindByIdStmt,
+		userInsertStmt:      q.userInsertStmt,
+		userUpdateStmt:      q.userUpdateStmt,
 	}
 }

@@ -120,23 +120,14 @@ func (q *Queries) UserFindByEmail(ctx context.Context, email string) ([]User, er
 	return items, nil
 }
 
-const userFindByIdOrEmailOrUuid = `-- name: UserFindByIdOrEmailOrUuid :many
+const userFindById = `-- name: UserFindById :many
 SELECT user_id, uuid, created_by, created_at, version, effective_date, end_date, is_active, common_access, email, name, user_tags, system_tags
 FROM "user" u
 WHERE u.user_id = $1
-   OR u.email = $2
-   or u.uuid = $3
-ORDER BY CASE WHEN u.user_id = $1 THEN 0 ELSE 1 END
 `
 
-type UserFindByIdOrEmailOrUuidParams struct {
-	UserID int64     `db:"user_id"`
-	Email  string    `db:"email"`
-	Uuid   uuid.UUID `db:"uuid"`
-}
-
-func (q *Queries) UserFindByIdOrEmailOrUuid(ctx context.Context, arg UserFindByIdOrEmailOrUuidParams) ([]User, error) {
-	rows, err := q.query(ctx, q.userFindByIdOrEmailOrUuidStmt, userFindByIdOrEmailOrUuid, arg.UserID, arg.Email, arg.Uuid)
+func (q *Queries) UserFindById(ctx context.Context, userID int64) ([]User, error) {
+	rows, err := q.query(ctx, q.userFindByIdStmt, userFindById, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -249,63 +240,6 @@ func (q *Queries) UserUpdate(ctx context.Context, arg UserUpdateParams) ([]UserU
 	for rows.Next() {
 		var i UserUpdateRow
 		if err := rows.Scan(&i.Version, &i.UserID); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const usersFindByUid = `-- name: UsersFindByUid :many
-SELECT DISTINCT u.user_id, u.uuid, u.created_by, u.created_at, u.version, u.effective_date, u.end_date, u.is_active, u.common_access, u.email, u.name, u.user_tags, u.system_tags
-FROM role_assignment ra
-         INNER JOIN "role" r on ra.role_id = r.role_id
-         INNER JOIN role_permission rp on r.role_id = rp.role_id
-         INNER JOIN "user" u on evaluate_access_user(rp.conditions, $1::bigint, u.user_id)
-WHERE ra.user_id = $1::bigint
-  AND rp.subject = 'user'
-  AND rp.is_active = true
-  AND ra.is_active = true
-  AND r.is_active = true
-  AND u.uuid = $2
-ORDER BY u.user_id
-`
-
-type UsersFindByUidParams struct {
-	SessionID int64     `db:"session_id"`
-	Uuid      uuid.UUID `db:"uuid"`
-}
-
-func (q *Queries) UsersFindByUid(ctx context.Context, arg UsersFindByUidParams) ([]User, error) {
-	rows, err := q.query(ctx, q.usersFindByUidStmt, usersFindByUid, arg.SessionID, arg.Uuid)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []User{}
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.UserID,
-			&i.Uuid,
-			&i.CreatedBy,
-			&i.CreatedAt,
-			&i.Version,
-			&i.EffectiveDate,
-			&i.EndDate,
-			&i.IsActive,
-			&i.CommonAccess,
-			&i.Email,
-			&i.Name,
-			pq.Array(&i.UserTags),
-			pq.Array(&i.SystemTags),
-		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

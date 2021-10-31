@@ -30,6 +30,30 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UserGet'
+    UserPostOk:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userId:
+                type: integer
+                format: int64
+              version:
+                type: integer
+                format: int64
+            required:
+              - userId
+              - version
+      headers:
+        ETag:
+          schema:
+            type: string
+          description: Current version
+        Location:
+          schema:
+            type: string
+          description: Known Location
   schemas:
     PatchDocument:
       description: A JSONPatch document as defined by RFC 6902
@@ -64,6 +88,12 @@ components:
       title: String Id
       readOnly: true
       description: A 27 character string representing an unique id
+    Created:
+      type: string
+      format: datetime
+      readOnly: true
+      description: The created time of this record
+      title: Created
     LastModified:
       type: string
       format: datetime
@@ -105,7 +135,7 @@ components:
           minLength: 1
           x-oapi-codegen-extra-tags:
             binding: "required,min=1,max=512"
-        common_access:
+        commonAccess:
           type: string
           example: private
           maxLength: 20
@@ -123,7 +153,7 @@ components:
         - userTags
         - email
         - name
-        - common_access
+        - commonAccess
     UserGet:
       allOf:
         - $ref: '#/components/schemas/User'
@@ -132,14 +162,14 @@ components:
             userId:
               type: integer
               format: int64
-            lastModified:
-              $ref: '#/components/schemas/LastModified'
+            created:
+              $ref: '#/components/schemas/Created'
             version:
               type: integer
               format: int64
           required:
             - userId
-            - lastModified
+            - created
             - version
 paths:
   /users/{userId}:
@@ -177,43 +207,7 @@ paths:
               $ref: '#/components/schemas/User'
       responses:
         '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  user_id:
-                    type: integer
-                  version:
-                    type: integer
-          headers:
-            ETag:
-              schema:
-                type: string
-              description: Current version
-            Location:
-              schema:
-                type: string
-              description: Known Location
+          $ref: '#/components/responses/UserPostOk'
         '200':
-          description: Updated
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  user_id:
-                    type: integer
-                  version:
-                    type: integer
-          headers:
-            ETag:
-              schema:
-                type: string
-              description: Current version
-            Location:
-              schema:
-                type: string
-              description: Known Location
+          $ref: '#/components/responses/UserPostOk'
 

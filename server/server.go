@@ -40,6 +40,7 @@ func serve() {
 	router.Use(bardlog.UseLoggingWithRequestId(log.Logger, []string{}, nil))
 
 	router.POST("/users", bardView5.PostUsersCreate)
+	router.GET("/users/:userId", bardView5.GetUsersById)
 
 
 	log.Info().Int("port", viper.GetInt("port")).Msg("Running on port")

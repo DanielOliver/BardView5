@@ -10,12 +10,8 @@ import (
 	"server/bardlog"
 	"server/db"
 	"strconv"
+	"time"
 )
-
-type userPostResponse struct {
-	UserId  int64 `json:"user_id"`
-	Version int64 `json:"version"`
-}
 
 func (b *BardView5) PostUsersCreate(c *gin.Context) {
 	session := NewSessionCriteria(c)
@@ -55,7 +51,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 		updatedUser := updatedUserRows[0]
 		c.Header("ETag", strconv.FormatInt(updatedUser.Version, 10))
 		c.Header("Location", fmt.Sprintf("/users%d/", updatedUser.UserID))
-		c.JSON(http.StatusOK, userPostResponse{
+		c.JSON(http.StatusOK, api.UserPostOk{
 			UserId:  updatedUser.UserID,
 			Version: userToUpdate.Version,
 		})
@@ -86,9 +82,46 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 		}
 		c.Header("ETag", "0")
 		c.Header("Location", fmt.Sprintf("/users%d/", newUserId))
-		c.JSON(http.StatusCreated, userPostResponse{
+		c.JSON(http.StatusCreated, api.UserPostOk{
 			UserId:  newUserId,
 			Version: 0,
 		})
 	}
+}
+
+type GetUserByIdParams struct {
+	UserID int64 `uri:"userId" binding:"required"`
+}
+
+func (b *BardView5) GetUsersById(c *gin.Context) {
+	var params GetUserByIdParams
+	if err := c.ShouldBindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	logger := bardlog.GetLogger(c)
+	users, err := b.Querier().UserFindById(c, params.UserID)
+	if err != nil {
+		logger.Err(err).Msg("Failed to get new user")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to return user")
+		return
+	}
+	if len(users) == 0 {
+		c.AbortWithStatusJSON(http.StatusNotFound, "Failed to return user")
+		return
+	}
+	user := users[0]
+	c.JSON(http.StatusOK, api.UserGet{
+		User: api.User{
+			CommonAccess: user.CommonAccess,
+			Email:        api.Email(user.Email),
+			Name:         user.Name,
+			SystemTags:   user.SystemTags,
+			UserTags:     user.UserTags,
+		},
+		Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
+		UserId:  user.UserID,
+		Version: user.Version,
+	})
 }

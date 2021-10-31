@@ -18,6 +18,9 @@ const (
 	PatchDocumentOpTest PatchDocumentOp = "test"
 )
 
+// The created time of this record
+type Created string
+
 // Email defines model for Email.
 type Email string
 
@@ -50,7 +53,7 @@ type SystemTags []string
 
 // User defines model for User.
 type User struct {
-	CommonAccess string     `binding:"required,oneof=private public" json:"common_access"`
+	CommonAccess string     `binding:"required,oneof=private public" json:"commonAccess"`
 	Email        Email      `binding:"required,email,min=1,max=512" json:"email"`
 	Name         string     `binding:"required,min=1,max=512" json:"name"`
 	SystemTags   SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags"`
@@ -62,10 +65,10 @@ type UserGet struct {
 	// Embedded struct due to allOf(#/components/schemas/User)
 	User `yaml:",inline"`
 	// Embedded fields due to inline allOf schema
-	// The last modified time of this record
-	LastModified LastModified `json:"lastModified"`
-	UserId       int64        `json:"userId"`
-	Version      int64        `json:"version"`
+	// The created time of this record
+	Created Created `json:"created"`
+	UserId  int64   `json:"userId"`
+	Version int64   `json:"version"`
 }
 
 // UserTags defines model for UserTags.
@@ -76,6 +79,12 @@ type UserId int64
 
 // UserGetOk defines model for UserGetOk.
 type UserGetOk UserGet
+
+// UserPostOk defines model for UserPostOk.
+type UserPostOk struct {
+	UserId  int64 `json:"userId"`
+	Version int64 `json:"version"`
+}
 
 // A JSONPatch document as defined by RFC 6902
 type Patch PatchDocument
