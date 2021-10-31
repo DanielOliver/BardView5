@@ -6,6 +6,7 @@ package tools
 import (
 	_ "github.com/OneOfOne/struct2ts"
 	_ "github.com/deepmap/oapi-codegen/cmd/oapi-codegen"
+	_ "github.com/cheekybits/genny"
 	//_ "github.com/jteeuwen/go-bindata"
 	_ "github.com/kevinburke/go-bindata/go-bindata"
 )

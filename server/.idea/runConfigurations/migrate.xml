@@ -6,7 +6,7 @@
     <envs>
       <env name="BARDVIEW5_connection" value="postgresql://postgres:mysecretpassword@localhost/bardview5?sslmode=disable" />
     </envs>
-    <kind value="PACKAGE" />
+    <kind value="DIRECTORY" />
     <package value="server" />
     <directory value="$PROJECT_DIR$" />
     <filePath value="$PROJECT_DIR$/main.go" />

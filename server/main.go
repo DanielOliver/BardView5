@@ -1,7 +1,7 @@
 package main
 
 //ignore_me go:generate go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen
-//go:generate genny -in=models/gen-api-models.go -out=models/api-models.go gen "ApiModel=RPG,RPGList"
+//go:generate go run github.com/cheekybits/genny -in=models/gen-api-models.go -out=models/api-models.go gen "ApiModel=RPG,RPGList"
 //go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen -o api/bardview5.go -package api -generate types,skip-prune bardview5.yaml
 //ignore_me go:generate go run github.com/kevinburke/go-bindata/go-bindata -o db/bindata.go -pkg db migrations
 
