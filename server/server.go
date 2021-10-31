@@ -13,6 +13,17 @@ import (
 	"server/bv5"
 )
 
+func registerRoutes(router *gin.Engine, bardView5 *bv5.BardView5) {
+	grpV1 := router.Group("/v1")
+	{
+		grpUsers := grpV1.Group("/users")
+		{
+			grpUsers.POST("", bardView5.PostUsersCreate)
+			grpUsers.GET("/:userId", bardView5.GetUsersById)
+		}
+	}
+}
+
 func serve() {
 	bardlogic.Init()
 
@@ -35,13 +46,12 @@ func serve() {
 	router.Use(cors.Default())
 	prometheus.Use(router)
 	router.Use(func(c *gin.Context) {
+		//TODO: solve this atrocity.
 		c.Set(bv5.SessionId, "1")
 	})
 	router.Use(bardlog.UseLoggingWithRequestId(log.Logger, []string{}, nil))
 
-	router.POST("/users", bardView5.PostUsersCreate)
-	router.GET("/users/:userId", bardView5.GetUsersById)
-
+	registerRoutes(router, bardView5)
 
 	log.Info().Int("port", viper.GetInt("port")).Msg("Running on port")
 	if err := router.Run(fmt.Sprintf(":%d", viper.GetInt("port"))); err != nil {

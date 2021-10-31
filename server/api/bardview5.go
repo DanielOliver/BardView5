@@ -89,11 +89,11 @@ type UserPostOk struct {
 // A JSONPatch document as defined by RFC 6902
 type Patch PatchDocument
 
-// PostUsersJSONBody defines parameters for PostUsers.
-type PostUsersJSONBody User
+// PostV1UsersJSONBody defines parameters for PostV1Users.
+type PostV1UsersJSONBody User
 
-// PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
-type PostUsersJSONRequestBody PostUsersJSONBody
+// PostV1UsersJSONRequestBody defines body for PostV1Users for application/json ContentType.
+type PostV1UsersJSONRequestBody PostV1UsersJSONBody
 
-// PatchUsersUserIdJSONRequestBody defines body for PatchUsersUserId for application/json ContentType.
-type PatchUsersUserIdJSONRequestBody Patch
+// PatchV1UsersUserIdJSONRequestBody defines body for PatchV1UsersUserId for application/json ContentType.
+type PatchV1UsersUserIdJSONRequestBody Patch

@@ -17,7 +17,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 	session := NewSessionCriteria(c)
 	logger := bardlog.GetLogger(c)
 
-	var body api.PostUsersJSONBody
+	var body api.PostV1UsersJSONBody
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -50,10 +50,10 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 		}
 		updatedUser := updatedUserRows[0]
 		c.Header("ETag", strconv.FormatInt(updatedUser.Version, 10))
-		c.Header("Location", fmt.Sprintf("/users%d/", updatedUser.UserID))
+		c.Header("Location", fmt.Sprintf("/v1/users%d/", updatedUser.UserID))
 		c.JSON(http.StatusOK, api.UserPostOk{
 			UserId:  updatedUser.UserID,
-			Version: userToUpdate.Version,
+			Version: updatedUser.Version,
 		})
 	} else {
 		newUserId := b.generators.userNode.Generate().Int64()
@@ -81,7 +81,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 			return
 		}
 		c.Header("ETag", "0")
-		c.Header("Location", fmt.Sprintf("/users%d/", newUserId))
+		c.Header("Location", fmt.Sprintf("/v1/users%d/", newUserId))
 		c.JSON(http.StatusCreated, api.UserPostOk{
 			UserId:  newUserId,
 			Version: 0,

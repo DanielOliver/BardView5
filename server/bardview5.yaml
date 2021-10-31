@@ -172,7 +172,7 @@ components:
             - created
             - version
 paths:
-  /users/{userId}:
+  /v1/users/{userId}:
     get:
       summary: Returns a user by ID.
       tags:
@@ -194,7 +194,7 @@ paths:
         '200':
           $ref: '#/components/responses/UserGetOk'
 
-  /users:
+  /v1/users:
     post:
       summary: Creates a new user or updates a user.
       tags:
