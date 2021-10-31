@@ -206,7 +206,7 @@ SET name          = $1
   , version       = version + 1
 WHERE u.user_id = $5
   AND u.version = $6
-RETURNING u.version, u.user_id
+RETURNING user_id, uuid, created_by, created_at, version, effective_date, end_date, is_active, common_access, email, name, user_tags, system_tags
 `
 
 type UserUpdateParams struct {
@@ -218,12 +218,7 @@ type UserUpdateParams struct {
 	Version      int64    `db:"version"`
 }
 
-type UserUpdateRow struct {
-	Version int64 `db:"version"`
-	UserID  int64 `db:"user_id"`
-}
-
-func (q *Queries) UserUpdate(ctx context.Context, arg UserUpdateParams) ([]UserUpdateRow, error) {
+func (q *Queries) UserUpdate(ctx context.Context, arg UserUpdateParams) ([]User, error) {
 	rows, err := q.query(ctx, q.userUpdateStmt, userUpdate,
 		arg.Name,
 		pq.Array(arg.UserTags),
@@ -236,10 +231,24 @@ func (q *Queries) UserUpdate(ctx context.Context, arg UserUpdateParams) ([]UserU
 		return nil, err
 	}
 	defer rows.Close()
-	items := []UserUpdateRow{}
+	items := []User{}
 	for rows.Next() {
-		var i UserUpdateRow
-		if err := rows.Scan(&i.Version, &i.UserID); err != nil {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Uuid,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.EffectiveDate,
+			&i.EndDate,
+			&i.IsActive,
+			&i.CommonAccess,
+			&i.Email,
+			&i.Name,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

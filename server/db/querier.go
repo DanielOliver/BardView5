@@ -11,7 +11,7 @@ type Querier interface {
 	UserFindByEmail(ctx context.Context, email string) ([]User, error)
 	UserFindById(ctx context.Context, userID int64) ([]User, error)
 	UserInsert(ctx context.Context, arg UserInsertParams) (int64, error)
-	UserUpdate(ctx context.Context, arg UserUpdateParams) ([]UserUpdateRow, error)
+	UserUpdate(ctx context.Context, arg UserUpdateParams) ([]User, error)
 }
 
 var _ Querier = (*Queries)(nil)

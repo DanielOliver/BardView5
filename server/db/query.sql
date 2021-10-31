@@ -39,5 +39,5 @@ SET name          = @name
   , version       = version + 1
 WHERE u.user_id = @user_id
   AND u.version = @version
-RETURNING u.version, u.user_id;
+RETURNING *;
 

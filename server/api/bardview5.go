@@ -28,7 +28,7 @@ type Email string
 type LastModified string
 
 // A JSONPatch document as defined by RFC 6902
-type PatchDocument struct {
+type PatchDocument []struct {
 	// A string containing a JSON Pointer value.
 	From *string `json:"from,omitempty"`
 

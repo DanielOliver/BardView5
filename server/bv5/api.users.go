@@ -2,9 +2,12 @@ package bv5
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"io/ioutil"
 	"net/http"
 	"server/api"
 	"server/bardlog"
@@ -123,5 +126,110 @@ func (b *BardView5) GetUsersById(c *gin.Context) {
 		Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
 		UserId:  user.UserID,
 		Version: user.Version,
+	})
+}
+
+func (b *BardView5) PatchUserById(c *gin.Context) {
+	var params GetUserByIdParams
+	if err := c.ShouldBindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	//var body api.PatchV1UsersUserIdJSONRequestBody
+	//if err := c.ShouldBindJSON(&body); err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	//	return
+	//}
+
+	logger := bardlog.GetLogger(c)
+	users, err := b.Querier().UserFindById(c, params.UserID)
+	if err != nil {
+		logger.Err(err).Msg("Failed to get new user")
+		c.AbortWithStatusJSON(http.StatusNotFound, "Failed to find user")
+		return
+	}
+	if len(users) == 0 {
+		c.AbortWithStatusJSON(http.StatusNotFound, "Failed to find user")
+		return
+	}
+	user := users[0]
+	originalUserJson, err := json.Marshal(api.UserGet{
+		User: api.User{
+			CommonAccess: user.CommonAccess,
+			Email:        api.Email(user.Email),
+			Name:         user.Name,
+			SystemTags:   user.SystemTags,
+			UserTags:     user.UserTags,
+		},
+		Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
+		UserId:  user.UserID,
+		Version: user.Version,
+	})
+	if err != nil {
+		logger.Err(err).Msg("Failed to patch user")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to patch user")
+		return
+	}
+	jsonData, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		logger.Err(err).Msg("Failed to patch user")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to patch user")
+		return
+	}
+
+	patch, err := jsonpatch.DecodePatch(jsonData)
+	if err != nil {
+		logger.Err(err).Msg("Failed to patch user")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to patch user")
+		return
+	}
+
+	modifiedUserJson, err := patch.Apply(originalUserJson)
+	if err != nil {
+		logger.Err(err).Msg("Failed to patch user")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to patch user")
+		return
+	}
+
+	var modifiedUser api.UserGet
+	if err := json.Unmarshal(modifiedUserJson, &modifiedUser); err != nil {
+		logger.Err(err).Msg("Failed to patch user")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to patch user")
+		return
+	}
+
+	updatedUserRows, err := b.Querier().UserUpdate(c, db.UserUpdateParams{
+		Name:         modifiedUser.Name,
+		UserTags:     modifiedUser.UserTags,
+		SystemTags:   modifiedUser.SystemTags,
+		CommonAccess: modifiedUser.CommonAccess,
+		UserID:       user.UserID,
+		Version:      user.Version,
+	})
+	if err != nil {
+		logger.Err(err).Msg("Error updating user")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "Error updating user")
+		return
+	}
+	if len(updatedUserRows) == 0 {
+		logger.Error().Msg("Error updating user")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "Error updating user")
+		return
+	}
+	updatedUser := updatedUserRows[0]
+	c.Header("ETag", strconv.FormatInt(updatedUser.Version, 10))
+	c.Header("Location", fmt.Sprintf("/v1/users%d/", updatedUser.UserID))
+	c.JSON(http.StatusOK, api.UserGet{
+		User: api.User{
+			CommonAccess: updatedUser.CommonAccess,
+			Email:        api.Email(updatedUser.Email),
+			Name:         updatedUser.Name,
+			SystemTags:   updatedUser.SystemTags,
+			UserTags:     updatedUser.UserTags,
+		},
+		Created: api.Created(updatedUser.CreatedAt.Format(time.RFC3339)),
+		UserId:  updatedUser.UserID,
+		Version: updatedUser.Version,
 	})
 }

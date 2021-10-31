@@ -26,6 +26,7 @@ require (
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
+	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/getkin/kin-openapi v0.61.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
