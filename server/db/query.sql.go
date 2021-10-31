@@ -164,8 +164,8 @@ func (q *Queries) UserFindById(ctx context.Context, userID int64) ([]User, error
 }
 
 const userInsert = `-- name: UserInsert :execrows
-INSERT INTO "user" as u (user_id, uuid, "name", email, user_tags, system_tags, created_by, common_access)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+INSERT INTO "user" as u (user_id, uuid, "name", email, user_tags, system_tags, created_by, common_access, is_active)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 ON CONFLICT (email) DO NOTHING
 `
 
@@ -178,6 +178,7 @@ type UserInsertParams struct {
 	SystemTags   []string      `db:"system_tags"`
 	CreatedBy    sql.NullInt64 `db:"created_by"`
 	CommonAccess string        `db:"common_access"`
+	IsActive     bool          `db:"is_active"`
 }
 
 func (q *Queries) UserInsert(ctx context.Context, arg UserInsertParams) (int64, error) {
@@ -190,6 +191,7 @@ func (q *Queries) UserInsert(ctx context.Context, arg UserInsertParams) (int64, 
 		pq.Array(arg.SystemTags),
 		arg.CreatedBy,
 		arg.CommonAccess,
+		arg.IsActive,
 	)
 	if err != nil {
 		return 0, err
@@ -204,9 +206,9 @@ SET name          = $1
   , system_tags   = $3
   , common_access = $4
   , version       = version + 1
-WHERE u.user_id = $5
-  AND u.version = $6
-RETURNING user_id, uuid, created_by, created_at, version, effective_date, end_date, is_active, common_access, email, name, user_tags, system_tags
+  , is_active     = $5
+WHERE u.user_id = $6
+  AND u.version = $7 RETURNING user_id, uuid, created_by, created_at, version, effective_date, end_date, is_active, common_access, email, name, user_tags, system_tags
 `
 
 type UserUpdateParams struct {
@@ -214,6 +216,7 @@ type UserUpdateParams struct {
 	UserTags     []string `db:"user_tags"`
 	SystemTags   []string `db:"system_tags"`
 	CommonAccess string   `db:"common_access"`
+	IsActive     bool     `db:"is_active"`
 	UserID       int64    `db:"user_id"`
 	Version      int64    `db:"version"`
 }
@@ -224,6 +227,7 @@ func (q *Queries) UserUpdate(ctx context.Context, arg UserUpdateParams) ([]User,
 		pq.Array(arg.UserTags),
 		pq.Array(arg.SystemTags),
 		arg.CommonAccess,
+		arg.IsActive,
 		arg.UserID,
 		arg.Version,
 	)

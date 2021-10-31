@@ -53,6 +53,7 @@ type SystemTags []string
 
 // User defines model for User.
 type User struct {
+	Active       bool       `json:"active"`
 	CommonAccess string     `binding:"required,oneof=private public" json:"commonAccess"`
 	Email        Email      `binding:"required,email,min=1,max=512" json:"email"`
 	Name         string     `binding:"required,min=1,max=512" json:"name"`

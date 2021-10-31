@@ -40,15 +40,16 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 			CommonAccess: body.CommonAccess,
 			UserID:       userToUpdate.UserID,
 			Version:      userToUpdate.Version,
+			IsActive:     body.Active,
 		})
 		if err != nil {
-			logger.Err(err).Msg("Error updating user")
-			c.AbortWithStatusJSON(http.StatusBadRequest, "Error updating user")
+			logger.Err(err).Str(bardlog.KeySubjectType, ObjectUser).Msg("Error updating user")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Error updating")
 			return
 		}
 		if len(updatedUserRows) == 0 {
-			logger.Error().Msg("Error updating user")
-			c.AbortWithStatusJSON(http.StatusBadRequest, "Error updating user")
+			logger.Warn().Str(bardlog.KeySubjectType, ObjectUser).Msg("Version out of date")
+			c.AbortWithStatus(http.StatusNotModified)
 			return
 		}
 		updatedUser := updatedUserRows[0]
@@ -73,6 +74,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 				session.SessionId(),
 				false,
 			},
+			IsActive: body.Active,
 		})
 		if err != nil {
 			logger.Err(err).Msg("Failed to create new user")
@@ -122,6 +124,7 @@ func (b *BardView5) GetUsersById(c *gin.Context) {
 			Name:         user.Name,
 			SystemTags:   user.SystemTags,
 			UserTags:     user.UserTags,
+			Active:       user.IsActive,
 		},
 		Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
 		UserId:  user.UserID,
@@ -136,16 +139,10 @@ func (b *BardView5) PatchUserById(c *gin.Context) {
 		return
 	}
 
-	//var body api.PatchV1UsersUserIdJSONRequestBody
-	//if err := c.ShouldBindJSON(&body); err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	//	return
-	//}
-
 	logger := bardlog.GetLogger(c)
 	users, err := b.Querier().UserFindById(c, params.UserID)
 	if err != nil {
-		logger.Err(err).Msg("Failed to get new user")
+		logger.Err(err).Str(bardlog.KeySubjectType, ObjectUser).Msg("Failed to find")
 		c.AbortWithStatusJSON(http.StatusNotFound, "Failed to find user")
 		return
 	}
@@ -161,40 +158,38 @@ func (b *BardView5) PatchUserById(c *gin.Context) {
 			Name:         user.Name,
 			SystemTags:   user.SystemTags,
 			UserTags:     user.UserTags,
+			Active:       user.IsActive,
 		},
 		Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
 		UserId:  user.UserID,
 		Version: user.Version,
 	})
 	if err != nil {
-		logger.Err(err).Msg("Failed to patch user")
+		logger.Err(err).Str(bardlog.KeySubjectType, ObjectUser).Msg("Failed to patch")
 		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to patch user")
 		return
 	}
 	jsonData, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		logger.Err(err).Msg("Failed to patch user")
+		logger.Err(err).Str(bardlog.KeySubjectType, ObjectUser).Msg("Failed to patch")
 		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to patch user")
 		return
 	}
-
 	patch, err := jsonpatch.DecodePatch(jsonData)
 	if err != nil {
-		logger.Err(err).Msg("Failed to patch user")
+		logger.Err(err).Str(bardlog.KeySubjectType, ObjectUser).Msg("Failed to patch")
 		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to patch user")
 		return
 	}
-
 	modifiedUserJson, err := patch.Apply(originalUserJson)
 	if err != nil {
-		logger.Err(err).Msg("Failed to patch user")
+		logger.Err(err).Str(bardlog.KeySubjectType, ObjectUser).Msg("Failed to patch")
 		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to patch user")
 		return
 	}
-
 	var modifiedUser api.UserGet
 	if err := json.Unmarshal(modifiedUserJson, &modifiedUser); err != nil {
-		logger.Err(err).Msg("Failed to patch user")
+		logger.Err(err).Str(bardlog.KeySubjectType, ObjectUser).Msg("Failed to patch")
 		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to patch user")
 		return
 	}
@@ -204,17 +199,18 @@ func (b *BardView5) PatchUserById(c *gin.Context) {
 		UserTags:     modifiedUser.UserTags,
 		SystemTags:   modifiedUser.SystemTags,
 		CommonAccess: modifiedUser.CommonAccess,
+		IsActive:     modifiedUser.Active,
 		UserID:       user.UserID,
 		Version:      user.Version,
 	})
 	if err != nil {
-		logger.Err(err).Msg("Error updating user")
-		c.AbortWithStatusJSON(http.StatusBadRequest, "Error updating user")
+		logger.Err(err).Str(bardlog.KeySubjectType, ObjectUser).Msg("Error updating user")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "Error updating")
 		return
 	}
 	if len(updatedUserRows) == 0 {
-		logger.Error().Msg("Error updating user")
-		c.AbortWithStatusJSON(http.StatusBadRequest, "Error updating user")
+		logger.Warn().Str(bardlog.KeySubjectType, ObjectUser).Msg("Version out of date")
+		c.AbortWithStatus(http.StatusNotModified)
 		return
 	}
 	updatedUser := updatedUserRows[0]
@@ -227,6 +223,7 @@ func (b *BardView5) PatchUserById(c *gin.Context) {
 			Name:         updatedUser.Name,
 			SystemTags:   updatedUser.SystemTags,
 			UserTags:     updatedUser.UserTags,
+			Active:       updatedUser.IsActive,
 		},
 		Created: api.Created(updatedUser.CreatedAt.Format(time.RFC3339)),
 		UserId:  updatedUser.UserID,

@@ -26,8 +26,8 @@ FROM "user" u
 WHERE u.user_id = @user_id;
 
 -- name: UserInsert :execrows
-INSERT INTO "user" as u (user_id, uuid, "name", email, user_tags, system_tags, created_by, common_access)
-VALUES (@user_id, @uuid, @name, @email, @user_tags, @system_tags, @created_by, @common_access)
+INSERT INTO "user" as u (user_id, uuid, "name", email, user_tags, system_tags, created_by, common_access, is_active)
+VALUES (@user_id, @uuid, @name, @email, @user_tags, @system_tags, @created_by, @common_access, @is_active)
 ON CONFLICT (email) DO NOTHING;
 
 -- name: UserUpdate :many
@@ -37,7 +37,7 @@ SET name          = @name
   , system_tags   = @system_tags
   , common_access = @common_access
   , version       = version + 1
+  , is_active     = @is_active
 WHERE u.user_id = @user_id
-  AND u.version = @version
-RETURNING *;
+  AND u.version = @version RETURNING *;
 

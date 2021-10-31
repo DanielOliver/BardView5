@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	KeyLogger    = "logger"
-	KeyRequestId = "request_id"
-	KeyLogType   = "type"
+	KeyLogger      = "logger"
+	KeyRequestId   = "request_id"
+	KeyLogType     = "type"
+	KeySubjectType = "subject_type"
 
 	HeaderXRequestId = "X-Request-ID"
 )

@@ -138,6 +138,9 @@ components:
           minLength: 1
           x-oapi-codegen-extra-tags:
             binding: "required,min=1,max=512"
+        active:
+          type: boolean
+          example: true
         commonAccess:
           type: string
           example: private
@@ -157,6 +160,7 @@ components:
         - email
         - name
         - commonAccess
+        - active
     UserGet:
       allOf:
         - $ref: '#/components/schemas/User'
