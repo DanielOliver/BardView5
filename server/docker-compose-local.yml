@@ -11,6 +11,13 @@ services:
       - "5432:5432"
     volumes:
       - ./snapshot:/sql_dump
+  nginx:
+    image: nginx:1.21.3-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx
 
   kratos-migrate:
     image: oryd/kratos:v0.8.0-alpha.3-sqlite
@@ -26,13 +33,14 @@ services:
       - ./kratos-sqlite:/var/lib/sqlite
     command: -c /etc/config/kratos/kratos.yml migrate -e --yes sql
     restart: on-failure
-    networks:
-      - intranet
+#    networks:
+#      - intranet
 
   kratos:
     depends_on:
       - kratos-migrate
     image: oryd/kratos:v0.8.0-alpha.3-sqlite
+#    hostname: kratos
     ports:
       - '4433:4433' # public
       - '4434:4434' # admin
@@ -46,16 +54,16 @@ services:
       - type: bind
         source: ./kratos
         target: /etc/config/kratos
-    networks:
-      - intranet
+#    networks:
+#      - intranet
 
   mailslurper:
     image: oryd/mailslurper:latest-smtps
     ports:
       - '4436:4436'
       - '4437:4437'
-    networks:
-      - intranet
+#    networks:
+#      - intranet
 
-networks:
-  intranet:
+#networks:
+#  intranet:
