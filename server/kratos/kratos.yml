@@ -4,16 +4,16 @@ dsn: memory
 
 serve:
   public:
-    base_url: http://auth.proxy.local:4433/
+    base_url: http://proxy.local/
     cors:
       enabled: true
   admin:
     base_url: http://kratos:4434/
 
 selfservice:
-  default_browser_return_url: http://proxy.local:4455/
+  default_browser_return_url: http://proxy.local/
   whitelisted_return_urls:
-    - http://proxy.local:4455
+    - http://proxy.local
 
   methods:
     password:
@@ -21,33 +21,33 @@ selfservice:
 
   flows:
     error:
-      ui_url: http://proxy.local:4455/error
+      ui_url: http://proxy.local/error
 
     settings:
-      ui_url: http://proxy.local:4455/settings
+      ui_url: http://proxy.local/settings
       privileged_session_max_age: 15m
 
     recovery:
       enabled: true
-      ui_url: http://proxy.local:4455/recovery
+      ui_url: http://proxy.local/recovery
 
     verification:
       enabled: true
-      ui_url: http://proxy.local:4455/verification
+      ui_url: http://proxy.local/verification
       after:
-        default_browser_return_url: http://proxy.local:4455/
+        default_browser_return_url: http://proxy.local/
 
     logout:
       after:
-        default_browser_return_url: http://proxy.local:4455/login
+        default_browser_return_url: http://proxy.local/login
 
     login:
-      ui_url: http://proxy.local:4455/login
+      ui_url: http://proxy.local/login
       lifespan: 10m
 
     registration:
       lifespan: 10m
-      ui_url: http://proxy.local:4455/registration
+      ui_url: http://proxy.local/registration
       after:
         password:
           hooks:
