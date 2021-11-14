@@ -3,7 +3,7 @@ import './App.css'
 import { Link, Outlet } from 'react-router-dom'
 import { AuthContext, AuthInitialState, AuthReducer } from './context/Auth.context'
 import { getSession } from './services/auth'
-import { Menu } from 'semantic-ui-react'
+import { Icon, Menu } from 'semantic-ui-react'
 
 // import 'whatwg-fetch';
 
@@ -55,8 +55,8 @@ function App () {
                 <Link to="/">Bardview5</Link>
               </Menu.Header>
               {!state.isAuthenticated && <>
-                <Menu.Item>Login</Menu.Item>
-                <Menu.Item><Link to="/register">Register</Link> </Menu.Item>
+                <Menu.Item><Icon name='sign-in' /> Login</Menu.Item>
+                <Menu.Item><Link to="/register"><Icon name='signup'/>Register</Link> </Menu.Item>
               </>}
             </Menu>
 

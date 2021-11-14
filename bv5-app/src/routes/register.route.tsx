@@ -118,24 +118,21 @@ function RegisterRoute () {
                                               field: {
                                                 onChange,
                                                 onBlur,
-                                                name,
-                                                ref
+                                                name
                                               }
                                             }) => (
-                                                    <Form.Field>
-                                                      <label>{node.meta?.label?.text}</label>
                                                       <Form.Input required={attributes.required}
                                                                   readOnly={disabled}
                                                                   hidden={hidden}
                                                                   fluid
+                                                                  placeholder={node.meta?.label?.text}
+                                                                  label={node.meta?.label?.text}
                                                                   onBlur={onBlur}
                                                                   onChange={onChange}
                                                                   name={name}
                                                                   type={attributes.type}
                                                                   error={errorMessage}
-                                                              // ref={ref}
-                                                      />
-                                                    </Form.Field>)}
+                                                      />)}
                                 />
                               </div>
                     }
