@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import './App.css'
-import { Link, Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import { AuthContext, AuthInitialState, AuthReducer } from './context/Auth.context'
 import { getSession } from './services/auth'
-import { Icon, Menu } from 'semantic-ui-react'
-
-// import 'whatwg-fetch';
+import { Layout } from './components/Layout'
 
 function App () {
   const [state, dispatch] = React.useReducer(AuthReducer, AuthInitialState)
@@ -50,16 +47,7 @@ function App () {
                     dispatch
                   }}
           >
-            <Menu stackable>
-              <Menu.Header as="h1">
-                <Link to="/">Bardview5</Link>
-              </Menu.Header>
-              {!state.isAuthenticated && <>
-                <Menu.Item><Icon name='sign-in' /> Login</Menu.Item>
-                <Menu.Item><Link to="/register"><Icon name='signup'/>Register</Link> </Menu.Item>
-              </>}
-            </Menu>
-
+           <Layout/>
             <div className="App">
               <Outlet/>
               {state.isAuthenticated && <p>
