@@ -13,6 +13,8 @@ function RegisterRoute () {
     data: apicall
   } = useQuery<ApiResponse<SelfServiceRegistrationFlow | JsonError>>('login?', async () => {
     return await startSelfServiceRegister()
+  }, {
+    refetchOnWindowFocus: false
   })
 
   const {
@@ -83,7 +85,7 @@ function RegisterRoute () {
                                  readOnly={disabled}
                                  hidden={hidden}
                                  type={node.attributes.type}
-                                 value={node.attributes.value}
+                                 defaultValue={node.attributes.value}
                                  {...register(node.attributes.name)}/>
                         </label>
                       {node.messages && node.messages.length > 0 && node.messages.map(message => {
