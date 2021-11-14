@@ -7,7 +7,7 @@ interface AuthState {
 }
 
 const AuthInitialState: AuthState = {
-  isAuthenticated: false,
+  isAuthenticated: localStorage.login === 'true',
   isRegistrationComplete: false,
   checked: 'UNCHECKED'
 }
@@ -31,6 +31,7 @@ const AuthContext = React.createContext<ContextDispatch<AuthState, AuthReducerAc
 function AuthReducer (state: AuthState, action: AuthReducerAction): AuthState {
   switch (action.type) {
     case 'LOGIN':
+      localStorage.setItem('login', 'true')
       return {
         ...state,
         isAuthenticated: true,

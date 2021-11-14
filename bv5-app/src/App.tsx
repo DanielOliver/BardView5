@@ -11,7 +11,7 @@ function App () {
   const [state, dispatch] = React.useReducer(AuthReducer, AuthInitialState)
   const [checking, setChecking] = useState<'CHECKED' | 'UNCHECKED' | 'CHECKING'>('UNCHECKED')
   useEffect(() => {
-    if (!state.isAuthenticated && state.checked === 'UNCHECKED' && checking === 'UNCHECKED') {
+    if (!state.isAuthenticated && state.checked === 'UNCHECKED' && checking === 'UNCHECKED' && localStorage.login !== 'true') {
       setChecking('CHECKING')
       getSession().then(
         value => {
