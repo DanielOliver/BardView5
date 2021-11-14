@@ -47,7 +47,7 @@ selfservice:
 
     registration:
       lifespan: 10m
-      ui_url: http://proxy.local/registration
+      ui_url: http://proxy.local/register
       after:
         password:
           hooks:

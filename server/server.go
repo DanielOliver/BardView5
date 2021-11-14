@@ -14,7 +14,7 @@ import (
 )
 
 func registerRoutes(router *gin.Engine, bardView5 *bv5.BardView5) {
-	grpV1 := router.Group("/v1")
+	grpV1 := router.Group("/api/v1")
 	{
 		grpUsers := grpV1.Group("/users")
 		{
@@ -22,6 +22,7 @@ func registerRoutes(router *gin.Engine, bardView5 *bv5.BardView5) {
 			grpUsers.GET("/:userId", bardView5.GetUsersById)
 			grpUsers.PATCH("/:userId", bardView5.PatchUserById)
 		}
+		grpV1.GET("/session", bardView5.GetWhoAmI)
 	}
 }
 
