@@ -1,6 +1,7 @@
 /* eslint-disable no-useless-constructor */
 import axios, { AxiosResponse } from 'axios'
-import { JsonError, SelfServiceRegistrationFlow } from '@ory/kratos-client'
+import { JsonError, SelfServiceRegistrationFlow, Session } from '@ory/kratos-client'
+import { SuccessfulSelfServiceRegistrationWithoutBrowser } from '@ory/kratos-client/dist/api'
 
 type ApiResponseCategory = 'Not Found' | 'Unauthorized' | 'Unknown' | 'Ok' | 'Bad Request'
 
@@ -26,23 +27,36 @@ function convertAxiosResponse<T> (response: AxiosResponse<T>): ApiResponse<T> {
   return new ApiResponse(response.status, category, response.data)
 }
 
-async function startSelfServiceRegister (): Promise<ApiResponse<SelfServiceRegistrationFlow | JsonError>> {
-  const response: AxiosResponse<SelfServiceRegistrationFlow> = await axios.get('/self-service/registration/browser', {
+async function startSelfServiceRegister (): Promise<ApiResponse<SelfServiceRegistrationFlow> | ApiResponse<JsonError>> {
+  const response = await axios.get('/self-service/registration/browser', {
     validateStatus: undefined
   })
   return convertAxiosResponse(response)
 }
 
-async function submitSelfServiceRegister (data: any, flowUrl: string): Promise<ApiResponse<SelfServiceRegistrationFlow>> {
-  const response: AxiosResponse<SelfServiceRegistrationFlow> = await axios.post(flowUrl, data, {
+async function submitSelfServiceRegister (data: any, flowUrl: string): Promise<ApiResponse<SelfServiceRegistrationFlow> | ApiResponse<SuccessfulSelfServiceRegistrationWithoutBrowser>> {
+  const response = await axios.post(flowUrl, data, {
     validateStatus: undefined
   })
+  return convertAxiosResponse(response)
+}
+
+async function getSession (): Promise<ApiResponse<Session> | null> {
+  const response = await axios.get('/sessions/whoami', {
+    validateStatus: status => {
+      return (status >= 200 && status < 300) || status === 401
+    }
+  })
+  if (response.status === 401) {
+    return null
+  }
   return convertAxiosResponse(response)
 }
 
 export {
   startSelfServiceRegister,
   submitSelfServiceRegister,
+  getSession,
   ApiResponse
 }
 export type {

@@ -3,15 +3,27 @@ import { JsonError, SelfServiceRegistrationFlow } from '@ory/kratos-client'
 import { ApiResponse, startSelfServiceRegister, submitSelfServiceRegister } from '../services/auth'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { AuthContext } from '../context/Auth.context'
+import { SuccessfulSelfServiceRegistrationWithoutBrowser } from '@ory/kratos-client/dist/api'
+
+const isSelfServiceRegistrationFlow = (variableToCheck: any): variableToCheck is SelfServiceRegistrationFlow => (variableToCheck as SelfServiceRegistrationFlow).ui !== undefined
+const isJsonError = (variableToCheck: any): variableToCheck is JsonError => (variableToCheck as JsonError).error !== undefined
+const isSuccessfulSelfServiceRegistrationWithoutBrowser = (variableToCheck: any): variableToCheck is SelfServiceRegistrationFlow => (variableToCheck as SuccessfulSelfServiceRegistrationWithoutBrowser).session !== undefined
 
 function RegisterRoute () {
-  const [registrationData, setRegistrationData] = useState<ApiResponse<SelfServiceRegistrationFlow | JsonError> | null>(null)
+  const {
+    dispatch,
+    state
+  } = React.useContext(AuthContext)
+
+  const [apiResponseData, setApiResponseData] = useState<ApiResponse<any> | null>(null)
+  const [registrationData, setRegistrationData] = useState<SelfServiceRegistrationFlow | JsonError | null>(null)
 
   const {
     isLoading,
     error,
     data: apicall
-  } = useQuery<ApiResponse<SelfServiceRegistrationFlow | JsonError>>('login?', async () => {
+  } = useQuery<ApiResponse<SelfServiceRegistrationFlow> | ApiResponse<JsonError>>('login?', async () => {
     return await startSelfServiceRegister()
   }, {
     refetchOnWindowFocus: false
@@ -26,21 +38,42 @@ function RegisterRoute () {
 
   useEffect(() => {
     if (!isLoading && !error && apicall) {
-      setRegistrationData(apicall)
+      setRegistrationData(apicall.data)
+      setApiResponseData(apicall)
+
+      if (isJsonError(apicall.data)) {
+        console.log('JsonError!', apicall.data)
+        if (apicall.data.error.id === 'session_already_available') {
+          console.log('Already logged in!')
+          dispatch({
+            type: 'LOGIN',
+            isRegistrationComplete: false
+          })
+        }
+      }
     }
   }, [apicall])
 
+  if (state.isAuthenticated) return <p>You are already registered you silly goose!</p>
+
   if (error) return <p>Registration is currently unavailable.</p>
 
-  // if (error) return <pre>An error has occurred: {JSON.stringify(error, null, 2)}</pre>
-
-  if (isLoading || !apicall || !registrationData) return <p>Loading...</p>
+  if (isLoading || !apicall || !apiResponseData || !registrationData) return <p>Loading...</p>
 
   const onSubmit = async (data: any) => {
     console.log(data)
-    if ('ui' in registrationData.data) {
-      const result = await submitSelfServiceRegister(data, registrationData.data.ui.action)
-      setRegistrationData(result)
+    if (isSelfServiceRegistrationFlow(registrationData)) {
+      const result = await submitSelfServiceRegister(data, registrationData.ui.action)
+      if (isSuccessfulSelfServiceRegistrationWithoutBrowser(result.data)) {
+        dispatch({
+          type: 'LOGIN',
+          isRegistrationComplete: false
+        })
+      }
+      if (isSelfServiceRegistrationFlow(result.data)) {
+        setRegistrationData(result.data)
+        setApiResponseData(result)
+      }
     }
 
     // axios.post<SelfServiceRegistrationFlow>(apicall.data.ui.action, data, {
@@ -53,12 +86,12 @@ function RegisterRoute () {
     // })
   }
 
-  switch (registrationData.category) {
+  switch (apiResponseData?.category) {
     case 'Not Found':
       return <p>Not Found</p>
     case 'Ok':
     case 'Bad Request':
-      if ('error' in registrationData.data) {
+      if ('error' in registrationData) {
         return <pre>
           {JSON.stringify(registrationData, null, 2)}
           </pre>
@@ -66,7 +99,7 @@ function RegisterRoute () {
       return (
               /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
               <form onSubmit={handleSubmit(onSubmit)}>
-                {registrationData.data.ui.nodes.filter(node => node.type === 'input').map(node => {
+                {registrationData.ui.nodes.filter(node => node.type === 'input').map(node => {
                   if ('name' in node.attributes) {
                     const hidden = node.attributes.type === 'hidden'
                     const disabled = node.attributes.disabled
@@ -80,28 +113,34 @@ function RegisterRoute () {
                               </button>
                     }
                     return <div key={node.attributes.name}>
-                        <label>{node?.meta?.label?.text}
-                          <input required={node.attributes.required}
-                                 readOnly={disabled}
-                                 hidden={hidden}
-                                 type={node.attributes.type}
-                                 defaultValue={node.attributes.value}
-                                 {...register(node.attributes.name)}/>
-                        </label>
-                      {node.messages && node.messages.length > 0 && node.messages.map(message => {
-                        return <p key={message.id}>
-                          {message.text}
-                        </p>
-                      })
+                              <label>{node?.meta?.label?.text}
+                                <input required={node.attributes.required}
+                                       readOnly={disabled}
+                                       hidden={hidden}
+                                       type={node.attributes.type}
+                                       defaultValue={node.attributes.value}
+                                       {...register(node.attributes.name)}/>
+                              </label>
+                              {node.messages && node.messages.length > 0 && node.messages.map(message => {
+                                return <p key={message.id}>
+                                  {message.text}
+                                </p>
+                              })
 
-                      }
-                      <br/>
+                              }
+                              <br/>
 
-                      </div>
+                            </div>
                   }
                   return <></>
                 }
                 )
+                }
+                {registrationData.ui.messages?.map(message => <>
+                  <p>{message.text}</p>
+                  <br/>
+                </>)
+
                 }
               </form>
       )

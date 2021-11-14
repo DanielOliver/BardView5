@@ -14,8 +14,9 @@ ReactDOM.render(
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<App/>}/>
-                <Route path="/register" element={<RegisterRoute/>}/>
+                <Route path="/" element={<App/>}>
+                  <Route path="/register" element={<RegisterRoute/>}/>
+                </Route>
               </Routes>
             </BrowserRouter>
           </QueryClientProvider>
