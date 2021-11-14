@@ -3,6 +3,10 @@ import axios, { AxiosResponse } from 'axios'
 import { JsonError, SelfServiceRegistrationFlow, Session } from '@ory/kratos-client'
 import { SuccessfulSelfServiceRegistrationWithoutBrowser } from '@ory/kratos-client/dist/api'
 
+const isSelfServiceRegistrationFlow = (variableToCheck: any): variableToCheck is SelfServiceRegistrationFlow => (variableToCheck as SelfServiceRegistrationFlow).ui !== undefined
+const isJsonError = (variableToCheck: any): variableToCheck is JsonError => (variableToCheck as JsonError).error !== undefined
+const isSuccessfulSelfServiceRegistrationWithoutBrowser = (variableToCheck: any): variableToCheck is SelfServiceRegistrationFlow => (variableToCheck as SuccessfulSelfServiceRegistrationWithoutBrowser).session !== undefined
+
 type ApiResponseCategory = 'Not Found' | 'Unauthorized' | 'Unknown' | 'Ok' | 'Bad Request'
 
 class ApiResponse<T> {
@@ -57,7 +61,11 @@ export {
   startSelfServiceRegister,
   submitSelfServiceRegister,
   getSession,
-  ApiResponse
+  ApiResponse,
+
+  isJsonError,
+  isSuccessfulSelfServiceRegistrationWithoutBrowser,
+  isSelfServiceRegistrationFlow
 }
 export type {
   ApiResponseCategory

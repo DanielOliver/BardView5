@@ -7,15 +7,15 @@ interface AuthState {
 }
 
 const AuthInitialState: AuthState = {
-  isAuthenticated: localStorage.login === 'true',
+  isAuthenticated: false,
   isRegistrationComplete: false,
   checked: 'UNCHECKED'
 }
 
 interface AuthReducerAction {
-  type: 'LOGIN' | 'LOGOUT',
-  isRegistrationComplete: boolean,
-  checked: | 'UNCHECKED' | 'CHECKED'
+  type: 'LOGIN' | 'LOGOUT' | 'CHECK',
+  isRegistrationComplete: boolean
+  // checked: | 'UNCHECKED' | 'CHECKED'
 }
 
 interface ContextDispatch<T, TReducer> {
@@ -30,13 +30,21 @@ const AuthContext = React.createContext<ContextDispatch<AuthState, AuthReducerAc
 
 function AuthReducer (state: AuthState, action: AuthReducerAction): AuthState {
   switch (action.type) {
+    case 'CHECK':
+      return {
+        ...state,
+        isAuthenticated: localStorage.login === 'true',
+        isRegistrationComplete: localStorage.registrationComplete === 'false',
+        checked: 'CHECKED'
+      }
     case 'LOGIN':
-      localStorage.setItem('login', 'true')
+      localStorage.registrationComplete = String(action.isRegistrationComplete)
+      localStorage.login = 'true'
       return {
         ...state,
         isAuthenticated: true,
         isRegistrationComplete: action.isRegistrationComplete,
-        checked: action.checked
+        checked: 'CHECKED'
       }
     case 'LOGOUT':
       localStorage.clear()
@@ -44,7 +52,7 @@ function AuthReducer (state: AuthState, action: AuthReducerAction): AuthState {
         ...state,
         isAuthenticated: false,
         isRegistrationComplete: false,
-        checked: action.checked
+        checked: 'CHECKED'
       }
     default:
       return state

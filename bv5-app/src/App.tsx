@@ -9,23 +9,31 @@ import { getSession } from './services/auth'
 
 function App () {
   const [state, dispatch] = React.useReducer(AuthReducer, AuthInitialState)
-  const [checking, setChecking] = useState<'CHECKED' | 'UNCHECKED' | 'CHECKING'>('UNCHECKED')
+  const [checking, setChecking] = useState<'CHECKED' | 'CHECKING_SESSION' | 'CHECKED_STORAGE' | 'UNCHECKED' | 'CHECKING_STORAGE'>('UNCHECKED')
   useEffect(() => {
-    if (!state.isAuthenticated && state.checked === 'UNCHECKED' && checking === 'UNCHECKED' && localStorage.login !== 'true') {
-      setChecking('CHECKING')
+    if (!state.isAuthenticated && state.checked === 'UNCHECKED' && checking === 'UNCHECKED') {
+      setChecking('CHECKING_STORAGE')
+      dispatch({
+        type: 'CHECK',
+        isRegistrationComplete: false
+      })
+    }
+    if (!state.isAuthenticated && state.checked === 'CHECKED' && checking === 'CHECKING_STORAGE') {
+      setChecking('CHECKED_STORAGE')
+    }
+    if (!state.isAuthenticated && checking === 'CHECKED_STORAGE') {
+      setChecking('CHECKING_SESSION')
       getSession().then(
         value => {
           if (value) {
             dispatch({
               type: 'LOGIN',
-              isRegistrationComplete: false,
-              checked: 'CHECKED'
+              isRegistrationComplete: false
             })
           } else {
             dispatch({
               type: 'LOGOUT',
-              isRegistrationComplete: false,
-              checked: 'CHECKED'
+              isRegistrationComplete: false
             })
           }
           setChecking('CHECKED')

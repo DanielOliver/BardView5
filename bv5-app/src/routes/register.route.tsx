@@ -1,14 +1,14 @@
 import { useQuery } from 'react-query'
 import { JsonError, SelfServiceRegistrationFlow } from '@ory/kratos-client'
-import { ApiResponse, startSelfServiceRegister, submitSelfServiceRegister } from '../services/auth'
+import {
+  ApiResponse, isJsonError,
+  isSelfServiceRegistrationFlow, isSuccessfulSelfServiceRegistrationWithoutBrowser,
+  startSelfServiceRegister,
+  submitSelfServiceRegister
+} from '../services/auth'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { AuthContext } from '../context/Auth.context'
-import { SuccessfulSelfServiceRegistrationWithoutBrowser } from '@ory/kratos-client/dist/api'
-
-const isSelfServiceRegistrationFlow = (variableToCheck: any): variableToCheck is SelfServiceRegistrationFlow => (variableToCheck as SelfServiceRegistrationFlow).ui !== undefined
-const isJsonError = (variableToCheck: any): variableToCheck is JsonError => (variableToCheck as JsonError).error !== undefined
-const isSuccessfulSelfServiceRegistrationWithoutBrowser = (variableToCheck: any): variableToCheck is SelfServiceRegistrationFlow => (variableToCheck as SuccessfulSelfServiceRegistrationWithoutBrowser).session !== undefined
 
 function RegisterRoute () {
   const {
@@ -32,8 +32,6 @@ function RegisterRoute () {
   const {
     register,
     handleSubmit
-    // watch,
-    // formState: { errors }
   } = useForm()
 
   useEffect(() => {
@@ -54,7 +52,11 @@ function RegisterRoute () {
     }
   }, [apicall])
 
-  if (state.isAuthenticated) return <p>You are already registered you silly goose!</p>
+  if (state.isAuthenticated) {
+    return <div>
+      <p>You are already registered you silly goose!</p>
+    </div>
+  }
 
   if (error) return <p>Registration is currently unavailable.</p>
 
@@ -97,7 +99,6 @@ function RegisterRoute () {
           </pre>
       }
       return (
-              /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
               <form onSubmit={handleSubmit(onSubmit)}>
                 {registrationData.ui.nodes.filter(node => node.type === 'input').map(node => {
                   if ('name' in node.attributes) {
