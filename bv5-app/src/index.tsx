@@ -7,6 +7,8 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import RegisterRoute from './routes/register.route'
 
+import 'semantic-ui-css/semantic.min.css'
+
 const queryClient = new QueryClient()
 
 ReactDOM.render(

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import logo from './logo.svg'
 import './App.css'
 import { Link, Outlet } from 'react-router-dom'
 import { AuthContext, AuthInitialState, AuthReducer } from './context/Auth.context'
 import { getSession } from './services/auth'
+import { Menu } from 'semantic-ui-react'
 
 // import 'whatwg-fetch';
 
@@ -50,19 +50,17 @@ function App () {
                     dispatch
                   }}
           >
+            <Menu stackable>
+              <Menu.Header as="h1">
+                <Link to="/">Bardview5</Link>
+              </Menu.Header>
+              {!state.isAuthenticated && <>
+                <Menu.Item>Login</Menu.Item>
+                <Menu.Item><Link to="/register">Register</Link> </Menu.Item>
+              </>}
+            </Menu>
+
             <div className="App">
-              <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo"/>
-                <h1>Bardview5</h1>
-                <nav
-                        style={{
-                          borderBottom: 'solid 1px',
-                          paddingBottom: '1rem'
-                        }}
-                >
-                  <Link to="/register">Register</Link>
-                </nav>
-              </header>
               <Outlet/>
               {state.isAuthenticated && <p>
                 WASSSSSSUUUPPP!!!

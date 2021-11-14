@@ -7,8 +7,9 @@ import {
   submitSelfServiceRegister
 } from '../services/auth'
 import React, { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { AuthContext } from '../context/Auth.context'
+import { Form, Message } from 'semantic-ui-react'
 
 function RegisterRoute () {
   const {
@@ -31,7 +32,8 @@ function RegisterRoute () {
 
   const {
     register,
-    handleSubmit
+    handleSubmit,
+    control
   } = useForm()
 
   useEffect(() => {
@@ -77,15 +79,6 @@ function RegisterRoute () {
         setApiResponseData(result)
       }
     }
-
-    // axios.post<SelfServiceRegistrationFlow>(apicall.data.ui.action, data, {
-    //   validateStatus: function (status) {
-    //     return (status >= 200 && status < 300) || status === 400
-    //   }
-    // }).then(x => {
-    //   console.log(JSON.stringify(x.data))
-    //   set(x.data)
-    // })
   }
 
   switch (apiResponseData?.category) {
@@ -99,51 +92,63 @@ function RegisterRoute () {
           </pre>
       }
       return (
-              <form onSubmit={handleSubmit(onSubmit)}>
+              <Form onSubmit={handleSubmit(onSubmit)} error={(registrationData.ui.messages?.length ?? 0) > 0}>
                 {registrationData.ui.nodes.filter(node => node.type === 'input').map(node => {
                   if ('name' in node.attributes) {
                     const hidden = node.attributes.type === 'hidden'
                     const disabled = node.attributes.disabled
                     if (node.attributes.type === 'submit') {
-                      return <button
-                                      hidden={hidden}
-                                      type={node.attributes.type}
-                                      value={node.attributes.value}
-                                      {...register(node.attributes.name)}>
-                                {node?.meta?.label?.text}
-                              </button>
+                      return <div key={node.attributes.name}>
+                                <Form.Field hidden>
+                                  <input hidden
+                                         type={node.attributes.type}
+                                         value={node.attributes.value}
+                                         {...register(node.attributes.name)}></input>
+                                </Form.Field>
+                              </div>
                     }
-                    return <div key={node.attributes.name}>
-                              <label>{node?.meta?.label?.text}
-                                <input required={node.attributes.required}
-                                       readOnly={disabled}
-                                       hidden={hidden}
-                                       type={node.attributes.type}
-                                       defaultValue={node.attributes.value}
-                                       {...register(node.attributes.name)}/>
-                              </label>
-                              {node.messages && node.messages.length > 0 && node.messages.map(message => {
-                                return <p key={message.id}>
-                                  {message.text}
-                                </p>
-                              })
-
-                              }
-                              <br/>
-
-                            </div>
+                    if ('required' in node.attributes) {
+                      const attributes = node.attributes
+                      const errorMessage = node.messages && node.messages.length > 0 ? node.messages.map(x => x.text).concat(' ') : undefined
+                      return <div key={node.attributes.name}>
+                                <Controller name={node.attributes.name}
+                                            defaultValue={node.attributes.value}
+                                            control={control}
+                                            render={({
+                                              field: {
+                                                onChange,
+                                                onBlur,
+                                                name,
+                                                ref
+                                              }
+                                            }) => (
+                                                    <Form.Field>
+                                                      <label>{node.meta?.label?.text}</label>
+                                                      <Form.Input required={attributes.required}
+                                                                  readOnly={disabled}
+                                                                  hidden={hidden}
+                                                                  fluid
+                                                                  onBlur={onBlur}
+                                                                  onChange={onChange}
+                                                                  name={name}
+                                                                  type={attributes.type}
+                                                                  error={errorMessage}
+                                                              // ref={ref}
+                                                      />
+                                                    </Form.Field>)}
+                                />
+                              </div>
+                    }
                   }
                   return <></>
                 }
                 )
                 }
-                {registrationData.ui.messages?.map(message => <>
-                  <p>{message.text}</p>
-                  <br/>
-                </>)
-
+                {registrationData.ui.messages?.map(message => (
+                        <Message error key={message.id} content={message.text}/>))
                 }
-              </form>
+                <Form.Button>Register</Form.Button>
+              </Form>
       )
     default:
       return <pre>
