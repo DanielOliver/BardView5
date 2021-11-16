@@ -1,39 +1,36 @@
 import { useQuery } from 'react-query'
-import { JsonError, SelfServiceRegistrationFlow } from '@ory/kratos-client'
+import { JsonError, SelfServiceLoginFlow } from '@ory/kratos-client'
 import {
   ApiResponse,
-  isJsonError,
-  isSelfServiceRegistrationFlow,
-  isSuccessfulSelfServiceRegistrationWithoutBrowser,
-  startSelfServiceRegister,
-  submitSelfServiceRegister
+  isJsonError, isSelfServiceLoginFlow, isSuccessfulSelfServiceLoginWithoutBrowser,
+  startSelfServiceLogin, submitSelfServiceLogin
 } from '../services/auth'
 import React, { useEffect, useState } from 'react'
 import { AuthContext } from '../context/Auth.context'
 import { RegisterForm } from '../components/RegisterForm'
 
-function RegisterRoute () {
+function LoginRoute () {
   const {
     dispatch,
     state
   } = React.useContext(AuthContext)
 
   const [apiResponseData, setApiResponseData] = useState<ApiResponse<any> | null>(null)
-  const [registrationData, setRegistrationData] = useState<SelfServiceRegistrationFlow | JsonError | null>(null)
+  const [loginData, setLoginData] = useState<SelfServiceLoginFlow | JsonError | null>(null)
 
   const {
     isLoading,
     error,
     data: apicall
-  } = useQuery<ApiResponse<SelfServiceRegistrationFlow> | ApiResponse<JsonError>>('register?', async () => {
-    return await startSelfServiceRegister()
+  } = useQuery<ApiResponse<SelfServiceLoginFlow> | ApiResponse<JsonError>>('login?', async () => {
+    return await startSelfServiceLogin()
   }, {
     refetchOnWindowFocus: false
   })
 
   useEffect(() => {
     if (!isLoading && !error && apicall) {
-      setRegistrationData(apicall.data)
+      setLoginData(apicall.data)
       setApiResponseData(apicall)
 
       if (isJsonError(apicall.data)) {
@@ -57,19 +54,20 @@ function RegisterRoute () {
 
   if (error) return <p>Registration is currently unavailable.</p>
 
-  if (isLoading || !apicall || !apiResponseData || !registrationData) return <p>Loading...</p>
+  if (isLoading || !apicall || !apiResponseData || !loginData) return <p>Loading...</p>
 
   const onSubmit = async (data: any) => {
-    if (isSelfServiceRegistrationFlow(registrationData)) {
-      const result = await submitSelfServiceRegister(data, registrationData.ui.action)
-      if (isSuccessfulSelfServiceRegistrationWithoutBrowser(result.data)) {
+    if (isSelfServiceLoginFlow(loginData)) {
+      console.log('submit login')
+      const result = await submitSelfServiceLogin(data, loginData.ui.action)
+      if (isSuccessfulSelfServiceLoginWithoutBrowser(result.data)) {
         dispatch({
           type: 'LOGIN',
           isRegistrationComplete: false
         })
       }
-      if (isSelfServiceRegistrationFlow(result.data)) {
-        setRegistrationData(result.data)
+      if (isSelfServiceLoginFlow(result.data)) {
+        setLoginData(result.data)
         setApiResponseData(result)
       }
     }
@@ -80,17 +78,17 @@ function RegisterRoute () {
       return <p>Not Found</p>
     case 'Ok':
     case 'Bad Request':
-      if ('error' in registrationData) {
+      if ('error' in loginData) {
         return <pre>
-          {JSON.stringify(registrationData, null, 2)}
+          {JSON.stringify(loginData, null, 2)}
           </pre>
       }
-      return <RegisterForm formType='Register' ui={registrationData.ui} onSubmit={onSubmit}/>
+      return <RegisterForm formType='Login' ui={loginData.ui} onSubmit={onSubmit}/>
     default:
       return <pre>
-    {JSON.stringify(registrationData, null, 2)}
+    {JSON.stringify(loginData, null, 2)}
   </pre>
   }
 }
 
-export default RegisterRoute
+export default LoginRoute

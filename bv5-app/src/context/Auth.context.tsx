@@ -7,8 +7,8 @@ interface AuthState {
 }
 
 const AuthInitialState: AuthState = {
-  isAuthenticated: false,
-  isRegistrationComplete: false,
+  isAuthenticated: localStorage.login === 'true',
+  isRegistrationComplete: localStorage.registrationComplete === 'false',
   checked: 'UNCHECKED'
 }
 

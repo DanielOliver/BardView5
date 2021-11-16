@@ -1,12 +1,13 @@
-import { SelfServiceRegistrationFlow } from '@ory/kratos-client'
+import { UiContainer } from '@ory/kratos-client'
 import { Controller, useForm } from 'react-hook-form'
 import { Form, Message } from 'semantic-ui-react'
 import React from 'react'
 
 export function RegisterForm ({
-  registrationData,
-  onSubmit
-}: { registrationData: SelfServiceRegistrationFlow, onSubmit: any }) {
+  ui,
+  onSubmit,
+  formType
+}: { ui: UiContainer, onSubmit: any, formType: 'Login' | 'Register' }) {
   const {
     register,
     handleSubmit,
@@ -14,8 +15,8 @@ export function RegisterForm ({
   } = useForm()
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)} error={(registrationData.ui.messages?.length ?? 0) > 0}>
-      {registrationData.ui.nodes.filter(node => node.type === 'input').map(node => {
+    <Form onSubmit={handleSubmit(onSubmit)} error={(ui.messages?.length ?? 0) > 0}>
+      {ui.nodes.filter(node => node.type === 'input').map(node => {
         if ('name' in node.attributes) {
           const hidden = node.attributes.type === 'hidden'
           const disabled = node.attributes.disabled
@@ -63,10 +64,10 @@ export function RegisterForm ({
       }
       )
       }
-      {registrationData.ui.messages?.map(message => (
+      {ui.messages?.map(message => (
         <Message error key={message.id} content={message.text}/>))
       }
-      <Form.Button>Register</Form.Button>
+      <Form.Button>{formType}</Form.Button>
     </Form>
   )
 }

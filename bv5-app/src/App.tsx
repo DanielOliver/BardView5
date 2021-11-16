@@ -1,24 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { AuthContext, AuthInitialState, AuthReducer } from './context/Auth.context'
-import { getSession } from './services/auth'
+import { getSelfServiceLogout, getSession } from './services/auth'
 import { Layout } from './components/Layout'
 
 function App () {
   const [state, dispatch] = React.useReducer(AuthReducer, AuthInitialState)
-  const [checking, setChecking] = useState<'CHECKED' | 'CHECKING_SESSION' | 'CHECKED_STORAGE' | 'UNCHECKED' | 'CHECKING_STORAGE'>('UNCHECKED')
-  useEffect(() => {
-    if (!state.isAuthenticated && state.checked === 'UNCHECKED' && checking === 'UNCHECKED') {
-      setChecking('CHECKING_STORAGE')
+  const [checking, setChecking] = useState<'CHECKED' | 'CHECKING_SESSION' | 'UNCHECKED'>('UNCHECKED')
+
+  const submitLogout = () => {
+    getSelfServiceLogout().then(value => {
       dispatch({
-        type: 'CHECK',
+        type: 'LOGOUT',
         isRegistrationComplete: false
       })
-    }
-    if (!state.isAuthenticated && state.checked === 'CHECKED' && checking === 'CHECKING_STORAGE') {
-      setChecking('CHECKED_STORAGE')
-    }
-    if (!state.isAuthenticated && checking === 'CHECKED_STORAGE') {
+      if (value) {
+        window.location.href = value.data.logout_url
+      }
+    })
+  }
+
+  useEffect(() => {
+    if (checking === 'UNCHECKED') {
       setChecking('CHECKING_SESSION')
       getSession().then(
         value => {
@@ -47,7 +50,7 @@ function App () {
                     dispatch
                   }}
           >
-           <Layout/>
+           <Layout logout={submitLogout}/>
             <div className="App">
               <Outlet/>
               {state.isAuthenticated && <p>
