@@ -7,6 +7,8 @@ release:
   services:
     - name: docker:dind
       alias: docker
+      command: [ "--tls=false" ]
+
 
   variables:
     # Disable shallow cloning so that goreleaser can diff between tags to
