@@ -5,7 +5,8 @@ release:
   stage: release
   image: docker:stable
   services:
-    - docker:dind
+    - name: docker:dind
+      alias: docker
 
   variables:
     # Disable shallow cloning so that goreleaser can diff between tags to
