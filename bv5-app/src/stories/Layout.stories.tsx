@@ -25,7 +25,6 @@ LoggedIn.decorators = [
     <Story/>
   </AuthContext.Provider>
 ]
-
 export const LoggedOut = Template.bind({ isAuthenticated: false })
 LoggedOut.decorators = [
   (Story) => <AuthContext.Provider value={{
