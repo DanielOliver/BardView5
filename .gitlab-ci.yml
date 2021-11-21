@@ -7,8 +7,6 @@ release:
   services:
     - name: docker:dind
       alias: docker
-      command: [ "--tls=false" ]
-
 
   variables:
     # Disable shallow cloning so that goreleaser can diff between tags to
@@ -17,6 +15,10 @@ release:
     DOCKER_REGISTRY: $CI_REGISTRY
     DOCKER_USERNAME: $CI_REGISTRY_USER
     DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
+
+    DOCKER_DRIVER: overlay2
+    # https://about.gitlab.com/blog/2019/07/31/docker-in-docker-with-docker-19-dot-03/
+    DOCKER_TLS_CERTDIR: "/certs"
 
   # # Only run this release job for tags, not every commit (for example).
   # only:
