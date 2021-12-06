@@ -15,6 +15,12 @@ components:
       schema:
         type: integer
         format: int64
+    UserUUID:
+      in: path
+      name: userUuid
+      schema:
+        type: string
+        format: uuid
   requestBodies:
     Patch:
       description: JsonPatch
@@ -131,6 +137,11 @@ components:
     User:
       type: object
       properties:
+        uuid:
+          type: string
+          format: uuid
+          x-oapi-codegen-extra-tags:
+            binding: "required,uuid"
         name:
           type: string
           example: Arthur Dent
@@ -179,6 +190,16 @@ components:
             - created
             - version
 paths:
+  /v1/users/{userUuid}:
+    get:
+      summary: Returns a user by UUID.
+      tags:
+        - user
+      parameters:
+        - $ref: '#/components/parameters/UserUUID'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserGetOk'
   /v1/users/{userId}:
     get:
       summary: Returns a user by ID.

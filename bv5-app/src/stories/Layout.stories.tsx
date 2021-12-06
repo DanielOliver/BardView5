@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { ComponentMeta, ComponentStory, Story } from '@storybook/react'
 import { Layout } from '../components/Layout'
 import React from 'react'
 import { AuthContext } from '../context/Auth.context'
@@ -8,8 +8,7 @@ export default {
   component: Layout
 } as ComponentMeta<typeof Layout>
 
-const Template: ComponentStory<typeof Layout> = (args: { isAuthenticated: boolean }) => <Layout logout={() => {
-}}/>
+const Template: ComponentStory<typeof Layout> = () => <Layout logout={() => {}}/>
 
 export const LoggedIn = Template.bind({ isAuthenticated: true })
 LoggedIn.decorators = [

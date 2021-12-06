@@ -163,6 +163,49 @@ func (q *Queries) UserFindById(ctx context.Context, userID int64) ([]User, error
 	return items, nil
 }
 
+const userFindByUuid = `-- name: UserFindByUuid :many
+SELECT user_id, uuid, created_by, created_at, version, effective_date, end_date, is_active, common_access, email, name, user_tags, system_tags
+FROM "user" u
+WHERE u.uuid = $1
+`
+
+func (q *Queries) UserFindByUuid(ctx context.Context, uuid uuid.UUID) ([]User, error) {
+	rows, err := q.query(ctx, q.userFindByUuidStmt, userFindByUuid, uuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Uuid,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.EffectiveDate,
+			&i.EndDate,
+			&i.IsActive,
+			&i.CommonAccess,
+			&i.Email,
+			&i.Name,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const userInsert = `-- name: UserInsert :execrows
 INSERT INTO "user" as u (user_id, uuid, "name", email, user_tags, system_tags, created_by, common_access, is_active)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)

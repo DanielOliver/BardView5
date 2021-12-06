@@ -98,17 +98,59 @@ type GetUserByIdParams struct {
 	UserID int64 `uri:"userId" binding:"required"`
 }
 
+type GetUserByUuidParams struct {
+	UserID string `uri:"userId" binding:"required,uuid"`
+}
+
 func (b *BardView5) GetUsersById(c *gin.Context) {
 	var params GetUserByIdParams
 	if err := c.ShouldBindUri(&params); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+		var uuidParams GetUserByUuidParams
+		if err := c.ShouldBindUri(&uuidParams); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		getUserByUuid(b, c, uuid.MustParse(uuidParams.UserID))
 		return
 	}
+	getUserById(b, c, params.UserID)
+}
 
+func getUserById(b *BardView5, c *gin.Context, userId int64) {
 	logger := bardlog.GetLogger(c)
-	users, err := b.Querier().UserFindById(c, params.UserID)
+	users, err := b.Querier().UserFindById(c, userId)
 	if err != nil {
-		logger.Err(err).Msg("Failed to get new user")
+		logger.Err(err).Int64("id", userId).Msg("Failed to get user")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to return user")
+		return
+	}
+	if len(users) == 0 {
+		c.AbortWithStatusJSON(http.StatusNotFound, "Failed to return user")
+		return
+	}
+	user := users[0]
+	c.JSON(http.StatusOK, api.UserGet{
+		User: api.User{
+			CommonAccess: user.CommonAccess,
+			Email:        api.Email(user.Email),
+			Name:         user.Name,
+			SystemTags:   user.SystemTags,
+			UserTags:     user.UserTags,
+			Active:       user.IsActive,
+		},
+		Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
+		UserId:  user.UserID,
+		Version: user.Version,
+	})
+}
+
+func getUserByUuid(b *BardView5, c *gin.Context, userUuid uuid.UUID) {
+	logger := bardlog.GetLogger(c)
+	users, err := b.Querier().UserFindByUuid(c, userUuid)
+	if err != nil {
+		logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to get user")
 		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to return user")
 		return
 	}

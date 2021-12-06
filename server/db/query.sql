@@ -25,6 +25,11 @@ SELECT *
 FROM "user" u
 WHERE u.user_id = @user_id;
 
+-- name: UserFindByUuid :many
+SELECT *
+FROM "user" u
+WHERE u.uuid = @uuid;
+
 -- name: UserInsert :execrows
 INSERT INTO "user" as u (user_id, uuid, "name", email, user_tags, system_tags, created_by, common_access, is_active)
 VALUES (@user_id, @uuid, @name, @email, @user_tags, @system_tags, @created_by, @common_access, @is_active)

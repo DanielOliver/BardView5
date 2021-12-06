@@ -59,6 +59,7 @@ type User struct {
 	Name         string     `binding:"required,min=1,max=512" json:"name"`
 	SystemTags   SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags"`
 	UserTags     UserTags   `binding:"required,max=64,dive,max=256" json:"userTags"`
+	Uuid         *string    `binding:"required,uuid" json:"uuid,omitempty"`
 }
 
 // UserGet defines model for UserGet.
@@ -77,6 +78,9 @@ type UserTags []string
 
 // UserId defines model for UserId.
 type UserId int64
+
+// UserUUID defines model for UserUUID.
+type UserUUID string
 
 // UserGetOk defines model for UserGetOk.
 type UserGetOk UserGet

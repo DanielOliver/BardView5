@@ -31,6 +31,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.userFindByIdStmt, err = db.PrepareContext(ctx, userFindById); err != nil {
 		return nil, fmt.Errorf("error preparing query UserFindById: %w", err)
 	}
+	if q.userFindByUuidStmt, err = db.PrepareContext(ctx, userFindByUuid); err != nil {
+		return nil, fmt.Errorf("error preparing query UserFindByUuid: %w", err)
+	}
 	if q.userInsertStmt, err = db.PrepareContext(ctx, userInsert); err != nil {
 		return nil, fmt.Errorf("error preparing query UserInsert: %w", err)
 	}
@@ -55,6 +58,11 @@ func (q *Queries) Close() error {
 	if q.userFindByIdStmt != nil {
 		if cerr := q.userFindByIdStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing userFindByIdStmt: %w", cerr)
+		}
+	}
+	if q.userFindByUuidStmt != nil {
+		if cerr := q.userFindByUuidStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing userFindByUuidStmt: %w", cerr)
 		}
 	}
 	if q.userInsertStmt != nil {
@@ -109,6 +117,7 @@ type Queries struct {
 	getAclBySubjectStmt *sql.Stmt
 	userFindByEmailStmt *sql.Stmt
 	userFindByIdStmt    *sql.Stmt
+	userFindByUuidStmt  *sql.Stmt
 	userInsertStmt      *sql.Stmt
 	userUpdateStmt      *sql.Stmt
 }
@@ -120,6 +129,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getAclBySubjectStmt: q.getAclBySubjectStmt,
 		userFindByEmailStmt: q.userFindByEmailStmt,
 		userFindByIdStmt:    q.userFindByIdStmt,
+		userFindByUuidStmt:  q.userFindByUuidStmt,
 		userInsertStmt:      q.userInsertStmt,
 		userUpdateStmt:      q.userUpdateStmt,
 	}
