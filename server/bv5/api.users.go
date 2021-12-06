@@ -72,7 +72,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 			CommonAccess: body.CommonAccess,
 			CreatedBy: sql.NullInt64{
 				session.SessionId(),
-				false,
+				true,
 			},
 			IsActive: body.Active,
 		})
@@ -92,6 +92,19 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 			Version: 0,
 		})
 	}
+}
+
+func (b *BardView5) GetUserThatIsMe(c *gin.Context) {
+	logger := bardlog.GetLogger(c)
+	session, err := b.getKratosSession(c)
+	if err != nil {
+		logger.Err(err).Msg("Failed to find me")
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	userUuid := uuid.MustParse(session.Identity.Id)
+	b.getUserByUuid(c, userUuid)
 }
 
 type GetUserByIdParams struct {

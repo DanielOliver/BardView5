@@ -190,7 +190,15 @@ components:
             - created
             - version
 paths:
-  /v1/users/{userUuid}:
+  /api/v1/users/me:
+    get:
+      summary: Returns current user
+      tags:
+        - user
+      responses:
+        '200':
+          $ref: '#/components/responses/UserGetOk'
+  /api/v1/users/{userUuid}:
     get:
       summary: Returns a user by UUID.
       tags:
@@ -200,7 +208,7 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/UserGetOk'
-  /v1/users/{userId}:
+  /api/v1/users/{userId}:
     get:
       summary: Returns a user by ID.
       tags:
@@ -222,7 +230,7 @@ paths:
         '200':
           $ref: '#/components/responses/UserGetOk'
 
-  /v1/users:
+  /api/v1/users:
     post:
       summary: Creates a new user or updates a user.
       tags:

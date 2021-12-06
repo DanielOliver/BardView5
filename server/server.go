@@ -19,6 +19,7 @@ func registerRoutes(router *gin.Engine, bardView5 *bv5.BardView5) {
 		grpUsers := grpV1.Group("/users")
 		{
 			grpUsers.POST("", bardView5.PostUsersCreate)
+			grpUsers.GET("/me", bardView5.GetUserThatIsMe)
 			grpUsers.GET("/:userId", bardView5.GetUsersById)
 			grpUsers.PATCH("/:userId", bardView5.PatchUserById)
 		}
