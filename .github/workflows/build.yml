@@ -13,11 +13,11 @@ jobs:
         node-version: '17'
     - run: npm install
       working-directory: bv5-app
-    - run: npm generate
+    - run: npm run generate
       working-directory: bv5-app
-    - run: npm test
+    - run: npm run test
       working-directory: bv5-app
-    - run: npm build
+    - run: npm run build
       working-directory: bv5-app
     - uses: actions/upload-artifact@v2
       with:
