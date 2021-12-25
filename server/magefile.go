@@ -97,7 +97,7 @@ func Migrate() error {
 		return err
 	}
 
-	if err := dockerCompose("exec", "db", "/bin/bash", "-c", "pg_dump -U postgres -s bardview5 > /sql_dump/snapshot.sql"); err != nil {
+	if err := dockerCompose("exec", "-T", "db", "/bin/bash", "-c", "pg_dump -U postgres -s bardview5 > /sql_dump/snapshot.sql"); err != nil {
 		return err
 	}
 	pwd, err := os.Getwd()
@@ -114,9 +114,18 @@ func Migrate() error {
 	return nil
 }
 
+func Test() error {
+	if err := sh.Run("go", "test", "./..."); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func All() error {
 	mg.Deps(Clean)
 	mg.Deps(Migrate)
+	mg.Deps(Test)
 	mg.Deps(Build)
 	return nil
 }
