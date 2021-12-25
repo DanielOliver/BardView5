@@ -20,7 +20,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 	session := NewSessionCriteria(c)
 	logger := bardlog.GetLogger(c)
 
-	var body api.PostV1UsersJSONBody
+	var body api.PostApiV1UsersJSONBody
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
