@@ -1,7 +1,30 @@
 on: [push, pull_request]
 name: Test
 jobs:
-  test:
+  client:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '17'
+    - run: npm install
+      working-directory: bv5-app
+    - run: npm generate
+      working-directory: bv5-app
+    - run: npm test
+      working-directory: bv5-app
+    - run: npm build
+      working-directory: bv5-app
+    - uses: actions/upload-artifact@v2
+      with:
+        name: client-${{ matrix.os }}
+        path: bv5-app/build/
+      if: github.event_name != 'pull_request'
+  server:
     # env:
     #   GOPROXY: https://proxy.golang.org
       # GO111MODULE: on
