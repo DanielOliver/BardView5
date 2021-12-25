@@ -22,7 +22,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: client-${{ matrix.os }}
-        path: bv5-app/public/
+        path: bv5-app/build/
       if: github.event_name != 'pull_request'
   server:
     # env:

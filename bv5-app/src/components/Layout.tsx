@@ -12,10 +12,7 @@ export function Layout ({ logout }: {
   const { state } = React.useContext(AuthContext)
 
   const {
-    isLoading,
-    isError,
-    data,
-    error
+    data
   } = useQuery<UserGet>('me', async () => {
     return (await axios.get<UserGet>('/api/v1/users/me')).data
   })

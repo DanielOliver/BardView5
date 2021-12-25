@@ -27,12 +27,12 @@
   },
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts build",
+    "build": "react-scripts --openssl-legacy-provider build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "storybook": "cross-env NODE_OPTIONS=--openssl-legacy-provider start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
-    "generate": "openapi --input ../server/bardview5.yaml --output ./src/bv5-server --exportServices false"
+    "generate": "openapi --input ../server/bardview5.yaml --output ./src/bv5-server --exportServices false --exportCore false"
   },
   "eslintConfig": {
     "extends": [
