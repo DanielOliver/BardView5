@@ -19,7 +19,7 @@ var bardviewexe = "bardview5.exe"
 var localhostPostgresql = "postgresql://postgres:mysecretpassword@localhost/bardview5?sslmode=disable"
 
 func init() {
-	if exe := os.Getenv("exe"); exe != "" {
+	if exe := os.Getenv("BARDVIEW5EXE"); exe != "" {
 		bardviewexe = exe
 	}
 }

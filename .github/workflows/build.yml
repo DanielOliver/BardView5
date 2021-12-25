@@ -2,10 +2,9 @@ on: [push, pull_request]
 name: Test
 jobs:
   test:
-    env:
-      GOPROXY: https://proxy.golang.org
-      GO111MODULE: on
-      bardviewexe: bardview
+    # env:
+    #   GOPROXY: https://proxy.golang.org
+      # GO111MODULE: on
     strategy:
       matrix:
         go-version: [1.17.x]
@@ -20,12 +19,15 @@ jobs:
       run: go get github.com/magefile/mage@07afc7d24f4d6d6442305d49552f04fbda5ccb3e
     - name: Checkout code
       uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-    - name: Test
+    - if: matrix.os == 'ubuntu-latest'
+      name: Test Ubuntu
       working-directory: server
+      env: 
+        BARDVIEW5EXE: bardview
       run: |
         mage -v all
     - uses: actions/upload-artifact@v2
       with:
-        name: bardview5-server
+        name: server-${{ matrix.os }}
         path: server/build/
       if: github.event_name != 'pull_request'
