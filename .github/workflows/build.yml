@@ -27,5 +27,5 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: bardview5-server
-        path: server/build/bardview5
+        path: server/build/
       if: github.event_name != 'pull_request'
