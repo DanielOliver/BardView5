@@ -94,6 +94,21 @@ CREATE TABLE public.common_access (
 ALTER TABLE public.common_access OWNER TO postgres;
 
 --
+-- Name: monster; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.monster (
+    monster_id bigint NOT NULL,
+    created_by bigint,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    version bigint DEFAULT 0 NOT NULL,
+    first_world_id bigint
+);
+
+
+ALTER TABLE public.monster OWNER TO postgres;
+
+--
 -- Name: role; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -228,11 +243,58 @@ CREATE TABLE public."user" (
 ALTER TABLE public."user" OWNER TO postgres;
 
 --
+-- Name: world; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.world (
+    world_id bigint NOT NULL,
+    created_by bigint,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    version bigint DEFAULT 0 NOT NULL,
+    is_active boolean DEFAULT true NOT NULL,
+    common_access text NOT NULL,
+    user_tags text[] NOT NULL,
+    system_tags text[] NOT NULL,
+    derived_from_world bigint,
+    name text NOT NULL
+);
+
+
+ALTER TABLE public.world OWNER TO postgres;
+
+--
+-- Name: world_monster; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.world_monster (
+    world_monster_id bigint NOT NULL,
+    created_by bigint,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    version bigint DEFAULT 0 NOT NULL,
+    user_tags text[] NOT NULL,
+    system_tags text[] NOT NULL,
+    world_id bigint NOT NULL,
+    monster_id bigint NOT NULL,
+    original_world boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public.world_monster OWNER TO postgres;
+
+--
 -- Name: common_access common_access_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.common_access
     ADD CONSTRAINT common_access_pk PRIMARY KEY (name);
+
+
+--
+-- Name: monster monster_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monster
+    ADD CONSTRAINT monster_pk PRIMARY KEY (monster_id);
 
 
 --
@@ -300,6 +362,22 @@ ALTER TABLE ONLY public."user"
 
 
 --
+-- Name: world_monster world_monster_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.world_monster
+    ADD CONSTRAINT world_monster_pk PRIMARY KEY (world_monster_id);
+
+
+--
+-- Name: world world_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.world
+    ADD CONSTRAINT world_pk PRIMARY KEY (world_id);
+
+
+--
 -- Name: roletype_name_uindex; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -318,6 +396,14 @@ CREATE UNIQUE INDEX user_email_uindex ON public."user" USING btree (email);
 --
 
 CREATE UNIQUE INDEX user_uuid_uindex ON public."user" USING btree (uuid);
+
+
+--
+-- Name: monster fk_monster_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monster
+    ADD CONSTRAINT fk_monster_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
 
 
 --
@@ -406,6 +492,62 @@ ALTER TABLE ONLY public."user"
 
 ALTER TABLE ONLY public."user"
     ADD CONSTRAINT fk_user_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: world fk_world_commonaccess; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.world
+    ADD CONSTRAINT fk_world_commonaccess FOREIGN KEY (common_access) REFERENCES public.common_access(name);
+
+
+--
+-- Name: world fk_world_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.world
+    ADD CONSTRAINT fk_world_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: world fk_world_derived_from; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.world
+    ADD CONSTRAINT fk_world_derived_from FOREIGN KEY (derived_from_world) REFERENCES public.world(world_id);
+
+
+--
+-- Name: world_monster fk_world_monster_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.world_monster
+    ADD CONSTRAINT fk_world_monster_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: world_monster fk_world_monster_monster; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.world_monster
+    ADD CONSTRAINT fk_world_monster_monster FOREIGN KEY (monster_id) REFERENCES public.monster(monster_id);
+
+
+--
+-- Name: world_monster fk_world_monster_world; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.world_monster
+    ADD CONSTRAINT fk_world_monster_world FOREIGN KEY (world_id) REFERENCES public.world(world_id);
+
+
+--
+-- Name: monster monster_world; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monster
+    ADD CONSTRAINT monster_world FOREIGN KEY (first_world_id) REFERENCES public.world(world_id);
 
 
 --

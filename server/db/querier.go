@@ -15,6 +15,8 @@ type Querier interface {
 	UserFindByUuid(ctx context.Context, uuid uuid.UUID) ([]User, error)
 	UserInsert(ctx context.Context, arg UserInsertParams) (int64, error)
 	UserUpdate(ctx context.Context, arg UserUpdateParams) ([]User, error)
+	WorldFindById(ctx context.Context, worldID int64) ([]World, error)
+	WorldInsert(ctx context.Context, arg WorldInsertParams) (int64, error)
 }
 
 var _ Querier = (*Queries)(nil)

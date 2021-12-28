@@ -11,6 +11,7 @@ create table "world"
     user_tags          text[]  not null,
     system_tags        text[]  not null,
     derived_from_world bigint  null,
+    name               text    not null,
 
     CONSTRAINT fk_world_createdby
         FOREIGN KEY (created_by)
@@ -34,6 +35,7 @@ create table "monster"
     created_at     timestamp without time zone default (now() at time zone 'utc') not null,
     version        bigint not null             default (0),
     first_world_id bigint null,
+    name           text   not null,
 
     CONSTRAINT fk_monster_createdby
         FOREIGN KEY (created_by)

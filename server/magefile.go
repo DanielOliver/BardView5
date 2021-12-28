@@ -17,6 +17,8 @@ import (
 
 var bardviewexe = "bardview5.exe"
 var localhostPostgresql = "postgresql://postgres:mysecretpassword@localhost/bardview5?sslmode=disable"
+var dockerComposeLocal = "docker-compose-local.yml"
+var dockerCompose = sh.RunCmd("docker-compose", "-f", dockerComposeLocal)
 
 func init() {
 	if exe := os.Getenv("BARDVIEW5EXE"); exe != "" {
@@ -70,10 +72,20 @@ func ConnectLoop(timeout time.Duration) error {
 	}
 }
 
+func DumpSchema() error {
+	fmt.Println("Run: DumpSchema")
+	if err := dockerCompose("exec", "-T", "db", "/bin/bash", "-c", "pg_dump -U postgres -s bardview5 > /sql_dump/snapshot.sql"); err != nil {
+		return err
+	}
+	pwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	return sh.RunV("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/src", strings.ReplaceAll(pwd, "\\", "/")), "-w", "/src", "kjconroy/sqlc", "generate")
+}
+
 func Migrate() error {
 	fmt.Println("Run: Migrate")
-	var dockerComposeLocal = "docker-compose-local.yml"
-	var dockerCompose = sh.RunCmd("docker-compose", "-f", dockerComposeLocal)
 	defer func() {
 		dockerCompose("down")
 	}()
@@ -97,16 +109,8 @@ func Migrate() error {
 		return err
 	}
 
-	if err := dockerCompose("exec", "-T", "db", "/bin/bash", "-c", "pg_dump -U postgres -s bardview5 > /sql_dump/snapshot.sql"); err != nil {
-		return err
-	}
-	pwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	if err := sh.RunV("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/src", strings.ReplaceAll(pwd, "\\", "/")), "-w", "/src", "kjconroy/sqlc", "generate"); err != nil {
-		return err
-	}
+	mg.Deps(DumpSchema)
+
 	if err := sh.Run("go", "generate", "./..."); err != nil {
 		return err
 	}

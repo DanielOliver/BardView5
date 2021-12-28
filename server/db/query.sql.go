@@ -251,7 +251,8 @@ SET name          = $1
   , version       = version + 1
   , is_active     = $5
 WHERE u.user_id = $6
-  AND u.version = $7 RETURNING user_id, uuid, created_by, created_at, version, effective_date, end_date, is_active, common_access, email, name, user_tags, system_tags
+  AND u.version = $7
+RETURNING user_id, uuid, created_by, created_at, version, effective_date, end_date, is_active, common_access, email, name, user_tags, system_tags
 `
 
 type UserUpdateParams struct {
@@ -307,4 +308,78 @@ func (q *Queries) UserUpdate(ctx context.Context, arg UserUpdateParams) ([]User,
 		return nil, err
 	}
 	return items, nil
+}
+
+const worldFindById = `-- name: WorldFindById :many
+SELECT world_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, derived_from_world, name
+FROM "world" w
+WHERE w.world_id = $1
+`
+
+func (q *Queries) WorldFindById(ctx context.Context, worldID int64) ([]World, error) {
+	rows, err := q.query(ctx, q.worldFindByIdStmt, worldFindById, worldID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []World{}
+	for rows.Next() {
+		var i World
+		if err := rows.Scan(
+			&i.WorldID,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.IsActive,
+			&i.CommonAccess,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
+			&i.DerivedFromWorld,
+			&i.Name,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const worldInsert = `-- name: WorldInsert :execrows
+insert into "world" (world_id, derived_from_world, common_access, created_by, is_active, system_tags, user_tags,
+                     "name")
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+`
+
+type WorldInsertParams struct {
+	WorldID          int64         `db:"world_id"`
+	DerivedFromWorld sql.NullInt64 `db:"derived_from_world"`
+	CommonAccess     string        `db:"common_access"`
+	CreatedBy        sql.NullInt64 `db:"created_by"`
+	IsActive         bool          `db:"is_active"`
+	SystemTags       []string      `db:"system_tags"`
+	UserTags         []string      `db:"user_tags"`
+	Name             string        `db:"name"`
+}
+
+func (q *Queries) WorldInsert(ctx context.Context, arg WorldInsertParams) (int64, error) {
+	result, err := q.exec(ctx, q.worldInsertStmt, worldInsert,
+		arg.WorldID,
+		arg.DerivedFromWorld,
+		arg.CommonAccess,
+		arg.CreatedBy,
+		arg.IsActive,
+		pq.Array(arg.SystemTags),
+		pq.Array(arg.UserTags),
+		arg.Name,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }

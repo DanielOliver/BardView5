@@ -40,6 +40,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.userUpdateStmt, err = db.PrepareContext(ctx, userUpdate); err != nil {
 		return nil, fmt.Errorf("error preparing query UserUpdate: %w", err)
 	}
+	if q.worldFindByIdStmt, err = db.PrepareContext(ctx, worldFindById); err != nil {
+		return nil, fmt.Errorf("error preparing query WorldFindById: %w", err)
+	}
+	if q.worldInsertStmt, err = db.PrepareContext(ctx, worldInsert); err != nil {
+		return nil, fmt.Errorf("error preparing query WorldInsert: %w", err)
+	}
 	return &q, nil
 }
 
@@ -73,6 +79,16 @@ func (q *Queries) Close() error {
 	if q.userUpdateStmt != nil {
 		if cerr := q.userUpdateStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing userUpdateStmt: %w", cerr)
+		}
+	}
+	if q.worldFindByIdStmt != nil {
+		if cerr := q.worldFindByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing worldFindByIdStmt: %w", cerr)
+		}
+	}
+	if q.worldInsertStmt != nil {
+		if cerr := q.worldInsertStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing worldInsertStmt: %w", cerr)
 		}
 	}
 	return err
@@ -120,6 +136,8 @@ type Queries struct {
 	userFindByUuidStmt  *sql.Stmt
 	userInsertStmt      *sql.Stmt
 	userUpdateStmt      *sql.Stmt
+	worldFindByIdStmt   *sql.Stmt
+	worldInsertStmt     *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -132,5 +150,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		userFindByUuidStmt:  q.userFindByUuidStmt,
 		userInsertStmt:      q.userInsertStmt,
 		userUpdateStmt:      q.userUpdateStmt,
+		worldFindByIdStmt:   q.worldFindByIdStmt,
+		worldInsertStmt:     q.worldInsertStmt,
 	}
 }

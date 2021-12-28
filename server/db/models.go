@@ -15,6 +15,14 @@ type CommonAccess struct {
 	CreatedAt time.Time `db:"created_at"`
 }
 
+type Monster struct {
+	MonsterID    int64         `db:"monster_id"`
+	CreatedBy    sql.NullInt64 `db:"created_by"`
+	CreatedAt    time.Time     `db:"created_at"`
+	Version      int64         `db:"version"`
+	FirstWorldID sql.NullInt64 `db:"first_world_id"`
+}
+
 type Role struct {
 	RoleID        int64         `db:"role_id"`
 	CreatedBy     sql.NullInt64 `db:"created_by"`
@@ -91,4 +99,29 @@ type User struct {
 	Name          string        `db:"name"`
 	UserTags      []string      `db:"user_tags"`
 	SystemTags    []string      `db:"system_tags"`
+}
+
+type World struct {
+	WorldID          int64         `db:"world_id"`
+	CreatedBy        sql.NullInt64 `db:"created_by"`
+	CreatedAt        time.Time     `db:"created_at"`
+	Version          int64         `db:"version"`
+	IsActive         bool          `db:"is_active"`
+	CommonAccess     string        `db:"common_access"`
+	UserTags         []string      `db:"user_tags"`
+	SystemTags       []string      `db:"system_tags"`
+	DerivedFromWorld sql.NullInt64 `db:"derived_from_world"`
+	Name             string        `db:"name"`
+}
+
+type WorldMonster struct {
+	WorldMonsterID int64         `db:"world_monster_id"`
+	CreatedBy      sql.NullInt64 `db:"created_by"`
+	CreatedAt      time.Time     `db:"created_at"`
+	Version        int64         `db:"version"`
+	UserTags       []string      `db:"user_tags"`
+	SystemTags     []string      `db:"system_tags"`
+	WorldID        int64         `db:"world_id"`
+	MonsterID      int64         `db:"monster_id"`
+	OriginalWorld  bool          `db:"original_world"`
 }
