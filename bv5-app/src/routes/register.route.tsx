@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useQuery, useQueryClient } from 'react-query'
 import { JsonError, SelfServiceRegistrationFlow } from '@ory/kratos-client'
 import {
   ApiResponse,
@@ -11,8 +11,10 @@ import {
 import React, { useEffect, useState } from 'react'
 import { AuthContext } from '../context/Auth.context'
 import { RegisterForm } from '../components/RegisterForm'
+import { useNavigate } from 'react-router-dom'
 
 function RegisterRoute () {
+  const navigate = useNavigate()
   const {
     dispatch,
     state
@@ -30,6 +32,7 @@ function RegisterRoute () {
   }, {
     refetchOnWindowFocus: false
   })
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (!isLoading && !error && apicall) {
@@ -37,9 +40,7 @@ function RegisterRoute () {
       setApiResponseData(apicall)
 
       if (isJsonError(apicall.data)) {
-        console.log('JsonError!', apicall.data)
         if (apicall.data.error.id === 'session_already_available') {
-          console.log('Already logged in!')
           dispatch({
             type: 'LOGIN',
             isRegistrationComplete: false
@@ -67,11 +68,13 @@ function RegisterRoute () {
           type: 'LOGIN',
           isRegistrationComplete: false
         })
+        navigate('/', { replace: true })
       }
       if (isSelfServiceRegistrationFlow(result.data)) {
         setRegistrationData(result.data)
         setApiResponseData(result)
       }
+      await queryClient.refetchQueries(['me'])
     }
   }
 

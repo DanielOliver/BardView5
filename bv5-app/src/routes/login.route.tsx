@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useQuery, useQueryClient } from 'react-query'
 import { JsonError, SelfServiceLoginFlow } from '@ory/kratos-client'
 import {
   ApiResponse,
@@ -8,8 +8,10 @@ import {
 import React, { useEffect, useState } from 'react'
 import { AuthContext } from '../context/Auth.context'
 import { RegisterForm } from '../components/RegisterForm'
+import { useNavigate } from 'react-router-dom'
 
 function LoginRoute () {
+  const navigate = useNavigate()
   const {
     dispatch,
     state
@@ -27,6 +29,7 @@ function LoginRoute () {
   }, {
     refetchOnWindowFocus: false
   })
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (!isLoading && !error && apicall) {
@@ -34,9 +37,7 @@ function LoginRoute () {
       setApiResponseData(apicall)
 
       if (isJsonError(apicall.data)) {
-        console.log('JsonError!', apicall.data)
         if (apicall.data.error.id === 'session_already_available') {
-          console.log('Already logged in!')
           dispatch({
             type: 'LOGIN',
             isRegistrationComplete: false
@@ -58,18 +59,19 @@ function LoginRoute () {
 
   const onSubmit = async (data: any) => {
     if (isSelfServiceLoginFlow(loginData)) {
-      console.log('submit login')
       const result = await submitSelfServiceLogin(data, loginData.ui.action)
       if (isSuccessfulSelfServiceLoginWithoutBrowser(result.data)) {
         dispatch({
           type: 'LOGIN',
           isRegistrationComplete: false
         })
+        navigate('/', { replace: true })
       }
       if (isSelfServiceLoginFlow(result.data)) {
         setLoginData(result.data)
         setApiResponseData(result)
       }
+      await queryClient.refetchQueries(['me'])
     }
   }
 
@@ -83,7 +85,7 @@ function LoginRoute () {
           {JSON.stringify(loginData, null, 2)}
           </pre>
       }
-      return <RegisterForm formType='Login' ui={loginData.ui} onSubmit={onSubmit}/>
+      return <RegisterForm formType="Login" ui={loginData.ui} onSubmit={onSubmit}/>
     default:
       return <pre>
     {JSON.stringify(loginData, null, 2)}

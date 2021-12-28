@@ -32,7 +32,7 @@ export function Layout ({ logout }: {
                     </Menu.Menu>
         )
       : (<Menu.Menu position="right">
-              <Menu.Item><Icon name="sign-in"/> Login</Menu.Item>
+              <Menu.Item><Link to="/login"> <Icon name="sign-in"/> Login</Link></Menu.Item>
               <Menu.Item><Link to="/register"><Icon name="signup"/>Register</Link> </Menu.Item>
             </Menu.Menu>)}
   </Menu>
