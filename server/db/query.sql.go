@@ -77,6 +77,40 @@ func (q *Queries) GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams
 	return items, nil
 }
 
+const languageFindAll = `-- name: LanguageFindAll :many
+SELECT language_id, created_by, created_at, version, name
+FROM "language" l
+`
+
+func (q *Queries) LanguageFindAll(ctx context.Context) ([]Language, error) {
+	rows, err := q.query(ctx, q.languageFindAllStmt, languageFindAll)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Language{}
+	for rows.Next() {
+		var i Language
+		if err := rows.Scan(
+			&i.LanguageID,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.Name,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const monsterFindById = `-- name: MonsterFindById :many
 SELECT monster_id, created_by, created_at, version, first_world_id, name, tags, monster_type, alignment, size_category, milli_challenge_rating, languages, description
 FROM "monster" m
@@ -120,13 +154,13 @@ func (q *Queries) MonsterFindById(ctx context.Context, monsterID int64) ([]Monst
 	return items, nil
 }
 
-const sizeFindAll = `-- name: SizeFindAll :many
+const sizeCategoryFindAll = `-- name: SizeCategoryFindAll :many
 SELECT created_by, created_at, version, name, space
 FROM "size_category" s
 `
 
-func (q *Queries) SizeFindAll(ctx context.Context) ([]SizeCategory, error) {
-	rows, err := q.query(ctx, q.sizeFindAllStmt, sizeFindAll)
+func (q *Queries) SizeCategoryFindAll(ctx context.Context) ([]SizeCategory, error) {
+	rows, err := q.query(ctx, q.sizeCategoryFindAllStmt, sizeCategoryFindAll)
 	if err != nil {
 		return nil, err
 	}
@@ -458,4 +492,80 @@ func (q *Queries) WorldInsert(ctx context.Context, arg WorldInsertParams) (int64
 		return 0, err
 	}
 	return result.RowsAffected()
+}
+
+const worldMonsterFindByIds = `-- name: WorldMonsterFindByIds :many
+SELECT m.monster_id,
+       wm.world_id,
+       m.name,
+       m.tags,
+       m.monster_type,
+       m.alignment,
+       m.size_category,
+       m.milli_challenge_rating,
+       m.languages,
+       m.description,
+       wm.user_tags,
+       wm.system_tags
+FROM "monster" m
+         INNER JOIN "world_monster" wm ON wm.monster_id = m.monster_id
+WHERE m.monster_id = $1
+  AND wm.monster_id = $1
+  AND wm.world_id = $2
+`
+
+type WorldMonsterFindByIdsParams struct {
+	MonsterID int64 `db:"monster_id"`
+	WorldID   int64 `db:"world_id"`
+}
+
+type WorldMonsterFindByIdsRow struct {
+	MonsterID            int64    `db:"monster_id"`
+	WorldID              int64    `db:"world_id"`
+	Name                 string   `db:"name"`
+	Tags                 []string `db:"tags"`
+	MonsterType          string   `db:"monster_type"`
+	Alignment            string   `db:"alignment"`
+	SizeCategory         string   `db:"size_category"`
+	MilliChallengeRating int64    `db:"milli_challenge_rating"`
+	Languages            []string `db:"languages"`
+	Description          string   `db:"description"`
+	UserTags             []string `db:"user_tags"`
+	SystemTags           []string `db:"system_tags"`
+}
+
+func (q *Queries) WorldMonsterFindByIds(ctx context.Context, arg WorldMonsterFindByIdsParams) ([]WorldMonsterFindByIdsRow, error) {
+	rows, err := q.query(ctx, q.worldMonsterFindByIdsStmt, worldMonsterFindByIds, arg.MonsterID, arg.WorldID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []WorldMonsterFindByIdsRow{}
+	for rows.Next() {
+		var i WorldMonsterFindByIdsRow
+		if err := rows.Scan(
+			&i.MonsterID,
+			&i.WorldID,
+			&i.Name,
+			pq.Array(&i.Tags),
+			&i.MonsterType,
+			&i.Alignment,
+			&i.SizeCategory,
+			&i.MilliChallengeRating,
+			pq.Array(&i.Languages),
+			&i.Description,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

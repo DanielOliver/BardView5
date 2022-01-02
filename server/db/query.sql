@@ -61,6 +61,29 @@ SELECT *
 FROM "monster" m
 WHERE m.monster_id = @monster_id;
 
--- name: SizeFindAll :many
+-- name: WorldMonsterFindByIds :many
+SELECT m.monster_id,
+       wm.world_id,
+       m.name,
+       m.tags,
+       m.monster_type,
+       m.alignment,
+       m.size_category,
+       m.milli_challenge_rating,
+       m.languages,
+       m.description,
+       wm.user_tags,
+       wm.system_tags
+FROM "monster" m
+         INNER JOIN "world_monster" wm ON wm.monster_id = m.monster_id
+WHERE m.monster_id = @monster_id
+  AND wm.monster_id = @monster_id
+  AND wm.world_id = @world_id;
+
+-- name: SizeCategoryFindAll :many
 SELECT *
 FROM "size_category" s;
+
+-- name: LanguageFindAll :many
+SELECT *
+FROM "language" l;
