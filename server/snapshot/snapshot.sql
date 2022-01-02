@@ -94,6 +94,21 @@ CREATE TABLE public.common_access (
 ALTER TABLE public.common_access OWNER TO postgres;
 
 --
+-- Name: language; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.language (
+    language_id bigint NOT NULL,
+    created_by bigint,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    version bigint DEFAULT 0 NOT NULL,
+    name text NOT NULL
+);
+
+
+ALTER TABLE public.language OWNER TO postgres;
+
+--
 -- Name: monster; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -102,11 +117,33 @@ CREATE TABLE public.monster (
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     version bigint DEFAULT 0 NOT NULL,
-    first_world_id bigint
+    first_world_id bigint,
+    name text NOT NULL,
+    tags text[] NOT NULL,
+    monster_type text NOT NULL,
+    alignment text NOT NULL,
+    size_category text NOT NULL,
+    milli_challenge_rating bigint NOT NULL,
+    languages text[] NOT NULL,
+    description text NOT NULL
 );
 
 
 ALTER TABLE public.monster OWNER TO postgres;
+
+--
+-- Name: monster_type; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.monster_type (
+    created_by bigint,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    version bigint DEFAULT 0 NOT NULL,
+    name text NOT NULL
+);
+
+
+ALTER TABLE public.monster_type OWNER TO postgres;
 
 --
 -- Name: role; Type: TABLE; Schema: public; Owner: postgres
@@ -220,6 +257,21 @@ CREATE TABLE public.schema_migrations (
 ALTER TABLE public.schema_migrations OWNER TO postgres;
 
 --
+-- Name: size_category; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.size_category (
+    created_by bigint,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    version bigint DEFAULT 0 NOT NULL,
+    name text NOT NULL,
+    space text NOT NULL
+);
+
+
+ALTER TABLE public.size_category OWNER TO postgres;
+
+--
 -- Name: user; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -290,11 +342,27 @@ ALTER TABLE ONLY public.common_access
 
 
 --
+-- Name: language language_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.language
+    ADD CONSTRAINT language_pk PRIMARY KEY (language_id);
+
+
+--
 -- Name: monster monster_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.monster
     ADD CONSTRAINT monster_pk PRIMARY KEY (monster_id);
+
+
+--
+-- Name: monster_type monster_type_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monster_type
+    ADD CONSTRAINT monster_type_pk PRIMARY KEY (name);
 
 
 --
@@ -354,6 +422,14 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: size_category size_category_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.size_category
+    ADD CONSTRAINT size_category_pk PRIMARY KEY (name);
+
+
+--
 -- Name: user user_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -399,11 +475,51 @@ CREATE UNIQUE INDEX user_uuid_uindex ON public."user" USING btree (uuid);
 
 
 --
+-- Name: language fk_language_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.language
+    ADD CONSTRAINT fk_language_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
 -- Name: monster fk_monster_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.monster
     ADD CONSTRAINT fk_monster_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: monster fk_monster_size_category; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monster
+    ADD CONSTRAINT fk_monster_size_category FOREIGN KEY (size_category) REFERENCES public.size_category(name);
+
+
+--
+-- Name: monster fk_monster_type; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monster
+    ADD CONSTRAINT fk_monster_type FOREIGN KEY (monster_type) REFERENCES public.monster_type(name);
+
+
+--
+-- Name: monster_type fk_monster_type_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monster_type
+    ADD CONSTRAINT fk_monster_type_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: monster fk_monster_world; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.monster
+    ADD CONSTRAINT fk_monster_world FOREIGN KEY (first_world_id) REFERENCES public.world(world_id);
 
 
 --
@@ -479,6 +595,14 @@ ALTER TABLE ONLY public.role_permission
 
 
 --
+-- Name: size_category fk_size_category_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.size_category
+    ADD CONSTRAINT fk_size_category_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
 -- Name: user fk_user_commonaccess; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -540,14 +664,6 @@ ALTER TABLE ONLY public.world_monster
 
 ALTER TABLE ONLY public.world_monster
     ADD CONSTRAINT fk_world_monster_world FOREIGN KEY (world_id) REFERENCES public.world(world_id);
-
-
---
--- Name: monster monster_world; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.monster
-    ADD CONSTRAINT monster_world FOREIGN KEY (first_world_id) REFERENCES public.world(world_id);
 
 
 --

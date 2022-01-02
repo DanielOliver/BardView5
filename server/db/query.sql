@@ -44,8 +44,7 @@ SET name          = @name
   , version       = version + 1
   , is_active     = @is_active
 WHERE u.user_id = @user_id
-  AND u.version = @version
-RETURNING *;
+  AND u.version = @version RETURNING *;
 
 -- name: WorldInsert :execrows
 insert into "world" (world_id, derived_from_world, common_access, created_by, is_active, system_tags, user_tags,
@@ -56,3 +55,12 @@ VALUES (@world_id, @derived_from_world, @common_access, @created_by, @is_active,
 SELECT *
 FROM "world" w
 WHERE w.world_id = @world_id;
+
+-- name: MonsterFindById :many
+SELECT *
+FROM "monster" m
+WHERE m.monster_id = @monster_id;
+
+-- name: SizeFindAll :many
+SELECT *
+FROM "size_category" s;

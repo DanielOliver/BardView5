@@ -15,12 +15,35 @@ type CommonAccess struct {
 	CreatedAt time.Time `db:"created_at"`
 }
 
+type Language struct {
+	LanguageID int64         `db:"language_id"`
+	CreatedBy  sql.NullInt64 `db:"created_by"`
+	CreatedAt  time.Time     `db:"created_at"`
+	Version    int64         `db:"version"`
+	Name       string        `db:"name"`
+}
+
 type Monster struct {
-	MonsterID    int64         `db:"monster_id"`
-	CreatedBy    sql.NullInt64 `db:"created_by"`
-	CreatedAt    time.Time     `db:"created_at"`
-	Version      int64         `db:"version"`
-	FirstWorldID sql.NullInt64 `db:"first_world_id"`
+	MonsterID            int64         `db:"monster_id"`
+	CreatedBy            sql.NullInt64 `db:"created_by"`
+	CreatedAt            time.Time     `db:"created_at"`
+	Version              int64         `db:"version"`
+	FirstWorldID         sql.NullInt64 `db:"first_world_id"`
+	Name                 string        `db:"name"`
+	Tags                 []string      `db:"tags"`
+	MonsterType          string        `db:"monster_type"`
+	Alignment            string        `db:"alignment"`
+	SizeCategory         string        `db:"size_category"`
+	MilliChallengeRating int64         `db:"milli_challenge_rating"`
+	Languages            []string      `db:"languages"`
+	Description          string        `db:"description"`
+}
+
+type MonsterType struct {
+	CreatedBy sql.NullInt64 `db:"created_by"`
+	CreatedAt time.Time     `db:"created_at"`
+	Version   int64         `db:"version"`
+	Name      string        `db:"name"`
 }
 
 type Role struct {
@@ -83,6 +106,14 @@ type RoleType struct {
 type SchemaMigration struct {
 	Version int64 `db:"version"`
 	Dirty   bool  `db:"dirty"`
+}
+
+type SizeCategory struct {
+	CreatedBy sql.NullInt64 `db:"created_by"`
+	CreatedAt time.Time     `db:"created_at"`
+	Version   int64         `db:"version"`
+	Name      string        `db:"name"`
+	Space     string        `db:"space"`
 }
 
 type User struct {

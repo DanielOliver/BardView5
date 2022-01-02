@@ -25,6 +25,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getAclBySubjectStmt, err = db.PrepareContext(ctx, getAclBySubject); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAclBySubject: %w", err)
 	}
+	if q.monsterFindByIdStmt, err = db.PrepareContext(ctx, monsterFindById); err != nil {
+		return nil, fmt.Errorf("error preparing query MonsterFindById: %w", err)
+	}
+	if q.sizeFindAllStmt, err = db.PrepareContext(ctx, sizeFindAll); err != nil {
+		return nil, fmt.Errorf("error preparing query SizeFindAll: %w", err)
+	}
 	if q.userFindByEmailStmt, err = db.PrepareContext(ctx, userFindByEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query UserFindByEmail: %w", err)
 	}
@@ -54,6 +60,16 @@ func (q *Queries) Close() error {
 	if q.getAclBySubjectStmt != nil {
 		if cerr := q.getAclBySubjectStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAclBySubjectStmt: %w", cerr)
+		}
+	}
+	if q.monsterFindByIdStmt != nil {
+		if cerr := q.monsterFindByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing monsterFindByIdStmt: %w", cerr)
+		}
+	}
+	if q.sizeFindAllStmt != nil {
+		if cerr := q.sizeFindAllStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing sizeFindAllStmt: %w", cerr)
 		}
 	}
 	if q.userFindByEmailStmt != nil {
@@ -131,6 +147,8 @@ type Queries struct {
 	db                  DBTX
 	tx                  *sql.Tx
 	getAclBySubjectStmt *sql.Stmt
+	monsterFindByIdStmt *sql.Stmt
+	sizeFindAllStmt     *sql.Stmt
 	userFindByEmailStmt *sql.Stmt
 	userFindByIdStmt    *sql.Stmt
 	userFindByUuidStmt  *sql.Stmt
@@ -145,6 +163,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                  tx,
 		tx:                  tx,
 		getAclBySubjectStmt: q.getAclBySubjectStmt,
+		monsterFindByIdStmt: q.monsterFindByIdStmt,
+		sizeFindAllStmt:     q.sizeFindAllStmt,
 		userFindByEmailStmt: q.userFindByEmailStmt,
 		userFindByIdStmt:    q.userFindByIdStmt,
 		userFindByUuidStmt:  q.userFindByUuidStmt,

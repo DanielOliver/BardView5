@@ -10,6 +10,8 @@ import (
 
 type Querier interface {
 	GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams) ([]GetAclBySubjectRow, error)
+	MonsterFindById(ctx context.Context, monsterID int64) ([]Monster, error)
+	SizeFindAll(ctx context.Context) ([]SizeCategory, error)
 	UserFindByEmail(ctx context.Context, email string) ([]User, error)
 	UserFindById(ctx context.Context, userID int64) ([]User, error)
 	UserFindByUuid(ctx context.Context, uuid uuid.UUID) ([]User, error)

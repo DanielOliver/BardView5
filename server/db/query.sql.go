@@ -77,6 +77,83 @@ func (q *Queries) GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams
 	return items, nil
 }
 
+const monsterFindById = `-- name: MonsterFindById :many
+SELECT monster_id, created_by, created_at, version, first_world_id, name, tags, monster_type, alignment, size_category, milli_challenge_rating, languages, description
+FROM "monster" m
+WHERE m.monster_id = $1
+`
+
+func (q *Queries) MonsterFindById(ctx context.Context, monsterID int64) ([]Monster, error) {
+	rows, err := q.query(ctx, q.monsterFindByIdStmt, monsterFindById, monsterID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Monster{}
+	for rows.Next() {
+		var i Monster
+		if err := rows.Scan(
+			&i.MonsterID,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.FirstWorldID,
+			&i.Name,
+			pq.Array(&i.Tags),
+			&i.MonsterType,
+			&i.Alignment,
+			&i.SizeCategory,
+			&i.MilliChallengeRating,
+			pq.Array(&i.Languages),
+			&i.Description,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const sizeFindAll = `-- name: SizeFindAll :many
+SELECT created_by, created_at, version, name, space
+FROM "size_category" s
+`
+
+func (q *Queries) SizeFindAll(ctx context.Context) ([]SizeCategory, error) {
+	rows, err := q.query(ctx, q.sizeFindAllStmt, sizeFindAll)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SizeCategory{}
+	for rows.Next() {
+		var i SizeCategory
+		if err := rows.Scan(
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.Name,
+			&i.Space,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const userFindByEmail = `-- name: UserFindByEmail :many
 SELECT user_id, uuid, created_by, created_at, version, effective_date, end_date, is_active, common_access, email, name, user_tags, system_tags
 FROM "user" u
@@ -251,8 +328,7 @@ SET name          = $1
   , version       = version + 1
   , is_active     = $5
 WHERE u.user_id = $6
-  AND u.version = $7
-RETURNING user_id, uuid, created_by, created_at, version, effective_date, end_date, is_active, common_access, email, name, user_tags, system_tags
+  AND u.version = $7 RETURNING user_id, uuid, created_by, created_at, version, effective_date, end_date, is_active, common_access, email, name, user_tags, system_tags
 `
 
 type UserUpdateParams struct {
