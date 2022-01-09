@@ -89,11 +89,11 @@ create table "monster"
             REFERENCES "monster_type" (name)
 );
 
-create table "world_monster"
+create table "inhabitant"
 (
 
-    world_monster_id bigint
-        constraint world_monster_pk
+    inhabitant_id bigint
+        constraint inhabitant_pk
             primary key,
     created_by       bigint  null,
     created_at       timestamp without time zone default (now() at time zone 'utc') not null,
@@ -104,16 +104,18 @@ create table "world_monster"
     monster_id       bigint  not null,
     original_world   boolean not null            default (false),
 
-    CONSTRAINT fk_world_monster_createdby
+    CONSTRAINT fk_inhabitant_createdby
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id),
-    CONSTRAINT fk_world_monster_world
+    CONSTRAINT fk_inhabitant_world
         FOREIGN KEY (world_id)
             REFERENCES "world" (world_id),
-    CONSTRAINT fk_world_monster_monster
+    CONSTRAINT fk_inhabitant_monster
         FOREIGN KEY (monster_id)
             REFERENCES "monster" (monster_id)
 );
+
+create index inhabitant_world_monster on inhabitant (world_id, monster_id);
 
 create table "language"
 (

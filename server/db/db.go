@@ -25,6 +25,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getAclBySubjectStmt, err = db.PrepareContext(ctx, getAclBySubject); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAclBySubject: %w", err)
 	}
+	if q.inhabitantsFindByWorldStmt, err = db.PrepareContext(ctx, inhabitantsFindByWorld); err != nil {
+		return nil, fmt.Errorf("error preparing query InhabitantsFindByWorld: %w", err)
+	}
+	if q.inhabitantsFindByWorldAndMonsterStmt, err = db.PrepareContext(ctx, inhabitantsFindByWorldAndMonster); err != nil {
+		return nil, fmt.Errorf("error preparing query InhabitantsFindByWorldAndMonster: %w", err)
+	}
 	if q.languageFindAllStmt, err = db.PrepareContext(ctx, languageFindAll); err != nil {
 		return nil, fmt.Errorf("error preparing query LanguageFindAll: %w", err)
 	}
@@ -55,9 +61,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.worldInsertStmt, err = db.PrepareContext(ctx, worldInsert); err != nil {
 		return nil, fmt.Errorf("error preparing query WorldInsert: %w", err)
 	}
-	if q.worldMonsterFindByIdsStmt, err = db.PrepareContext(ctx, worldMonsterFindByIds); err != nil {
-		return nil, fmt.Errorf("error preparing query WorldMonsterFindByIds: %w", err)
-	}
 	return &q, nil
 }
 
@@ -66,6 +69,16 @@ func (q *Queries) Close() error {
 	if q.getAclBySubjectStmt != nil {
 		if cerr := q.getAclBySubjectStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAclBySubjectStmt: %w", cerr)
+		}
+	}
+	if q.inhabitantsFindByWorldStmt != nil {
+		if cerr := q.inhabitantsFindByWorldStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing inhabitantsFindByWorldStmt: %w", cerr)
+		}
+	}
+	if q.inhabitantsFindByWorldAndMonsterStmt != nil {
+		if cerr := q.inhabitantsFindByWorldAndMonsterStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing inhabitantsFindByWorldAndMonsterStmt: %w", cerr)
 		}
 	}
 	if q.languageFindAllStmt != nil {
@@ -118,11 +131,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing worldInsertStmt: %w", cerr)
 		}
 	}
-	if q.worldMonsterFindByIdsStmt != nil {
-		if cerr := q.worldMonsterFindByIdsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing worldMonsterFindByIdsStmt: %w", cerr)
-		}
-	}
 	return err
 }
 
@@ -160,37 +168,39 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                        DBTX
-	tx                        *sql.Tx
-	getAclBySubjectStmt       *sql.Stmt
-	languageFindAllStmt       *sql.Stmt
-	monsterFindByIdStmt       *sql.Stmt
-	sizeCategoryFindAllStmt   *sql.Stmt
-	userFindByEmailStmt       *sql.Stmt
-	userFindByIdStmt          *sql.Stmt
-	userFindByUuidStmt        *sql.Stmt
-	userInsertStmt            *sql.Stmt
-	userUpdateStmt            *sql.Stmt
-	worldFindByIdStmt         *sql.Stmt
-	worldInsertStmt           *sql.Stmt
-	worldMonsterFindByIdsStmt *sql.Stmt
+	db                                   DBTX
+	tx                                   *sql.Tx
+	getAclBySubjectStmt                  *sql.Stmt
+	inhabitantsFindByWorldStmt           *sql.Stmt
+	inhabitantsFindByWorldAndMonsterStmt *sql.Stmt
+	languageFindAllStmt                  *sql.Stmt
+	monsterFindByIdStmt                  *sql.Stmt
+	sizeCategoryFindAllStmt              *sql.Stmt
+	userFindByEmailStmt                  *sql.Stmt
+	userFindByIdStmt                     *sql.Stmt
+	userFindByUuidStmt                   *sql.Stmt
+	userInsertStmt                       *sql.Stmt
+	userUpdateStmt                       *sql.Stmt
+	worldFindByIdStmt                    *sql.Stmt
+	worldInsertStmt                      *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                        tx,
-		tx:                        tx,
-		getAclBySubjectStmt:       q.getAclBySubjectStmt,
-		languageFindAllStmt:       q.languageFindAllStmt,
-		monsterFindByIdStmt:       q.monsterFindByIdStmt,
-		sizeCategoryFindAllStmt:   q.sizeCategoryFindAllStmt,
-		userFindByEmailStmt:       q.userFindByEmailStmt,
-		userFindByIdStmt:          q.userFindByIdStmt,
-		userFindByUuidStmt:        q.userFindByUuidStmt,
-		userInsertStmt:            q.userInsertStmt,
-		userUpdateStmt:            q.userUpdateStmt,
-		worldFindByIdStmt:         q.worldFindByIdStmt,
-		worldInsertStmt:           q.worldInsertStmt,
-		worldMonsterFindByIdsStmt: q.worldMonsterFindByIdsStmt,
+		db:                                   tx,
+		tx:                                   tx,
+		getAclBySubjectStmt:                  q.getAclBySubjectStmt,
+		inhabitantsFindByWorldStmt:           q.inhabitantsFindByWorldStmt,
+		inhabitantsFindByWorldAndMonsterStmt: q.inhabitantsFindByWorldAndMonsterStmt,
+		languageFindAllStmt:                  q.languageFindAllStmt,
+		monsterFindByIdStmt:                  q.monsterFindByIdStmt,
+		sizeCategoryFindAllStmt:              q.sizeCategoryFindAllStmt,
+		userFindByEmailStmt:                  q.userFindByEmailStmt,
+		userFindByIdStmt:                     q.userFindByIdStmt,
+		userFindByUuidStmt:                   q.userFindByUuidStmt,
+		userInsertStmt:                       q.userInsertStmt,
+		userUpdateStmt:                       q.userUpdateStmt,
+		worldFindByIdStmt:                    q.worldFindByIdStmt,
+		worldInsertStmt:                      q.worldInsertStmt,
 	}
 }

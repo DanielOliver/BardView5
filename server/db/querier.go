@@ -10,6 +10,8 @@ import (
 
 type Querier interface {
 	GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams) ([]GetAclBySubjectRow, error)
+	InhabitantsFindByWorld(ctx context.Context, arg InhabitantsFindByWorldParams) ([]InhabitantsFindByWorldRow, error)
+	InhabitantsFindByWorldAndMonster(ctx context.Context, arg InhabitantsFindByWorldAndMonsterParams) ([]InhabitantsFindByWorldAndMonsterRow, error)
 	LanguageFindAll(ctx context.Context) ([]Language, error)
 	MonsterFindById(ctx context.Context, monsterID int64) ([]Monster, error)
 	SizeCategoryFindAll(ctx context.Context) ([]SizeCategory, error)
@@ -20,7 +22,6 @@ type Querier interface {
 	UserUpdate(ctx context.Context, arg UserUpdateParams) ([]User, error)
 	WorldFindById(ctx context.Context, worldID int64) ([]World, error)
 	WorldInsert(ctx context.Context, arg WorldInsertParams) (int64, error)
-	WorldMonsterFindByIds(ctx context.Context, arg WorldMonsterFindByIdsParams) ([]WorldMonsterFindByIdsRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

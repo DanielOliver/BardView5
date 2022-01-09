@@ -61,8 +61,9 @@ SELECT *
 FROM "monster" m
 WHERE m.monster_id = @monster_id;
 
--- name: WorldMonsterFindByIds :many
-SELECT m.monster_id,
+-- name: InhabitantsFindByWorldAndMonster :many
+SELECT wm.inhabitant_id,
+       m.monster_id,
        wm.world_id,
        m.name,
        m.tags,
@@ -75,10 +76,30 @@ SELECT m.monster_id,
        wm.user_tags,
        wm.system_tags
 FROM "monster" m
-         INNER JOIN "world_monster" wm ON wm.monster_id = m.monster_id
+         INNER JOIN "inhabitant" wm ON wm.monster_id = m.monster_id
 WHERE m.monster_id = @monster_id
   AND wm.monster_id = @monster_id
   AND wm.world_id = @world_id;
+
+-- name: InhabitantsFindByWorld :many
+SELECT wm.inhabitant_id,
+       m.monster_id,
+       wm.world_id,
+       m.name,
+       m.tags,
+       m.monster_type,
+       m.alignment,
+       m.size_category,
+       m.milli_challenge_rating,
+       m.languages,
+       m.description,
+       wm.user_tags,
+       wm.system_tags
+FROM "monster" m
+         INNER JOIN "inhabitant" wm ON wm.monster_id = m.monster_id
+WHERE wm.world_id = @world_id
+ORDER BY wm.world_id, wm.monster_id
+OFFSET @row_offset LIMIT @row_limit;
 
 -- name: SizeCategoryFindAll :many
 SELECT *

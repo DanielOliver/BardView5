@@ -15,6 +15,18 @@ type CommonAccess struct {
 	CreatedAt time.Time `db:"created_at"`
 }
 
+type Inhabitant struct {
+	InhabitantID  int64         `db:"inhabitant_id"`
+	CreatedBy     sql.NullInt64 `db:"created_by"`
+	CreatedAt     time.Time     `db:"created_at"`
+	Version       int64         `db:"version"`
+	UserTags      []string      `db:"user_tags"`
+	SystemTags    []string      `db:"system_tags"`
+	WorldID       int64         `db:"world_id"`
+	MonsterID     int64         `db:"monster_id"`
+	OriginalWorld bool          `db:"original_world"`
+}
+
 type Language struct {
 	LanguageID int64         `db:"language_id"`
 	CreatedBy  sql.NullInt64 `db:"created_by"`
@@ -143,16 +155,4 @@ type World struct {
 	SystemTags       []string      `db:"system_tags"`
 	DerivedFromWorld sql.NullInt64 `db:"derived_from_world"`
 	Name             string        `db:"name"`
-}
-
-type WorldMonster struct {
-	WorldMonsterID int64         `db:"world_monster_id"`
-	CreatedBy      sql.NullInt64 `db:"created_by"`
-	CreatedAt      time.Time     `db:"created_at"`
-	Version        int64         `db:"version"`
-	UserTags       []string      `db:"user_tags"`
-	SystemTags     []string      `db:"system_tags"`
-	WorldID        int64         `db:"world_id"`
-	MonsterID      int64         `db:"monster_id"`
-	OriginalWorld  bool          `db:"original_world"`
 }

@@ -77,6 +77,165 @@ func (q *Queries) GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams
 	return items, nil
 }
 
+const inhabitantsFindByWorld = `-- name: InhabitantsFindByWorld :many
+SELECT wm.inhabitant_id,
+       m.monster_id,
+       wm.world_id,
+       m.name,
+       m.tags,
+       m.monster_type,
+       m.alignment,
+       m.size_category,
+       m.milli_challenge_rating,
+       m.languages,
+       m.description,
+       wm.user_tags,
+       wm.system_tags
+FROM "monster" m
+         INNER JOIN "inhabitant" wm ON wm.monster_id = m.monster_id
+WHERE wm.world_id = $1
+ORDER BY wm.world_id, wm.monster_id
+OFFSET $2 LIMIT $3
+`
+
+type InhabitantsFindByWorldParams struct {
+	WorldID   int64 `db:"world_id"`
+	RowOffset int32 `db:"row_offset"`
+	RowLimit  int32 `db:"row_limit"`
+}
+
+type InhabitantsFindByWorldRow struct {
+	InhabitantID         int64    `db:"inhabitant_id"`
+	MonsterID            int64    `db:"monster_id"`
+	WorldID              int64    `db:"world_id"`
+	Name                 string   `db:"name"`
+	Tags                 []string `db:"tags"`
+	MonsterType          string   `db:"monster_type"`
+	Alignment            string   `db:"alignment"`
+	SizeCategory         string   `db:"size_category"`
+	MilliChallengeRating int64    `db:"milli_challenge_rating"`
+	Languages            []string `db:"languages"`
+	Description          string   `db:"description"`
+	UserTags             []string `db:"user_tags"`
+	SystemTags           []string `db:"system_tags"`
+}
+
+func (q *Queries) InhabitantsFindByWorld(ctx context.Context, arg InhabitantsFindByWorldParams) ([]InhabitantsFindByWorldRow, error) {
+	rows, err := q.query(ctx, q.inhabitantsFindByWorldStmt, inhabitantsFindByWorld, arg.WorldID, arg.RowOffset, arg.RowLimit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []InhabitantsFindByWorldRow{}
+	for rows.Next() {
+		var i InhabitantsFindByWorldRow
+		if err := rows.Scan(
+			&i.InhabitantID,
+			&i.MonsterID,
+			&i.WorldID,
+			&i.Name,
+			pq.Array(&i.Tags),
+			&i.MonsterType,
+			&i.Alignment,
+			&i.SizeCategory,
+			&i.MilliChallengeRating,
+			pq.Array(&i.Languages),
+			&i.Description,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const inhabitantsFindByWorldAndMonster = `-- name: InhabitantsFindByWorldAndMonster :many
+SELECT wm.inhabitant_id,
+       m.monster_id,
+       wm.world_id,
+       m.name,
+       m.tags,
+       m.monster_type,
+       m.alignment,
+       m.size_category,
+       m.milli_challenge_rating,
+       m.languages,
+       m.description,
+       wm.user_tags,
+       wm.system_tags
+FROM "monster" m
+         INNER JOIN "inhabitant" wm ON wm.monster_id = m.monster_id
+WHERE m.monster_id = $1
+  AND wm.monster_id = $1
+  AND wm.world_id = $2
+`
+
+type InhabitantsFindByWorldAndMonsterParams struct {
+	MonsterID int64 `db:"monster_id"`
+	WorldID   int64 `db:"world_id"`
+}
+
+type InhabitantsFindByWorldAndMonsterRow struct {
+	InhabitantID         int64    `db:"inhabitant_id"`
+	MonsterID            int64    `db:"monster_id"`
+	WorldID              int64    `db:"world_id"`
+	Name                 string   `db:"name"`
+	Tags                 []string `db:"tags"`
+	MonsterType          string   `db:"monster_type"`
+	Alignment            string   `db:"alignment"`
+	SizeCategory         string   `db:"size_category"`
+	MilliChallengeRating int64    `db:"milli_challenge_rating"`
+	Languages            []string `db:"languages"`
+	Description          string   `db:"description"`
+	UserTags             []string `db:"user_tags"`
+	SystemTags           []string `db:"system_tags"`
+}
+
+func (q *Queries) InhabitantsFindByWorldAndMonster(ctx context.Context, arg InhabitantsFindByWorldAndMonsterParams) ([]InhabitantsFindByWorldAndMonsterRow, error) {
+	rows, err := q.query(ctx, q.inhabitantsFindByWorldAndMonsterStmt, inhabitantsFindByWorldAndMonster, arg.MonsterID, arg.WorldID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []InhabitantsFindByWorldAndMonsterRow{}
+	for rows.Next() {
+		var i InhabitantsFindByWorldAndMonsterRow
+		if err := rows.Scan(
+			&i.InhabitantID,
+			&i.MonsterID,
+			&i.WorldID,
+			&i.Name,
+			pq.Array(&i.Tags),
+			&i.MonsterType,
+			&i.Alignment,
+			&i.SizeCategory,
+			&i.MilliChallengeRating,
+			pq.Array(&i.Languages),
+			&i.Description,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const languageFindAll = `-- name: LanguageFindAll :many
 SELECT language_id, created_by, created_at, version, name
 FROM "language" l
@@ -492,80 +651,4 @@ func (q *Queries) WorldInsert(ctx context.Context, arg WorldInsertParams) (int64
 		return 0, err
 	}
 	return result.RowsAffected()
-}
-
-const worldMonsterFindByIds = `-- name: WorldMonsterFindByIds :many
-SELECT m.monster_id,
-       wm.world_id,
-       m.name,
-       m.tags,
-       m.monster_type,
-       m.alignment,
-       m.size_category,
-       m.milli_challenge_rating,
-       m.languages,
-       m.description,
-       wm.user_tags,
-       wm.system_tags
-FROM "monster" m
-         INNER JOIN "world_monster" wm ON wm.monster_id = m.monster_id
-WHERE m.monster_id = $1
-  AND wm.monster_id = $1
-  AND wm.world_id = $2
-`
-
-type WorldMonsterFindByIdsParams struct {
-	MonsterID int64 `db:"monster_id"`
-	WorldID   int64 `db:"world_id"`
-}
-
-type WorldMonsterFindByIdsRow struct {
-	MonsterID            int64    `db:"monster_id"`
-	WorldID              int64    `db:"world_id"`
-	Name                 string   `db:"name"`
-	Tags                 []string `db:"tags"`
-	MonsterType          string   `db:"monster_type"`
-	Alignment            string   `db:"alignment"`
-	SizeCategory         string   `db:"size_category"`
-	MilliChallengeRating int64    `db:"milli_challenge_rating"`
-	Languages            []string `db:"languages"`
-	Description          string   `db:"description"`
-	UserTags             []string `db:"user_tags"`
-	SystemTags           []string `db:"system_tags"`
-}
-
-func (q *Queries) WorldMonsterFindByIds(ctx context.Context, arg WorldMonsterFindByIdsParams) ([]WorldMonsterFindByIdsRow, error) {
-	rows, err := q.query(ctx, q.worldMonsterFindByIdsStmt, worldMonsterFindByIds, arg.MonsterID, arg.WorldID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []WorldMonsterFindByIdsRow{}
-	for rows.Next() {
-		var i WorldMonsterFindByIdsRow
-		if err := rows.Scan(
-			&i.MonsterID,
-			&i.WorldID,
-			&i.Name,
-			pq.Array(&i.Tags),
-			&i.MonsterType,
-			&i.Alignment,
-			&i.SizeCategory,
-			&i.MilliChallengeRating,
-			pq.Array(&i.Languages),
-			&i.Description,
-			pq.Array(&i.UserTags),
-			pq.Array(&i.SystemTags),
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
