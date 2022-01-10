@@ -15,28 +15,28 @@ type CommonAccess struct {
 	CreatedAt time.Time `db:"created_at"`
 }
 
-type Inhabitant struct {
-	InhabitantID  int64         `db:"inhabitant_id"`
-	CreatedBy     sql.NullInt64 `db:"created_by"`
-	CreatedAt     time.Time     `db:"created_at"`
-	Version       int64         `db:"version"`
-	UserTags      []string      `db:"user_tags"`
-	SystemTags    []string      `db:"system_tags"`
-	WorldID       int64         `db:"world_id"`
-	MonsterID     int64         `db:"monster_id"`
-	OriginalWorld bool          `db:"original_world"`
+type Dnd5eInhabitant struct {
+	Dnd5eInhabitantID int64         `db:"dnd5e_inhabitant_id"`
+	CreatedBy         sql.NullInt64 `db:"created_by"`
+	CreatedAt         time.Time     `db:"created_at"`
+	Version           int64         `db:"version"`
+	UserTags          []string      `db:"user_tags"`
+	SystemTags        []string      `db:"system_tags"`
+	Dnd5eWorldID      int64         `db:"dnd5e_world_id"`
+	Dnd5eMonsterID    int64         `db:"dnd5e_monster_id"`
+	OriginalWorld     bool          `db:"original_world"`
 }
 
-type Language struct {
-	LanguageID int64         `db:"language_id"`
-	CreatedBy  sql.NullInt64 `db:"created_by"`
-	CreatedAt  time.Time     `db:"created_at"`
-	Version    int64         `db:"version"`
-	Name       string        `db:"name"`
+type Dnd5eLanguage struct {
+	Dnd5eLanguageID int64         `db:"dnd5e_language_id"`
+	CreatedBy       sql.NullInt64 `db:"created_by"`
+	CreatedAt       time.Time     `db:"created_at"`
+	Version         int64         `db:"version"`
+	Name            string        `db:"name"`
 }
 
-type Monster struct {
-	MonsterID            int64         `db:"monster_id"`
+type Dnd5eMonster struct {
+	Dnd5eMonsterID       int64         `db:"dnd5e_monster_id"`
 	CreatedBy            sql.NullInt64 `db:"created_by"`
 	CreatedAt            time.Time     `db:"created_at"`
 	Version              int64         `db:"version"`
@@ -51,11 +51,32 @@ type Monster struct {
 	Description          string        `db:"description"`
 }
 
-type MonsterType struct {
+type Dnd5eMonsterType struct {
 	CreatedBy sql.NullInt64 `db:"created_by"`
 	CreatedAt time.Time     `db:"created_at"`
 	Version   int64         `db:"version"`
 	Name      string        `db:"name"`
+}
+
+type Dnd5eSizeCategory struct {
+	CreatedBy sql.NullInt64 `db:"created_by"`
+	CreatedAt time.Time     `db:"created_at"`
+	Version   int64         `db:"version"`
+	Name      string        `db:"name"`
+	Space     string        `db:"space"`
+}
+
+type Dnd5eWorld struct {
+	Dnd5eWorldID     int64         `db:"dnd5e_world_id"`
+	CreatedBy        sql.NullInt64 `db:"created_by"`
+	CreatedAt        time.Time     `db:"created_at"`
+	Version          int64         `db:"version"`
+	IsActive         bool          `db:"is_active"`
+	CommonAccess     string        `db:"common_access"`
+	UserTags         []string      `db:"user_tags"`
+	SystemTags       []string      `db:"system_tags"`
+	DerivedFromWorld sql.NullInt64 `db:"derived_from_world"`
+	Name             string        `db:"name"`
 }
 
 type Role struct {
@@ -120,14 +141,6 @@ type SchemaMigration struct {
 	Dirty   bool  `db:"dirty"`
 }
 
-type SizeCategory struct {
-	CreatedBy sql.NullInt64 `db:"created_by"`
-	CreatedAt time.Time     `db:"created_at"`
-	Version   int64         `db:"version"`
-	Name      string        `db:"name"`
-	Space     string        `db:"space"`
-}
-
 type User struct {
 	UserID        int64         `db:"user_id"`
 	Uuid          uuid.UUID     `db:"uuid"`
@@ -142,17 +155,4 @@ type User struct {
 	Name          string        `db:"name"`
 	UserTags      []string      `db:"user_tags"`
 	SystemTags    []string      `db:"system_tags"`
-}
-
-type World struct {
-	WorldID          int64         `db:"world_id"`
-	CreatedBy        sql.NullInt64 `db:"created_by"`
-	CreatedAt        time.Time     `db:"created_at"`
-	Version          int64         `db:"version"`
-	IsActive         bool          `db:"is_active"`
-	CommonAccess     string        `db:"common_access"`
-	UserTags         []string      `db:"user_tags"`
-	SystemTags       []string      `db:"system_tags"`
-	DerivedFromWorld sql.NullInt64 `db:"derived_from_world"`
-	Name             string        `db:"name"`
 }

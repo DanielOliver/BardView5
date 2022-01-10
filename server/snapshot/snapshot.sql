@@ -94,30 +94,30 @@ CREATE TABLE public.common_access (
 ALTER TABLE public.common_access OWNER TO postgres;
 
 --
--- Name: inhabitant; Type: TABLE; Schema: public; Owner: postgres
+-- Name: dnd5e_inhabitant; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.inhabitant (
-    inhabitant_id bigint NOT NULL,
+CREATE TABLE public.dnd5e_inhabitant (
+    dnd5e_inhabitant_id bigint NOT NULL,
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     version bigint DEFAULT 0 NOT NULL,
     user_tags text[] NOT NULL,
     system_tags text[] NOT NULL,
-    world_id bigint NOT NULL,
-    monster_id bigint NOT NULL,
+    dnd5e_world_id bigint NOT NULL,
+    dnd5e_monster_id bigint NOT NULL,
     original_world boolean DEFAULT false NOT NULL
 );
 
 
-ALTER TABLE public.inhabitant OWNER TO postgres;
+ALTER TABLE public.dnd5e_inhabitant OWNER TO postgres;
 
 --
--- Name: language; Type: TABLE; Schema: public; Owner: postgres
+-- Name: dnd5e_language; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.language (
-    language_id bigint NOT NULL,
+CREATE TABLE public.dnd5e_language (
+    dnd5e_language_id bigint NOT NULL,
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     version bigint DEFAULT 0 NOT NULL,
@@ -125,14 +125,14 @@ CREATE TABLE public.language (
 );
 
 
-ALTER TABLE public.language OWNER TO postgres;
+ALTER TABLE public.dnd5e_language OWNER TO postgres;
 
 --
--- Name: monster; Type: TABLE; Schema: public; Owner: postgres
+-- Name: dnd5e_monster; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.monster (
-    monster_id bigint NOT NULL,
+CREATE TABLE public.dnd5e_monster (
+    dnd5e_monster_id bigint NOT NULL,
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     version bigint DEFAULT 0 NOT NULL,
@@ -148,13 +148,13 @@ CREATE TABLE public.monster (
 );
 
 
-ALTER TABLE public.monster OWNER TO postgres;
+ALTER TABLE public.dnd5e_monster OWNER TO postgres;
 
 --
--- Name: monster_type; Type: TABLE; Schema: public; Owner: postgres
+-- Name: dnd5e_monster_type; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.monster_type (
+CREATE TABLE public.dnd5e_monster_type (
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     version bigint DEFAULT 0 NOT NULL,
@@ -162,7 +162,42 @@ CREATE TABLE public.monster_type (
 );
 
 
-ALTER TABLE public.monster_type OWNER TO postgres;
+ALTER TABLE public.dnd5e_monster_type OWNER TO postgres;
+
+--
+-- Name: dnd5e_size_category; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.dnd5e_size_category (
+    created_by bigint,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    version bigint DEFAULT 0 NOT NULL,
+    name text NOT NULL,
+    space text NOT NULL
+);
+
+
+ALTER TABLE public.dnd5e_size_category OWNER TO postgres;
+
+--
+-- Name: dnd5e_world; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.dnd5e_world (
+    dnd5e_world_id bigint NOT NULL,
+    created_by bigint,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    version bigint DEFAULT 0 NOT NULL,
+    is_active boolean DEFAULT true NOT NULL,
+    common_access text NOT NULL,
+    user_tags text[] NOT NULL,
+    system_tags text[] NOT NULL,
+    derived_from_world bigint,
+    name text NOT NULL
+);
+
+
+ALTER TABLE public.dnd5e_world OWNER TO postgres;
 
 --
 -- Name: role; Type: TABLE; Schema: public; Owner: postgres
@@ -276,21 +311,6 @@ CREATE TABLE public.schema_migrations (
 ALTER TABLE public.schema_migrations OWNER TO postgres;
 
 --
--- Name: size_category; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.size_category (
-    created_by bigint,
-    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    version bigint DEFAULT 0 NOT NULL,
-    name text NOT NULL,
-    space text NOT NULL
-);
-
-
-ALTER TABLE public.size_category OWNER TO postgres;
-
---
 -- Name: user; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -314,26 +334,6 @@ CREATE TABLE public."user" (
 ALTER TABLE public."user" OWNER TO postgres;
 
 --
--- Name: world; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.world (
-    world_id bigint NOT NULL,
-    created_by bigint,
-    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    version bigint DEFAULT 0 NOT NULL,
-    is_active boolean DEFAULT true NOT NULL,
-    common_access text NOT NULL,
-    user_tags text[] NOT NULL,
-    system_tags text[] NOT NULL,
-    derived_from_world bigint,
-    name text NOT NULL
-);
-
-
-ALTER TABLE public.world OWNER TO postgres;
-
---
 -- Name: common_access common_access_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -342,35 +342,51 @@ ALTER TABLE ONLY public.common_access
 
 
 --
--- Name: inhabitant inhabitant_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dnd5e_inhabitant dnd5e_inhabitant_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.inhabitant
-    ADD CONSTRAINT inhabitant_pk PRIMARY KEY (inhabitant_id);
-
-
---
--- Name: language language_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.language
-    ADD CONSTRAINT language_pk PRIMARY KEY (language_id);
+ALTER TABLE ONLY public.dnd5e_inhabitant
+    ADD CONSTRAINT dnd5e_inhabitant_pk PRIMARY KEY (dnd5e_inhabitant_id);
 
 
 --
--- Name: monster monster_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dnd5e_language dnd5e_language_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.monster
-    ADD CONSTRAINT monster_pk PRIMARY KEY (monster_id);
+ALTER TABLE ONLY public.dnd5e_language
+    ADD CONSTRAINT dnd5e_language_pk PRIMARY KEY (dnd5e_language_id);
 
 
 --
--- Name: monster_type monster_type_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dnd5e_monster dnd5e_monster_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.monster_type
-    ADD CONSTRAINT monster_type_pk PRIMARY KEY (name);
+ALTER TABLE ONLY public.dnd5e_monster
+    ADD CONSTRAINT dnd5e_monster_pk PRIMARY KEY (dnd5e_monster_id);
+
+
+--
+-- Name: dnd5e_monster_type dnd5e_monster_type_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_monster_type
+    ADD CONSTRAINT dnd5e_monster_type_pk PRIMARY KEY (name);
+
+
+--
+-- Name: dnd5e_size_category dnd5e_size_category_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_size_category
+    ADD CONSTRAINT dnd5e_size_category_pk PRIMARY KEY (name);
+
+
+--
+-- Name: dnd5e_world dnd5e_world_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_world
+    ADD CONSTRAINT dnd5e_world_pk PRIMARY KEY (dnd5e_world_id);
 
 
 --
@@ -430,14 +446,6 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
--- Name: size_category size_category_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.size_category
-    ADD CONSTRAINT size_category_pk PRIMARY KEY (name);
-
-
---
 -- Name: user user_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -446,11 +454,10 @@ ALTER TABLE ONLY public."user"
 
 
 --
--- Name: world world_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dnd5e_inhabitant_world_monster; Type: INDEX; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.world
-    ADD CONSTRAINT world_pk PRIMARY KEY (world_id);
+CREATE INDEX dnd5e_inhabitant_world_monster ON public.dnd5e_inhabitant USING btree (dnd5e_world_id, dnd5e_monster_id);
 
 
 --
@@ -475,75 +482,107 @@ CREATE UNIQUE INDEX user_uuid_uindex ON public."user" USING btree (uuid);
 
 
 --
--- Name: inhabitant fk_inhabitant_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dnd5e_inhabitant fk_dnd5e_inhabitant_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.inhabitant
-    ADD CONSTRAINT fk_inhabitant_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
-
-
---
--- Name: inhabitant fk_inhabitant_monster; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.inhabitant
-    ADD CONSTRAINT fk_inhabitant_monster FOREIGN KEY (monster_id) REFERENCES public.monster(monster_id);
+ALTER TABLE ONLY public.dnd5e_inhabitant
+    ADD CONSTRAINT fk_dnd5e_inhabitant_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
 
 
 --
--- Name: inhabitant fk_inhabitant_world; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dnd5e_inhabitant fk_dnd5e_inhabitant_monster; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.inhabitant
-    ADD CONSTRAINT fk_inhabitant_world FOREIGN KEY (world_id) REFERENCES public.world(world_id);
-
-
---
--- Name: language fk_language_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.language
-    ADD CONSTRAINT fk_language_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+ALTER TABLE ONLY public.dnd5e_inhabitant
+    ADD CONSTRAINT fk_dnd5e_inhabitant_monster FOREIGN KEY (dnd5e_monster_id) REFERENCES public.dnd5e_monster(dnd5e_monster_id);
 
 
 --
--- Name: monster fk_monster_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dnd5e_inhabitant fk_dnd5e_inhabitant_world; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.monster
-    ADD CONSTRAINT fk_monster_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
-
-
---
--- Name: monster fk_monster_size_category; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.monster
-    ADD CONSTRAINT fk_monster_size_category FOREIGN KEY (size_category) REFERENCES public.size_category(name);
+ALTER TABLE ONLY public.dnd5e_inhabitant
+    ADD CONSTRAINT fk_dnd5e_inhabitant_world FOREIGN KEY (dnd5e_world_id) REFERENCES public.dnd5e_world(dnd5e_world_id);
 
 
 --
--- Name: monster fk_monster_type; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dnd5e_language fk_dnd5e_language_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.monster
-    ADD CONSTRAINT fk_monster_type FOREIGN KEY (monster_type) REFERENCES public.monster_type(name);
-
-
---
--- Name: monster_type fk_monster_type_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.monster_type
-    ADD CONSTRAINT fk_monster_type_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+ALTER TABLE ONLY public.dnd5e_language
+    ADD CONSTRAINT fk_dnd5e_language_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
 
 
 --
--- Name: monster fk_monster_world; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dnd5e_monster fk_dnd5e_monster_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.monster
-    ADD CONSTRAINT fk_monster_world FOREIGN KEY (first_world_id) REFERENCES public.world(world_id);
+ALTER TABLE ONLY public.dnd5e_monster
+    ADD CONSTRAINT fk_dnd5e_monster_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: dnd5e_monster fk_dnd5e_monster_dnd5e_size_category; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_monster
+    ADD CONSTRAINT fk_dnd5e_monster_dnd5e_size_category FOREIGN KEY (size_category) REFERENCES public.dnd5e_size_category(name);
+
+
+--
+-- Name: dnd5e_monster fk_dnd5e_monster_type; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_monster
+    ADD CONSTRAINT fk_dnd5e_monster_type FOREIGN KEY (monster_type) REFERENCES public.dnd5e_monster_type(name);
+
+
+--
+-- Name: dnd5e_monster_type fk_dnd5e_monster_type_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_monster_type
+    ADD CONSTRAINT fk_dnd5e_monster_type_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: dnd5e_monster fk_dnd5e_monster_world; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_monster
+    ADD CONSTRAINT fk_dnd5e_monster_world FOREIGN KEY (first_world_id) REFERENCES public.dnd5e_world(dnd5e_world_id);
+
+
+--
+-- Name: dnd5e_size_category fk_dnd5e_size_category_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_size_category
+    ADD CONSTRAINT fk_dnd5e_size_category_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: dnd5e_world fk_dnd5e_world_commonaccess; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_world
+    ADD CONSTRAINT fk_dnd5e_world_commonaccess FOREIGN KEY (common_access) REFERENCES public.common_access(name);
+
+
+--
+-- Name: dnd5e_world fk_dnd5e_world_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_world
+    ADD CONSTRAINT fk_dnd5e_world_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: dnd5e_world fk_dnd5e_world_derived_from; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_world
+    ADD CONSTRAINT fk_dnd5e_world_derived_from FOREIGN KEY (derived_from_world) REFERENCES public.dnd5e_world(dnd5e_world_id);
 
 
 --
@@ -619,14 +658,6 @@ ALTER TABLE ONLY public.role_permission
 
 
 --
--- Name: size_category fk_size_category_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.size_category
-    ADD CONSTRAINT fk_size_category_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
-
-
---
 -- Name: user fk_user_commonaccess; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -640,30 +671,6 @@ ALTER TABLE ONLY public."user"
 
 ALTER TABLE ONLY public."user"
     ADD CONSTRAINT fk_user_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
-
-
---
--- Name: world fk_world_commonaccess; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.world
-    ADD CONSTRAINT fk_world_commonaccess FOREIGN KEY (common_access) REFERENCES public.common_access(name);
-
-
---
--- Name: world fk_world_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.world
-    ADD CONSTRAINT fk_world_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
-
-
---
--- Name: world fk_world_derived_from; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.world
-    ADD CONSTRAINT fk_world_derived_from FOREIGN KEY (derived_from_world) REFERENCES public.world(world_id);
 
 
 --

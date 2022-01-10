@@ -46,25 +46,25 @@ SET name          = @name
 WHERE u.user_id = @user_id
   AND u.version = @version RETURNING *;
 
--- name: WorldInsert :execrows
-insert into "world" (world_id, derived_from_world, common_access, created_by, is_active, system_tags, user_tags,
-                     "name")
-VALUES (@world_id, @derived_from_world, @common_access, @created_by, @is_active, @system_tags, @user_tags, @name);
+-- name: Dnd5eWorldInsert :execrows
+insert into "dnd5e_world" (dnd5e_world_id, derived_from_world, common_access, created_by, is_active, system_tags,
+                           user_tags, "name")
+VALUES (@dnd5e_world_id, @derived_from_world, @common_access, @created_by, @is_active, @system_tags, @user_tags, @name);
 
--- name: WorldFindById :many
+-- name: Dnd5eWorldFindById :many
 SELECT *
-FROM "world" w
-WHERE w.world_id = @world_id;
+FROM "dnd5e_world" w
+WHERE w.dnd5e_world_id = @dnd5e_world_id;
 
--- name: MonsterFindById :many
+-- name: Dnd5eMonsterFindById :many
 SELECT *
-FROM "monster" m
-WHERE m.monster_id = @monster_id;
+FROM "dnd5e_monster" m
+WHERE m.dnd5e_monster_id = @dnd5e_monster_id;
 
--- name: InhabitantsFindByWorldAndMonster :many
-SELECT wm.inhabitant_id,
-       m.monster_id,
-       wm.world_id,
+-- name: Dnd5eInhabitantsFindByWorldAndMonster :many
+SELECT wm.dnd5e_inhabitant_id,
+       m.dnd5e_monster_id,
+       wm.dnd5e_world_id,
        m.name,
        m.tags,
        m.monster_type,
@@ -75,16 +75,16 @@ SELECT wm.inhabitant_id,
        m.description,
        wm.user_tags,
        wm.system_tags
-FROM "monster" m
-         INNER JOIN "inhabitant" wm ON wm.monster_id = m.monster_id
-WHERE m.monster_id = @monster_id
-  AND wm.monster_id = @monster_id
-  AND wm.world_id = @world_id;
+FROM "dnd5e_monster" m
+         INNER JOIN "dnd5e_inhabitant" wm ON wm.dnd5e_monster_id = m.dnd5e_monster_id
+WHERE m.dnd5e_monster_id = @dnd5e_monster_id
+  AND wm.dnd5e_monster_id = @dnd5e_monster_id
+  AND wm.dnd5e_world_id = @dnd5e_world_id;
 
--- name: InhabitantsFindByWorld :many
-SELECT wm.inhabitant_id,
-       m.monster_id,
-       wm.world_id,
+-- name: Dnd5eInhabitantsFindByWorld :many
+SELECT wm.dnd5e_inhabitant_id,
+       m.dnd5e_monster_id,
+       wm.dnd5e_world_id,
        m.name,
        m.tags,
        m.monster_type,
@@ -95,16 +95,16 @@ SELECT wm.inhabitant_id,
        m.description,
        wm.user_tags,
        wm.system_tags
-FROM "monster" m
-         INNER JOIN "inhabitant" wm ON wm.monster_id = m.monster_id
-WHERE wm.world_id = @world_id
-ORDER BY wm.world_id, wm.monster_id
+FROM "dnd5e_monster" m
+         INNER JOIN "dnd5e_inhabitant" wm ON wm.dnd5e_monster_id = m.dnd5e_monster_id
+WHERE wm.dnd5e_world_id = @dnd5e_world_id
+ORDER BY wm.dnd5e_world_id, wm.dnd5e_monster_id
 OFFSET @row_offset LIMIT @row_limit;
 
--- name: SizeCategoryFindAll :many
+-- name: Dnd5eSizeCategoryFindAll :many
 SELECT *
-FROM "size_category" s;
+FROM "dnd5e_size_category" s;
 
--- name: LanguageFindAll :many
+-- name: Dnd5eLanguageFindAll :many
 SELECT *
-FROM "language" l;
+FROM "dnd5e_language" l;

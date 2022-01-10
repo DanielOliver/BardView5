@@ -9,19 +9,19 @@ import (
 )
 
 type Querier interface {
+	Dnd5eInhabitantsFindByWorld(ctx context.Context, arg Dnd5eInhabitantsFindByWorldParams) ([]Dnd5eInhabitantsFindByWorldRow, error)
+	Dnd5eInhabitantsFindByWorldAndMonster(ctx context.Context, arg Dnd5eInhabitantsFindByWorldAndMonsterParams) ([]Dnd5eInhabitantsFindByWorldAndMonsterRow, error)
+	Dnd5eLanguageFindAll(ctx context.Context) ([]Dnd5eLanguage, error)
+	Dnd5eMonsterFindById(ctx context.Context, dnd5eMonsterID int64) ([]Dnd5eMonster, error)
+	Dnd5eSizeCategoryFindAll(ctx context.Context) ([]Dnd5eSizeCategory, error)
+	Dnd5eWorldFindById(ctx context.Context, dnd5eWorldID int64) ([]Dnd5eWorld, error)
+	Dnd5eWorldInsert(ctx context.Context, arg Dnd5eWorldInsertParams) (int64, error)
 	GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams) ([]GetAclBySubjectRow, error)
-	InhabitantsFindByWorld(ctx context.Context, arg InhabitantsFindByWorldParams) ([]InhabitantsFindByWorldRow, error)
-	InhabitantsFindByWorldAndMonster(ctx context.Context, arg InhabitantsFindByWorldAndMonsterParams) ([]InhabitantsFindByWorldAndMonsterRow, error)
-	LanguageFindAll(ctx context.Context) ([]Language, error)
-	MonsterFindById(ctx context.Context, monsterID int64) ([]Monster, error)
-	SizeCategoryFindAll(ctx context.Context) ([]SizeCategory, error)
 	UserFindByEmail(ctx context.Context, email string) ([]User, error)
 	UserFindById(ctx context.Context, userID int64) ([]User, error)
 	UserFindByUuid(ctx context.Context, uuid uuid.UUID) ([]User, error)
 	UserInsert(ctx context.Context, arg UserInsertParams) (int64, error)
 	UserUpdate(ctx context.Context, arg UserUpdateParams) ([]User, error)
-	WorldFindById(ctx context.Context, worldID int64) ([]World, error)
-	WorldInsert(ctx context.Context, arg WorldInsertParams) (int64, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -1,7 +1,7 @@
-create table "world"
+create table "dnd5e_world"
 (
-    world_id           bigint
-        constraint world_pk
+    dnd5e_world_id     bigint
+        constraint dnd5e_world_pk
             primary key,
     created_by         bigint  null,
     created_at         timestamp without time zone default (now() at time zone 'utc') not null,
@@ -13,53 +13,53 @@ create table "world"
     derived_from_world bigint  null,
     name               text    not null,
 
-    CONSTRAINT fk_world_createdby
+    CONSTRAINT fk_dnd5e_world_createdby
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id),
-    CONSTRAINT fk_world_commonaccess
+    CONSTRAINT fk_dnd5e_world_commonaccess
         FOREIGN KEY (common_access)
             REFERENCES common_access (name),
-    CONSTRAINT fk_world_derived_from
+    CONSTRAINT fk_dnd5e_world_derived_from
         FOREIGN KEY (derived_from_world)
-            REFERENCES "world" (world_id)
+            REFERENCES "dnd5e_world" (dnd5e_world_id)
 
 );
 
 
-create table "monster_type"
+create table "dnd5e_monster_type"
 (
     created_by bigint null,
     created_at timestamp without time zone default (now() at time zone 'utc') not null,
     version    bigint not null             default (0),
     name       text   not null
-        constraint monster_type_pk
+        constraint dnd5e_monster_type_pk
             primary key,
 
-    CONSTRAINT fk_monster_type_createdby
+    CONSTRAINT fk_dnd5e_monster_type_createdby
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id)
 );
 
-create table "size_category"
+create table "dnd5e_size_category"
 (
     created_by bigint null,
     created_at timestamp without time zone default (now() at time zone 'utc') not null,
     version    bigint not null             default (0),
     name       text   not null
-        constraint size_category_pk
+        constraint dnd5e_size_category_pk
             primary key,
     space      text   not null,
 
-    CONSTRAINT fk_size_category_createdby
+    CONSTRAINT fk_dnd5e_size_category_createdby
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id)
 );
 
-create table "monster"
+create table "dnd5e_monster"
 (
 
-    monster_id             bigint
-        constraint monster_pk
+    dnd5e_monster_id       bigint
+        constraint dnd5e_monster_pk
             primary key,
     created_by             bigint null,
     created_at             timestamp without time zone default (now() at time zone 'utc') not null,
@@ -67,73 +67,73 @@ create table "monster"
     first_world_id         bigint null,
     name                   text   not null,
     tags                   text[] not null,
-    monster_type           text   not null,
+    monster_type     text   not null,
     alignment              text   not null,
-    size_category          text   not null,
+    size_category    text   not null,
     milli_challenge_rating bigint not null,
-    languages              text[] not null,
+    languages        text[] not null,
     description            text   not null,
 
 
-    CONSTRAINT fk_monster_createdby
+    CONSTRAINT fk_dnd5e_monster_createdby
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id),
-    CONSTRAINT fk_monster_world
+    CONSTRAINT fk_dnd5e_monster_world
         FOREIGN KEY (first_world_id)
-            REFERENCES "world" (world_id),
-    CONSTRAINT fk_monster_size_category
+            REFERENCES "dnd5e_world" (dnd5e_world_id),
+    CONSTRAINT fk_dnd5e_monster_dnd5e_size_category
         FOREIGN KEY (size_category)
-            REFERENCES "size_category" (name),
-    CONSTRAINT fk_monster_type
+            REFERENCES "dnd5e_size_category" (name),
+    CONSTRAINT fk_dnd5e_monster_type
         FOREIGN KEY (monster_type)
-            REFERENCES "monster_type" (name)
+            REFERENCES "dnd5e_monster_type" (name)
 );
 
-create table "inhabitant"
+create table "dnd5e_inhabitant"
 (
 
-    inhabitant_id bigint
-        constraint inhabitant_pk
+    dnd5e_inhabitant_id bigint
+        constraint dnd5e_inhabitant_pk
             primary key,
-    created_by       bigint  null,
-    created_at       timestamp without time zone default (now() at time zone 'utc') not null,
-    version          bigint  not null            default (0),
-    user_tags        text[]  not null,
-    system_tags      text[]  not null,
-    world_id         bigint  not null,
-    monster_id       bigint  not null,
-    original_world   boolean not null            default (false),
+    created_by          bigint  null,
+    created_at          timestamp without time zone default (now() at time zone 'utc') not null,
+    version             bigint  not null            default (0),
+    user_tags           text[]  not null,
+    system_tags         text[]  not null,
+    dnd5e_world_id      bigint  not null,
+    dnd5e_monster_id    bigint  not null,
+    original_world      boolean not null            default (false),
 
-    CONSTRAINT fk_inhabitant_createdby
+    CONSTRAINT fk_dnd5e_inhabitant_createdby
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id),
-    CONSTRAINT fk_inhabitant_world
-        FOREIGN KEY (world_id)
-            REFERENCES "world" (world_id),
-    CONSTRAINT fk_inhabitant_monster
-        FOREIGN KEY (monster_id)
-            REFERENCES "monster" (monster_id)
+    CONSTRAINT fk_dnd5e_inhabitant_world
+        FOREIGN KEY (dnd5e_world_id)
+            REFERENCES "dnd5e_world" (dnd5e_world_id),
+    CONSTRAINT fk_dnd5e_inhabitant_monster
+        FOREIGN KEY (dnd5e_monster_id)
+            REFERENCES "dnd5e_monster" (dnd5e_monster_id)
 );
 
-create index inhabitant_world_monster on inhabitant (world_id, monster_id);
+create index dnd5e_inhabitant_world_monster on dnd5e_inhabitant (dnd5e_world_id, dnd5e_monster_id);
 
-create table "language"
+create table "dnd5e_language"
 (
 
-    language_id bigint
-        constraint language_pk
+    dnd5e_language_id bigint
+        constraint dnd5e_language_pk
             primary key,
-    created_by  bigint null,
-    created_at  timestamp without time zone default (now() at time zone 'utc') not null,
-    version     bigint not null             default (0),
-    name        text   not null,
+    created_by        bigint null,
+    created_at        timestamp without time zone default (now() at time zone 'utc') not null,
+    version           bigint not null             default (0),
+    name              text   not null,
 
-    CONSTRAINT fk_language_createdby
+    CONSTRAINT fk_dnd5e_language_createdby
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id)
 );
 
-INSERT INTO "size_category" (name, space)
+INSERT INTO "dnd5e_size_category" (name, space)
 VALUES ('Tiny', '2½ by 2½ ft.'),
        ('Small', '5 by 5 ft.'),
        ('Medium', '5 by 5 ft.'),
