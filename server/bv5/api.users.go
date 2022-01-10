@@ -17,7 +17,7 @@ import (
 )
 
 func (b *BardView5) PostUsersCreate(c *gin.Context) {
-	session := NewSessionCriteria(c)
+	session := SessionCriteria(c)
 	logger := bardlog.GetLogger(c)
 
 	var body api.PostApiV1UsersJSONBody

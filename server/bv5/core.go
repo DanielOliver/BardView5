@@ -10,9 +10,12 @@ import (
 	"server/db"
 )
 
-
 type Generators struct {
 	userNode *snowflake.Node
+}
+
+type bardView5Configuration struct {
+	kratosBaseUrl string
 }
 
 type BardView5 struct {
@@ -20,6 +23,7 @@ type BardView5 struct {
 	querier    db.Querier
 	generators *Generators
 	dbMetrics  *db.WithDbMetrics
+	conf       bardView5Configuration
 }
 
 func NewBardView5() (bv5 *BardView5, err error) {
@@ -42,6 +46,9 @@ func NewBardView5() (bv5 *BardView5, err error) {
 			userNode: userNode,
 		},
 		dbMetrics: metricsPg,
+		conf: bardView5Configuration{
+			kratosBaseUrl: "http://proxy.local",
+		},
 	}, nil
 }
 

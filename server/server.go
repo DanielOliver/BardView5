@@ -48,10 +48,11 @@ func serve() {
 	router.Use(gin.Recovery())
 	router.Use(cors.Default())
 	prometheus.Use(router)
-	router.Use(func(c *gin.Context) {
-		//TODO: solve this atrocity.
-		c.Set(bv5.SessionId, "1")
-	})
+	//router.Use(func(c *gin.Context) {
+	//	//TODO: solve this atrocity.
+	//	c.Set(bv5.SessionId, "1")
+	//})
+	router.Use(bardView5.AddSessionToContext)
 	router.Use(bardlog.UseLoggingWithRequestId(log.Logger, []string{}, nil))
 
 	registerRoutes(router, bardView5)
