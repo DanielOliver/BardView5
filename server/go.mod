@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/OneOfOne/struct2ts v1.0.6
+	github.com/allegro/bigcache/v3 v3.0.1
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cheekybits/genny v1.0.1-0.20200709201058-3e22f1a88ff2
 	github.com/deepmap/oapi-codegen v1.8.3
@@ -16,6 +17,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/kevinburke/go-bindata v3.22.0+incompatible
 	github.com/lib/pq v1.10.3
+	github.com/magefile/mage v1.12.1
 	github.com/ory/kratos-client-go v0.8.0-alpha.2
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
@@ -46,7 +48,6 @@ require (
 	github.com/labstack/echo/v4 v4.2.1 // indirect
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/magefile/mage v1.12.1 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mailru/easyjson v0.7.0 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
