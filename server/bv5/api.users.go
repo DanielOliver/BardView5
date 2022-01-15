@@ -94,17 +94,16 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 	}
 }
 
-func (b *BardView5) GetUserThatIsMe(c *gin.Context) {
-	logger := bardlog.GetLogger(c)
-	session, err := b.getKratosSession(c)
+func GetUserThatIsMe(b *BardView5Http) {
+	session, err := b.BardView5.getKratosSession(b.Context)
 	if err != nil {
-		logger.Err(err).Msg("Failed to find me")
-		c.AbortWithStatus(http.StatusNotFound)
+		b.Logger.Err(err).Msg("Failed to find me")
+		b.Context.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
 	userUuid := uuid.MustParse(session.Identity.Id)
-	b.getUserByUuid(c, userUuid)
+	b.BardView5.getUserByUuid(b.Context, userUuid)
 }
 
 type GetUserByIdParams struct {

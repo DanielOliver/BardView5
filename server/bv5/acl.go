@@ -46,13 +46,13 @@ type ModelCommons interface {
 	CommonAccess_() string
 }
 
-type sessionCriteria struct {
+type sessionContext struct {
 	AvailableFields map[string]string
 	sessionId       int64
 	Anonymous       bool
 }
 
-func (s *sessionCriteria) SessionId() int64 {
+func (s *sessionContext) SessionId() int64 {
 	return s.sessionId
 }
 
@@ -67,12 +67,12 @@ type aclCondition struct {
 	Field *string `json:"field"`
 }
 
-func SessionCriteria(context context.Context) *sessionCriteria {
-	return context.Value(Session).(*sessionCriteria)
+func SessionCriteria(context context.Context) *sessionContext {
+	return context.Value(Session).(*sessionContext)
 }
 
-func MakeAnonymousSession() *sessionCriteria {
-	return &sessionCriteria{
+func MakeAnonymousSession() *sessionContext {
+	return &sessionContext{
 		map[string]string{
 			SessionId: "",
 		},
@@ -81,8 +81,8 @@ func MakeAnonymousSession() *sessionCriteria {
 	}
 }
 
-func MakeSession(sessionId int64) *sessionCriteria {
-	return &sessionCriteria{
+func MakeSession(sessionId int64) *sessionContext {
+	return &sessionContext{
 		map[string]string{
 			SessionId: strconv.FormatInt(sessionId, 10),
 		},
@@ -91,7 +91,7 @@ func MakeSession(sessionId int64) *sessionCriteria {
 	}
 }
 
-func (s *sessionCriteria) Evaluate(object *AclObjectMetadata, acl []db.GetAclBySubjectRow, session *sessionCriteria) *aclEvaluation {
+func (s *sessionContext) Evaluate(object *AclObjectMetadata, acl []db.GetAclBySubjectRow, session *sessionContext) *aclEvaluation {
 	result := &aclEvaluation{
 		Object:  object.ObjectName,
 		Id:      object.Id,

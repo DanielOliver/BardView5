@@ -19,7 +19,7 @@ func registerRoutes(router *gin.Engine, bardView5 *bv5.BardView5) {
 		grpUsers := grpV1.Group("/users")
 		{
 			grpUsers.POST("", bardView5.PostUsersCreate)
-			grpUsers.GET("/me", bardView5.GetUserThatIsMe)
+			grpUsers.GET("/me", bardView5.WrapRequest(bv5.GetUserThatIsMe))
 			grpUsers.GET("/:userId", bardView5.GetUsersById)
 			grpUsers.PATCH("/:userId", bardView5.PatchUserById)
 		}
@@ -48,10 +48,6 @@ func serve() {
 	router.Use(gin.Recovery())
 	router.Use(cors.Default())
 	prometheus.Use(router)
-	//router.Use(func(c *gin.Context) {
-	//	//TODO: solve this atrocity.
-	//	c.Set(bv5.SessionId, "1")
-	//})
 	router.Use(bardView5.AddSessionToContext)
 	router.Use(bardlog.UseLoggingWithRequestId(log.Logger, []string{}, nil))
 

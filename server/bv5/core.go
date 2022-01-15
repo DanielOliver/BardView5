@@ -5,9 +5,12 @@ import (
 	"fmt"
 	bigcache "github.com/allegro/bigcache/v3"
 	"github.com/bwmarrin/snowflake"
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
+	"server/bardlog"
 	"server/db"
 	"strconv"
 	"time"
@@ -91,4 +94,22 @@ func (b *bardView5Sessions) GetSessionCache(sessionCookie string) (int64, bool) 
 		return 0, false
 	}
 	return userId, true
+}
+
+type BardView5Http struct {
+	BardView5 *BardView5
+	Logger    zerolog.Logger
+	Session   sessionContext
+	Context   *gin.Context
+}
+
+func (b *BardView5) WrapRequest(pipe func(request *BardView5Http)) func(*gin.Context) {
+	return func(c *gin.Context) {
+		pipe(&BardView5Http{
+			BardView5: b,
+			Logger:    bardlog.GetLogger(c),
+			Session:   *SessionCriteria(c),
+			Context:   c,
+		})
+	}
 }
