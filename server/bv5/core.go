@@ -37,6 +37,13 @@ type BardView5 struct {
 	sessions   *bardView5Sessions
 }
 
+type BardView5Http struct {
+	BardView5 *BardView5
+	Logger    zerolog.Logger
+	Session   sessionContext
+	Context   *gin.Context
+}
+
 func NewBardView5() (bv5 *BardView5, err error) {
 	connectionString := viper.GetString("CONNECTION")
 	if connectionString == "" {
@@ -94,13 +101,6 @@ func (b *bardView5Sessions) GetSessionCache(sessionCookie string) (int64, bool) 
 		return 0, false
 	}
 	return userId, true
-}
-
-type BardView5Http struct {
-	BardView5 *BardView5
-	Logger    zerolog.Logger
-	Session   sessionContext
-	Context   *gin.Context
 }
 
 func (b *BardView5) WrapRequest(pipe func(request *BardView5Http)) func(*gin.Context) {

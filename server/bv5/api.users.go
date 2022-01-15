@@ -103,7 +103,7 @@ func GetUserThatIsMe(b *BardView5Http) {
 	}
 
 	userUuid := uuid.MustParse(session.Identity.Id)
-	b.BardView5.getUserByUuid(b.Context, userUuid)
+	getUserByUuid(b, userUuid)
 }
 
 type GetUserByIdParams struct {
@@ -114,36 +114,35 @@ type GetUserByUuidParams struct {
 	UserID string `uri:"userId" binding:"required,uuid"`
 }
 
-func (b *BardView5) GetUsersById(c *gin.Context) {
+func GetUsersById(b *BardView5Http) {
 	var params GetUserByIdParams
-	if err := c.ShouldBindUri(&params); err != nil {
+	if err := b.Context.ShouldBindUri(&params); err != nil {
 
 		var uuidParams GetUserByUuidParams
-		if err := c.ShouldBindUri(&uuidParams); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err := b.Context.ShouldBindUri(&uuidParams); err != nil {
+			b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		b.getUserByUuid(c, uuid.MustParse(uuidParams.UserID))
+		getUserByUuid(b, uuid.MustParse(uuidParams.UserID))
 		return
 	}
-	b.getUserById(c, params.UserID)
+	getUserById(b, params.UserID)
 }
 
-func (b *BardView5) getUserById(c *gin.Context, userId int64) {
-	logger := bardlog.GetLogger(c)
-	users, err := b.Querier().UserFindById(c, userId)
+func getUserById(b *BardView5Http, userId int64) {
+	users, err := b.BardView5.Querier().UserFindById(b.Context, userId)
 	if err != nil {
-		logger.Err(err).Int64("id", userId).Msg("Failed to get user")
-		c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to return user")
+		b.Logger.Err(err).Int64("id", userId).Msg("Failed to get user")
+		b.Context.AbortWithStatusJSON(http.StatusBadRequest, "Failed to return user")
 		return
 	}
 	if len(users) == 0 {
-		c.AbortWithStatusJSON(http.StatusNotFound, "Failed to return user")
+		b.Context.AbortWithStatusJSON(http.StatusNotFound, "Failed to return user")
 		return
 	}
 	user := users[0]
-	c.JSON(http.StatusOK, api.UserGet{
+	b.Context.JSON(http.StatusOK, api.UserGet{
 		User: api.User{
 			CommonAccess: user.CommonAccess,
 			Email:        api.Email(user.Email),

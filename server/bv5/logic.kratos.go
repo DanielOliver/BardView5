@@ -12,6 +12,7 @@ import (
 	"server/api"
 	"server/bardlog"
 	"server/db"
+	"strconv"
 	"time"
 )
 
@@ -27,34 +28,37 @@ var (
 	session401 = &SessionError{
 		msg: "401",
 	}
+	sessionInactiveUser = &SessionError{
+		msg: "User not active",
+	}
 )
 
-func (b *BardView5) getUserByUuid(c *gin.Context, userUuid uuid.UUID) {
-	logger := bardlog.GetLogger(c)
-	users, err := b.Querier().UserFindByUuid(c, userUuid)
+func getUserByUuid(b *BardView5Http, userUuid uuid.UUID) {
+	users, err := b.BardView5.Querier().UserFindByUuid(b.Context, userUuid)
 	if err != nil {
-		logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to get user")
-		c.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to return user")
+		b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to get user")
+		b.Context.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	if len(users) == 0 {
-		session, err := b.getKratosSession(c)
+		session, err := b.BardView5.getKratosSession(b.Context)
 		if err != nil {
-			logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to get user")
-			c.AbortWithStatusJSON(http.StatusNotFound, "Failed to return user")
+			b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to get user")
+			b.Context.AbortWithStatus(http.StatusNotFound)
 			return
 		}
 
 		traits, ok := session.Identity.Traits.(map[string]interface{})
 		if !ok {
-			logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to understand user")
-			c.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to understand user")
+			b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to understand user")
+			b.Context.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 
-		newUserId := b.generators.userNode.Generate().Int64()
+		newUserId := b.BardView5.generators.userNode.Generate().Int64()
 		newUserUuid := uuid.MustParse(session.Identity.Id)
-		changedRows, err := b.Querier().UserInsert(c, db.UserInsertParams{
+		b.Logger.Info().Str("uuid", userUuid.String()).Int64("userid", newUserId).Msg("Creating user in BardView5")
+		changedRows, err := b.BardView5.Querier().UserInsert(b.Context, db.UserInsertParams{
 			UserID:       newUserId,
 			Uuid:         newUserUuid,
 			Name:         traits["username"].(string),
@@ -66,24 +70,36 @@ func (b *BardView5) getUserByUuid(c *gin.Context, userUuid uuid.UUID) {
 			IsActive:     true,
 		})
 		if err != nil {
-			logger.Err(err).Msg("Failed to confirm new user")
-			c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to confirm new user")
+			b.Logger.Err(err).Msg("Failed to confirm new user")
+			b.Context.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
 		if changedRows == 0 {
-			c.JSON(http.StatusBadRequest, "Failed to confirm new user")
+			b.Logger.Err(err).Msg("No rows changed for user")
+			b.Context.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
-		c.Header("ETag", "0")
-		c.Header("Location", fmt.Sprintf("/v1/users%d/", newUserId))
-		c.JSON(http.StatusCreated, api.UserGetOk{
+		b.Context.Header("ETag", "0")
+		b.Context.Header("Location", fmt.Sprintf("/v1/users/%d/", newUserId))
+		b.Context.JSON(http.StatusCreated, api.UserGetOk{
 			UserId:  newUserId,
 			Version: 0,
 		})
 
-	} else {
-		user := users[0]
-		c.JSON(http.StatusOK, api.UserGet{
+		//Prime user array for next fetch.
+		users, err = b.BardView5.Querier().UserFindByUuid(b.Context, userUuid)
+	}
+
+	if len(users) == 0 {
+		b.Context.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	user := users[0]
+	if user.CommonAccess == CommonAccessPublic || b.Session.sessionId == user.UserID {
+		b.Context.Header("ETag", strconv.FormatInt(user.Version, 10))
+		b.Context.Header("Location", fmt.Sprintf("/v1/users/%d/", user.UserID))
+		b.Context.JSON(http.StatusOK, api.UserGet{
 			User: api.User{
 				CommonAccess: user.CommonAccess,
 				Email:        api.Email(user.Email),
@@ -96,7 +112,11 @@ func (b *BardView5) getUserByUuid(c *gin.Context, userUuid uuid.UUID) {
 			UserId:  user.UserID,
 			Version: user.Version,
 		})
+		return
 	}
+
+	b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("NotAuthorized")
+	b.Context.AbortWithStatus(http.StatusNotFound)
 }
 
 func (b *BardView5) createOrGetUserByUuid(c *gin.Context, session *kratos.Session) (int64, error) {
@@ -140,6 +160,10 @@ func (b *BardView5) createOrGetUserByUuid(c *gin.Context, session *kratos.Sessio
 		return newUserId, nil
 	} else {
 		user := users[0]
+		if !user.IsActive {
+			return 0, sessionInactiveUser
+		}
+
 		return user.UserID, nil
 	}
 }
@@ -197,6 +221,7 @@ func (b *BardView5) AddSessionToContext(c *gin.Context) {
 	}
 	userId, err := b.createOrGetUserByUuid(c, session)
 	if err != nil {
+		c.Set(Session, MakeAnonymousSession())
 		return
 	}
 	b.sessions.SetSessionCache(oryKratosSession, userId)

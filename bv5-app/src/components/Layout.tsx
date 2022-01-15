@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 import React from 'react'
 import { AuthContext } from '../context/Auth.context'
 import { useQuery } from 'react-query'
-import axios from 'axios'
 import { UserGet } from '../bv5-server'
+import { bv5V1GetMe } from '../services/bardview5'
 
 export function Layout ({ logout }: {
   logout: () => void
@@ -14,7 +14,7 @@ export function Layout ({ logout }: {
   const {
     data
   } = useQuery<UserGet>('me', async () => {
-    return (await axios.get<UserGet>('/api/v1/users/me')).data
+    return (await bv5V1GetMe()).data
   })
 
   return <Menu stackable>

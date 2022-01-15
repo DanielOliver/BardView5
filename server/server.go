@@ -13,17 +13,17 @@ import (
 	"server/bv5"
 )
 
-func registerRoutes(router *gin.Engine, bardView5 *bv5.BardView5) {
+func registerRoutes(router *gin.Engine, b *bv5.BardView5) {
 	grpV1 := router.Group("/api/v1")
 	{
 		grpUsers := grpV1.Group("/users")
 		{
-			grpUsers.POST("", bardView5.PostUsersCreate)
-			grpUsers.GET("/me", bardView5.WrapRequest(bv5.GetUserThatIsMe))
-			grpUsers.GET("/:userId", bardView5.GetUsersById)
-			grpUsers.PATCH("/:userId", bardView5.PatchUserById)
+			grpUsers.GET("/me", b.WrapRequest(bv5.GetUserThatIsMe))
+			grpUsers.GET("/:userId", b.WrapRequest(bv5.GetUsersById))
+			grpUsers.POST("", b.RequireValidSession, b.PostUsersCreate)
+			grpUsers.PATCH("/:userId", b.RequireValidSession, b.PatchUserById)
 		}
-		grpV1.GET("/session", bardView5.GetWhoAmI)
+		grpV1.GET("/session", b.GetWhoAmI)
 	}
 }
 
