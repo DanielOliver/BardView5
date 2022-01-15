@@ -11,14 +11,15 @@ const (
 	ObjectUser = "user"
 
 	SessionId = "session_id"
+	Session   = "session"
 
-	ActionManage = "manage"
-	ActionOwner = "owner"
-	ActionView = "view"
+	ActionManage     = "manage"
+	ActionOwner      = "owner"
+	ActionView       = "view"
 	ActionPublicView = "public_view"
 
 	CommonAccessPrivate = "private"
-	CommonAccessPublic = "public"
+	CommonAccessPublic  = "public"
 )
 
 type AclObjectMetadata struct {
@@ -45,12 +46,13 @@ type ModelCommons interface {
 	CommonAccess_() string
 }
 
-type sessionCriteria struct {
+type sessionContext struct {
 	AvailableFields map[string]string
 	sessionId       int64
+	Anonymous       bool
 }
 
-func (s *sessionCriteria) SessionId() int64 {
+func (s *sessionContext) SessionId() int64 {
 	return s.sessionId
 }
 
@@ -65,18 +67,31 @@ type aclCondition struct {
 	Field *string `json:"field"`
 }
 
-func NewSessionCriteria(context context.Context) *sessionCriteria {
-	sessionIdStr := context.Value(SessionId).(string)
-	sessionId, _ := strconv.ParseInt(sessionIdStr, 10, 64)
-	return &sessionCriteria{
+func SessionCriteria(context context.Context) *sessionContext {
+	return context.Value(Session).(*sessionContext)
+}
+
+func MakeAnonymousSession() *sessionContext {
+	return &sessionContext{
 		map[string]string{
-			SessionId: sessionIdStr,
+			SessionId: "",
 		},
-		sessionId,
+		0,
+		true,
 	}
 }
 
-func (s *sessionCriteria) Evaluate(object *AclObjectMetadata, acl []db.GetAclBySubjectRow, session *sessionCriteria) *aclEvaluation {
+func MakeSession(sessionId int64) *sessionContext {
+	return &sessionContext{
+		map[string]string{
+			SessionId: strconv.FormatInt(sessionId, 10),
+		},
+		sessionId,
+		sessionId == 0,
+	}
+}
+
+func (s *sessionContext) Evaluate(object *AclObjectMetadata, acl []db.GetAclBySubjectRow, session *sessionContext) *aclEvaluation {
 	result := &aclEvaluation{
 		Object:  object.ObjectName,
 		Id:      object.Id,
@@ -114,4 +129,3 @@ func (s *sessionCriteria) Evaluate(object *AclObjectMetadata, acl []db.GetAclByS
 	}
 	return result
 }
-

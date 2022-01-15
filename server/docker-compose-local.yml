@@ -18,6 +18,10 @@ services:
       - "443:443"
     volumes:
       - ./nginx:/etc/nginx
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      - kratos
 
   kratos-migrate:
     image: oryd/kratos:v0.8.0-alpha.3-sqlite
@@ -64,6 +68,3 @@ services:
       - '4437:4437'
 #    networks:
 #      - intranet
-
-#networks:
-#  intranet:

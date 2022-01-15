@@ -33,6 +33,8 @@ create table "user"
 
 create unique index user_email_uindex on "user" (email);
 
+create unique index user_uuid_uindex on "user" (uuid);
+
 create table "role_type"
 (
     role_type_id                 bigint
@@ -165,8 +167,6 @@ WHERE name = 'User Role, Global'
 $$
     LANGUAGE SQL;
 
-create unique index user_uuid_uindex
-    on "user" (uuid);
 
 create or replace function generate_ksuid()
     returns char(27)

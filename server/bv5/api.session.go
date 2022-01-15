@@ -3,6 +3,7 @@ package bv5
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	kratos "github.com/ory/kratos-client-go"
 	"io"
 	"net/http"
 	"server/bardlog"
@@ -32,12 +33,12 @@ func (b *BardView5) GetWhoAmI(c *gin.Context) {
 		return
 	}
 
-	var result interface{}
+	var result kratos.Session
 	if err := json.Unmarshal(body, &result); err != nil {
 		logger.Err(err)
 		c.Status(500)
 		return
 	}
-	logger.Info().Interface("response", result).Msg("Response!")
+	logger.Info().Interface("response", result).Msg("Session Response")
 	c.JSON(resp.StatusCode, result)
 }

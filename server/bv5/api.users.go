@@ -17,7 +17,7 @@ import (
 )
 
 func (b *BardView5) PostUsersCreate(c *gin.Context) {
-	session := NewSessionCriteria(c)
+	session := SessionCriteria(c)
 	logger := bardlog.GetLogger(c)
 
 	var body api.PostApiV1UsersJSONBody
@@ -94,17 +94,16 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 	}
 }
 
-func (b *BardView5) GetUserThatIsMe(c *gin.Context) {
-	logger := bardlog.GetLogger(c)
-	session, err := b.getKratosSession(c)
+func GetUserThatIsMe(b *BardView5Http) {
+	session, err := b.BardView5.getKratosSession(b.Context)
 	if err != nil {
-		logger.Err(err).Msg("Failed to find me")
-		c.AbortWithStatus(http.StatusNotFound)
+		b.Logger.Err(err).Msg("Failed to find me")
+		b.Context.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
 	userUuid := uuid.MustParse(session.Identity.Id)
-	b.getUserByUuid(c, userUuid)
+	b.BardView5.getUserByUuid(b.Context, userUuid)
 }
 
 type GetUserByIdParams struct {
@@ -157,76 +156,6 @@ func (b *BardView5) getUserById(c *gin.Context, userId int64) {
 		UserId:  user.UserID,
 		Version: user.Version,
 	})
-}
-
-func (b *BardView5) getUserByUuid(c *gin.Context, userUuid uuid.UUID) {
-	logger := bardlog.GetLogger(c)
-	users, err := b.Querier().UserFindByUuid(c, userUuid)
-	if err != nil {
-		logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to get user")
-		c.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to return user")
-		return
-	}
-	if len(users) == 0 {
-		session, err := b.getKratosSession(c)
-		if err != nil {
-			logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to get user")
-			c.AbortWithStatusJSON(http.StatusNotFound, "Failed to return user")
-			return
-		}
-
-		traits, ok := session.Identity.Traits.(map[string]interface{})
-		if !ok {
-			logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to understand user")
-			c.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to understand user")
-			return
-		}
-
-		newUserId := b.generators.userNode.Generate().Int64()
-		newUserUuid := uuid.MustParse(session.Identity.Id)
-		changedRows, err := b.Querier().UserInsert(c, db.UserInsertParams{
-			UserID:       newUserId,
-			Uuid:         newUserUuid,
-			Name:         traits["username"].(string),
-			Email:        traits["email"].(string),
-			UserTags:     []string{},
-			SystemTags:   []string{"implicit_registration"},
-			CommonAccess: CommonAccessPrivate,
-			CreatedBy:    sql.NullInt64{},
-			IsActive:     true,
-		})
-		if err != nil {
-			logger.Err(err).Msg("Failed to confirm new user")
-			c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to confirm new user")
-			return
-		}
-		if changedRows == 0 {
-			c.JSON(http.StatusBadRequest, "Failed to confirm new user")
-			return
-		}
-		c.Header("ETag", "0")
-		c.Header("Location", fmt.Sprintf("/v1/users%d/", newUserId))
-		c.JSON(http.StatusCreated, api.UserGetOk{
-			UserId:  newUserId,
-			Version: 0,
-		})
-
-	} else {
-		user := users[0]
-		c.JSON(http.StatusOK, api.UserGet{
-			User: api.User{
-				CommonAccess: user.CommonAccess,
-				Email:        api.Email(user.Email),
-				Name:         user.Name,
-				SystemTags:   user.SystemTags,
-				UserTags:     user.UserTags,
-				Active:       user.IsActive,
-			},
-			Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
-			UserId:  user.UserID,
-			Version: user.Version,
-		})
-	}
 }
 
 func (b *BardView5) PatchUserById(c *gin.Context) {
