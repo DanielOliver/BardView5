@@ -34,7 +34,7 @@ func mapDnd5eWorldToJsonBody(dnd5eWorld *db.Dnd5eWorld) *api.Dnd5eWorldGet {
 }
 
 type GetDnd5eWorldByIdParams struct {
-	dnd5eWorldId int64 `uri:"userId" binding:"required"`
+	Dnd5eWorldId int64 `uri:"dnd5eWorldId" binding:"required"`
 }
 
 func GetDnd5eWorldById(b *BardView5Http) {
@@ -44,10 +44,10 @@ func GetDnd5eWorldById(b *BardView5Http) {
 		return
 	}
 
-	dnd5eWorlds, err := b.Querier().Dnd5eWorldFindById(b.Context, params.dnd5eWorldId)
+	dnd5eWorlds, err := b.Querier().Dnd5eWorldFindById(b.Context, params.Dnd5eWorldId)
 
 	if err != nil {
-		b.Logger.Err(err).Int64("id", params.dnd5eWorldId).Msg("Failed to get dnd5eworld")
+		b.Logger.Err(err).Int64("id", params.Dnd5eWorldId).Msg("Failed to get dnd5eworld")
 		b.Context.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
