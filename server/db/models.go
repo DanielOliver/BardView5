@@ -66,18 +66,20 @@ type Dnd5eSizeCategory struct {
 }
 
 type Dnd5eWorld struct {
-	Dnd5eWorldID     int64          `db:"dnd5e_world_id"`
-	CreatedBy        sql.NullInt64  `db:"created_by"`
-	CreatedAt        time.Time      `db:"created_at"`
-	Version          int64          `db:"version"`
-	IsActive         bool           `db:"is_active"`
-	CommonAccess     string         `db:"common_access"`
-	UserTags         []string       `db:"user_tags"`
-	SystemTags       []string       `db:"system_tags"`
-	DerivedFromWorld sql.NullInt64  `db:"derived_from_world"`
-	Name             string         `db:"name"`
-	Module           sql.NullString `db:"module"`
-	Description      string         `db:"description"`
+	Dnd5eWorldID      int64          `db:"dnd5e_world_id"`
+	CreatedBy         sql.NullInt64  `db:"created_by"`
+	CreatedAt         time.Time      `db:"created_at"`
+	Version           int64          `db:"version"`
+	IsActive          bool           `db:"is_active"`
+	CommonAccess      string         `db:"common_access"`
+	UserTags          []string       `db:"user_tags"`
+	SystemTags        []string       `db:"system_tags"`
+	DerivedFromWorld  sql.NullInt64  `db:"derived_from_world"`
+	Name              string         `db:"name"`
+	Module            sql.NullString `db:"module"`
+	Description       string         `db:"description"`
+	ExternalSourceID  sql.NullInt64  `db:"external_source_id"`
+	ExternalSourceKey sql.NullString `db:"external_source_key"`
 }
 
 type Dnd5eWorldAssignment struct {
@@ -87,6 +89,18 @@ type Dnd5eWorldAssignment struct {
 	UserID       int64         `db:"user_id"`
 	Dnd5eWorldID int64         `db:"dnd5e_world_id"`
 	RoleAction   string        `db:"role_action"`
+}
+
+type ExternalSource struct {
+	ExternalSourceID      int64         `db:"external_source_id"`
+	CreatedBy             sql.NullInt64 `db:"created_by"`
+	CreatedAt             time.Time     `db:"created_at"`
+	Version               int64         `db:"version"`
+	ExternalSourceKey     string        `db:"external_source_key"`
+	ExternalSourceVersion string        `db:"external_source_version"`
+	UserTags              []string      `db:"user_tags"`
+	SystemTags            []string      `db:"system_tags"`
+	Name                  string        `db:"name"`
 }
 
 type RoleAction struct {

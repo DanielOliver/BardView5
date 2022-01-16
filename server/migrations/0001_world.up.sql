@@ -1,19 +1,21 @@
 create table "dnd5e_world"
 (
-    dnd5e_world_id     bigint
+    dnd5e_world_id      bigint
         constraint dnd5e_world_pk
             primary key,
-    created_by         bigint  null,
-    created_at         timestamp without time zone default (now() at time zone 'utc') not null,
-    version            bigint  not null            default (0),
-    is_active          boolean not null            default (true),
-    common_access      text    not null,
-    user_tags          text[]  not null,
-    system_tags        text[]  not null,
-    derived_from_world bigint  null,
-    name               text    not null,
-    module             text    null,
-    description        text    not null,
+    created_by          bigint  null,
+    created_at          timestamp without time zone default (now() at time zone 'utc') not null,
+    version             bigint  not null            default (0),
+    is_active           boolean not null            default (true),
+    common_access       text    not null,
+    user_tags           text[]  not null,
+    system_tags         text[]  not null,
+    derived_from_world  bigint  null,
+    name                text    not null,
+    module              text    null,
+    description         text    not null,
+    external_source_id  bigint  null,
+    external_source_key text    null,
 
     CONSTRAINT fk_dnd5e_world_createdby
         FOREIGN KEY (created_by)
@@ -23,7 +25,11 @@ create table "dnd5e_world"
             REFERENCES common_access (name),
     CONSTRAINT fk_dnd5e_world_derived_from
         FOREIGN KEY (derived_from_world)
-            REFERENCES "dnd5e_world" (dnd5e_world_id)
+            REFERENCES "dnd5e_world" (dnd5e_world_id),
+
+    CONSTRAINT fk_dnd5e_world_derived_from_external_source
+        FOREIGN KEY (external_source_id)
+            REFERENCES "external_source" (external_source_id)
 
 );
 

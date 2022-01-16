@@ -1,6 +1,7 @@
 package bv5
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"server/api"
@@ -107,4 +108,53 @@ func GetMyDnd5eWorlds(b *BardView5Http) {
 	}
 
 	b.Context.JSON(http.StatusOK, results)
+}
+
+func PostDnd5eWorldsCreate(b *BardView5Http) {
+	var body api.PostApiV1Dnd5eWorldsJSONBody
+	if err := b.Context.ShouldBindJSON(&body); err != nil {
+		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	newDnd5eWorldId := b.GenDnd5eWorld().Generate().Int64()
+	changedRows, err := b.Querier().Dnd5eWorldInsert(b.Context, db.Dnd5eWorldInsertParams{
+		Dnd5eWorldID:     newDnd5eWorldId,
+		DerivedFromWorld: MaybeInt64(body.DerivedFromWorld),
+		CommonAccess:     body.CommonAccess,
+		CreatedBy:        MaybeInt64(&b.Session.sessionId),
+		IsActive:         body.Active,
+		SystemTags:       body.SystemTags,
+		UserTags:         body.UserTags,
+		Name:             body.Name,
+		Module:           MaybeString(body.Module),
+		Description:      body.Description,
+	})
+	if err != nil {
+		b.Logger.Err(err).Msg("Failed to create new dnd5eworld")
+		b.Context.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to create new dnd5eworld")
+		return
+	}
+	if changedRows == 0 {
+		b.Context.JSON(http.StatusBadRequest, "Failed to create new dnd5eworld")
+		return
+	}
+
+	_, err = b.Querier().Dnd5eWorldUpsertAssignment(b.Context, db.Dnd5eWorldUpsertAssignmentParams{
+		CreatedBy:    MaybeInt64(&b.Session.sessionId),
+		UserID:       b.Session.sessionId,
+		Dnd5eWorldID: newDnd5eWorldId,
+		RoleAction:   RoleActionOwner,
+	})
+	if err != nil {
+		b.Logger.Err(err).Msg("Failed to assign new dnd5eworld")
+		b.Context.AbortWithStatusJSON(http.StatusInternalServerError, "Troubled creating new dnd5eworld")
+		return
+	}
+
+	b.Context.Header("ETag", "0")
+	b.Context.Header("Location", fmt.Sprintf("/v1/dnd5e/world/%d/", newDnd5eWorldId))
+	b.Context.JSON(http.StatusCreated, api.UserPostOk{
+		UserId:  newDnd5eWorldId,
+		Version: 0,
+	})
 }

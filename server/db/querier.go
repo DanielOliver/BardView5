@@ -18,6 +18,7 @@ type Querier interface {
 	Dnd5eWorldFindByAssignment(ctx context.Context, userID int64) ([]Dnd5eWorld, error)
 	Dnd5eWorldFindById(ctx context.Context, dnd5eWorldID int64) ([]Dnd5eWorld, error)
 	Dnd5eWorldInsert(ctx context.Context, arg Dnd5eWorldInsertParams) (int64, error)
+	Dnd5eWorldUpsertAssignment(ctx context.Context, arg Dnd5eWorldUpsertAssignmentParams) (int64, error)
 	UserFindByEmail(ctx context.Context, email string) ([]User, error)
 	UserFindById(ctx context.Context, userID int64) ([]User, error)
 	UserFindByUuid(ctx context.Context, uuid uuid.UUID) ([]User, error)

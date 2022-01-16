@@ -4,6 +4,7 @@ import { bv5V1GetDnd5eWorldsMine } from '../services/bardview5'
 import { Col, Container, ListGroup, Row } from 'react-bootstrap'
 import { Dnd5eWorldGet } from '../bv5-server'
 import { formatDistance } from 'date-fns'
+import { AccessBadge } from '../components/AccessBadge'
 
 function HomeRoute () {
   const {
@@ -13,7 +14,7 @@ function HomeRoute () {
   })
 
   return <Container>
-    <Row><h1>D&D 5e</h1></Row>
+    <Row><Col><h1 className="m-1">D&D 5e</h1></Col></Row>
     <Row>
       <Col md={6}>
         <h2>Worlds</h2>
@@ -24,9 +25,12 @@ function HomeRoute () {
 
             return (
                     <ListGroup.Item key={world.dnd5eWorldId}>
-                      <div className="d-flex w-100 justify-content-between">
+                      <div className="d-flex justify-content-between flex-column flex-md-row">
                         <h5 className="mb-1">{world.name}</h5>
-                        <small>{daysAgo}</small>
+                        <div className="mb-1 justify-content-between d-flex">
+                          <small className="me-1">{daysAgo}</small>
+                          <AccessBadge accessType={world.commonAccess}/>
+                        </div>
                       </div>
                       <p className="mb-1"><i>{shortDescription}</i></p>
                     </ListGroup.Item>

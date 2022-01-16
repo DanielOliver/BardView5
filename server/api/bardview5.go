@@ -27,7 +27,7 @@ type Dnd5eWorld struct {
 	CommonAccess     string     `binding:"required,oneof=private anyuser public" json:"commonAccess"`
 	DerivedFromWorld *int64     `json:"derivedFromWorld,omitempty"`
 	Description      string     `binding:"required,min=1,max=1024" json:"description"`
-	Module           *string    `binding:"required,min=1,max=512" json:"module,omitempty"`
+	Module           *string    `binding:"min=1,max=512" json:"module,omitempty"`
 	Name             string     `binding:"required,min=1,max=512" json:"name"`
 	SystemTags       SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags"`
 	UserTags         UserTags   `binding:"required,max=64,dive,max=256" json:"userTags"`
@@ -114,6 +114,12 @@ type Dnd5eWorldArrayGetOk []Dnd5eWorld
 // Dnd5eWorldGetOk defines model for Dnd5eWorldGetOk.
 type Dnd5eWorldGetOk Dnd5eWorld
 
+// Dnd5eWorldPostOk defines model for Dnd5eWorldPostOk.
+type Dnd5eWorldPostOk struct {
+	Dnd5eWorldId int64 `json:"dnd5eWorldId"`
+	Version      int64 `json:"version"`
+}
+
 // UserGetOk defines model for UserGetOk.
 type UserGetOk UserGet
 
@@ -126,8 +132,20 @@ type UserPostOk struct {
 // A JSONPatch document as defined by RFC 6902
 type Patch PatchDocument
 
+// PostApiV1Dnd5eWorldsJSONBody defines parameters for PostApiV1Dnd5eWorlds.
+type PostApiV1Dnd5eWorldsJSONBody Dnd5eWorld
+
+// PostApiV1Dnd5eWorldsDnd5eWorldIdJSONBody defines parameters for PostApiV1Dnd5eWorldsDnd5eWorldId.
+type PostApiV1Dnd5eWorldsDnd5eWorldIdJSONBody Dnd5eWorld
+
 // PostApiV1UsersJSONBody defines parameters for PostApiV1Users.
 type PostApiV1UsersJSONBody User
+
+// PostApiV1Dnd5eWorldsJSONRequestBody defines body for PostApiV1Dnd5eWorlds for application/json ContentType.
+type PostApiV1Dnd5eWorldsJSONRequestBody PostApiV1Dnd5eWorldsJSONBody
+
+// PostApiV1Dnd5eWorldsDnd5eWorldIdJSONRequestBody defines body for PostApiV1Dnd5eWorldsDnd5eWorldId for application/json ContentType.
+type PostApiV1Dnd5eWorldsDnd5eWorldIdJSONRequestBody PostApiV1Dnd5eWorldsDnd5eWorldIdJSONBody
 
 // PostApiV1UsersJSONRequestBody defines body for PostApiV1Users for application/json ContentType.
 type PostApiV1UsersJSONRequestBody PostApiV1UsersJSONBody

@@ -14,6 +14,8 @@ const (
 	CommonAccessPrivate = "private"
 	CommonAccessAnyUser = "anyuser"
 	CommonAccessPublic  = "public"
+
+	RoleActionOwner = "owner"
 )
 
 type sessionContext struct {

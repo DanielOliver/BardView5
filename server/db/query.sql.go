@@ -285,7 +285,7 @@ const dnd5eWorldFindAssignment = `-- name: Dnd5eWorldFindAssignment :many
 SELECT wa.created_by, wa.created_at, wa.version, wa.user_id, wa.dnd5e_world_id, wa.role_action
 FROM "dnd5e_world_assignment" wa
 WHERE wa.user_id = $1
-    AND wa.dnd5e_world_id = $2
+  AND wa.dnd5e_world_id = $2
 ORDER BY w.dnd5e_world_id desc
 `
 
@@ -325,9 +325,9 @@ func (q *Queries) Dnd5eWorldFindAssignment(ctx context.Context, arg Dnd5eWorldFi
 }
 
 const dnd5eWorldFindByAssignment = `-- name: Dnd5eWorldFindByAssignment :many
-SELECT DISTINCT w.dnd5e_world_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.derived_from_world, w.name, w.module, w.description
+SELECT DISTINCT w.dnd5e_world_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.derived_from_world, w.name, w.module, w.description, w.external_source_id, w.external_source_key
 FROM "dnd5e_world" w
-INNER JOIN "dnd5e_world_assignment" wa ON
+         INNER JOIN "dnd5e_world_assignment" wa ON
     w.dnd5e_world_id = wa.dnd5e_world_id
 WHERE wa.user_id = $1
 ORDER BY w.dnd5e_world_id desc
@@ -355,6 +355,8 @@ func (q *Queries) Dnd5eWorldFindByAssignment(ctx context.Context, userID int64) 
 			&i.Name,
 			&i.Module,
 			&i.Description,
+			&i.ExternalSourceID,
+			&i.ExternalSourceKey,
 		); err != nil {
 			return nil, err
 		}
@@ -370,7 +372,7 @@ func (q *Queries) Dnd5eWorldFindByAssignment(ctx context.Context, userID int64) 
 }
 
 const dnd5eWorldFindById = `-- name: Dnd5eWorldFindById :many
-SELECT dnd5e_world_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, derived_from_world, name, module, description
+SELECT dnd5e_world_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, derived_from_world, name, module, description, external_source_id, external_source_key
 FROM "dnd5e_world" w
 WHERE w.dnd5e_world_id = $1
 `
@@ -397,6 +399,8 @@ func (q *Queries) Dnd5eWorldFindById(ctx context.Context, dnd5eWorldID int64) ([
 			&i.Name,
 			&i.Module,
 			&i.Description,
+			&i.ExternalSourceID,
+			&i.ExternalSourceKey,
 		); err != nil {
 			return nil, err
 		}
@@ -413,19 +417,22 @@ func (q *Queries) Dnd5eWorldFindById(ctx context.Context, dnd5eWorldID int64) ([
 
 const dnd5eWorldInsert = `-- name: Dnd5eWorldInsert :execrows
 insert into "dnd5e_world" (dnd5e_world_id, derived_from_world, common_access, created_by, is_active, system_tags,
-                           user_tags, "name")
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                           user_tags, "name", module, description)
+VALUES ($1, $2, $3, $4, $5,
+        $6, $7, $8, $9, $10)
 `
 
 type Dnd5eWorldInsertParams struct {
-	Dnd5eWorldID     int64         `db:"dnd5e_world_id"`
-	DerivedFromWorld sql.NullInt64 `db:"derived_from_world"`
-	CommonAccess     string        `db:"common_access"`
-	CreatedBy        sql.NullInt64 `db:"created_by"`
-	IsActive         bool          `db:"is_active"`
-	SystemTags       []string      `db:"system_tags"`
-	UserTags         []string      `db:"user_tags"`
-	Name             string        `db:"name"`
+	Dnd5eWorldID     int64          `db:"dnd5e_world_id"`
+	DerivedFromWorld sql.NullInt64  `db:"derived_from_world"`
+	CommonAccess     string         `db:"common_access"`
+	CreatedBy        sql.NullInt64  `db:"created_by"`
+	IsActive         bool           `db:"is_active"`
+	SystemTags       []string       `db:"system_tags"`
+	UserTags         []string       `db:"user_tags"`
+	Name             string         `db:"name"`
+	Module           sql.NullString `db:"module"`
+	Description      string         `db:"description"`
 }
 
 func (q *Queries) Dnd5eWorldInsert(ctx context.Context, arg Dnd5eWorldInsertParams) (int64, error) {
@@ -438,6 +445,39 @@ func (q *Queries) Dnd5eWorldInsert(ctx context.Context, arg Dnd5eWorldInsertPara
 		pq.Array(arg.SystemTags),
 		pq.Array(arg.UserTags),
 		arg.Name,
+		arg.Module,
+		arg.Description,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const dnd5eWorldUpsertAssignment = `-- name: Dnd5eWorldUpsertAssignment :execrows
+insert into "dnd5e_world_assignment" (created_by, user_id, dnd5e_world_id, role_action)
+SELECT $1,
+       $2,
+       $3,
+       $4 WHERE NOT EXISTS (
+    SELECT 1 FROM dnd5e_world_assignment
+    WHERE user_id = $2 AND dnd5e_world_id = $3 AND role_action = $4
+)
+`
+
+type Dnd5eWorldUpsertAssignmentParams struct {
+	CreatedBy    sql.NullInt64 `db:"created_by"`
+	UserID       int64         `db:"user_id"`
+	Dnd5eWorldID int64         `db:"dnd5e_world_id"`
+	RoleAction   string        `db:"role_action"`
+}
+
+func (q *Queries) Dnd5eWorldUpsertAssignment(ctx context.Context, arg Dnd5eWorldUpsertAssignmentParams) (int64, error) {
+	result, err := q.exec(ctx, q.dnd5eWorldUpsertAssignmentStmt, dnd5eWorldUpsertAssignment,
+		arg.CreatedBy,
+		arg.UserID,
+		arg.Dnd5eWorldID,
+		arg.RoleAction,
 	)
 	if err != nil {
 		return 0, err

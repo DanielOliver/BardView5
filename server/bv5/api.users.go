@@ -78,7 +78,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 		})
 		if err != nil {
 			logger.Err(err).Msg("Failed to create new user")
-			c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to create new user")
+			c.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to create new user")
 			return
 		}
 		if changedRows == 0 {
@@ -86,7 +86,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 			return
 		}
 		c.Header("ETag", "0")
-		c.Header("Location", fmt.Sprintf("/v1/users%d/", newUserId))
+		c.Header("Location", fmt.Sprintf("/v1/users/%d/", newUserId))
 		c.JSON(http.StatusCreated, api.UserPostOk{
 			UserId:  newUserId,
 			Version: 0,

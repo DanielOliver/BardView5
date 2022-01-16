@@ -31,18 +31,29 @@ WHERE u.user_id = @user_id
 
 -- name: Dnd5eWorldInsert :execrows
 insert into "dnd5e_world" (dnd5e_world_id, derived_from_world, common_access, created_by, is_active, system_tags,
-                           user_tags, "name")
-VALUES (@dnd5e_world_id, @derived_from_world, @common_access, @created_by, @is_active, @system_tags, @user_tags, @name);
+                           user_tags, "name", module, description)
+VALUES (@dnd5e_world_id, @derived_from_world, @common_access, @created_by, @is_active,
+        @system_tags, @user_tags, @name, @module, @description);
 
 -- name: Dnd5eWorldFindById :many
 SELECT *
 FROM "dnd5e_world" w
 WHERE w.dnd5e_world_id = @dnd5e_world_id;
 
+-- name: Dnd5eWorldUpsertAssignment :execrows
+insert into "dnd5e_world_assignment" (created_by, user_id, dnd5e_world_id, role_action)
+SELECT @created_by,
+       @user_id,
+       @dnd5e_world_id,
+       @role_action WHERE NOT EXISTS (
+    SELECT 1 FROM dnd5e_world_assignment
+    WHERE user_id = @user_id AND dnd5e_world_id = @dnd5e_world_id AND role_action = @role_action
+);
+
 -- name: Dnd5eWorldFindByAssignment :many
 SELECT DISTINCT w.*
 FROM "dnd5e_world" w
-INNER JOIN "dnd5e_world_assignment" wa ON
+         INNER JOIN "dnd5e_world_assignment" wa ON
     w.dnd5e_world_id = wa.dnd5e_world_id
 WHERE wa.user_id = @user_id
 ORDER BY w.dnd5e_world_id desc;
@@ -51,7 +62,7 @@ ORDER BY w.dnd5e_world_id desc;
 SELECT wa.*
 FROM "dnd5e_world_assignment" wa
 WHERE wa.user_id = @user_id
-    AND wa.dnd5e_world_id = @dnd5e_world_id
+  AND wa.dnd5e_world_id = @dnd5e_world_id
 ORDER BY w.dnd5e_world_id desc;
 
 -- name: Dnd5eMonsterFindById :many

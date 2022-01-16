@@ -81,6 +81,31 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Dnd5eWorld'
+    Dnd5eWorldPostOk:
+      description: Dnd5eWorldPost
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              dnd5eWorldId:
+                type: integer
+                format: int64
+              version:
+                type: integer
+                format: int64
+            required:
+              - dnd5eWorldId
+              - version
+      headers:
+        ETag:
+          schema:
+            type: string
+          description: Current version
+        Location:
+          schema:
+            type: string
+          description: Known Location
   schemas:
     PatchDocument:
       description: A JSONPatch document as defined by RFC 6902
@@ -178,7 +203,7 @@ components:
           maxLength: 512
           minLength: 1
           x-oapi-codegen-extra-tags:
-            binding: "required,min=1,max=512"
+            binding: "min=1,max=512"
         active:
           type: boolean
           example: true
@@ -276,7 +301,7 @@ components:
             - created
             - version
 paths:
-  /api/v1/dnd5e/worlds/mine:
+  /api/v1/dnd5e/worlds/assigned:
     get:
       summary: Returns all Dnd5e Worlds that I have explicit access to.
       tags:
@@ -294,6 +319,35 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Dnd5eWorldGetOk'
+    post:
+      summary: Updates dnd5e world.
+      tags:
+        - Dnd5eWorld
+      parameters:
+        - $ref: '#/components/parameters/Dnd5eWorldId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dnd5eWorld'
+      responses:
+        '201':
+          $ref: '#/components/responses/Dnd5eWorldPostOk'
+  /api/v1/dnd5e/worlds:
+    post:
+      summary: Creates a new dnd5e world.
+      tags:
+        - Dnd5eWorld
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dnd5eWorld'
+      responses:
+        '201':
+          $ref: '#/components/responses/Dnd5eWorldPostOk'
   /api/v1/users/me:
     get:
       summary: Returns current user

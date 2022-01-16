@@ -6,7 +6,7 @@ async function bv5V1GetMe (): Promise<AxiosResponse<UserGet>> {
 }
 
 async function bv5V1GetDnd5eWorldsMine (): Promise<AxiosResponse<Dnd5eWorldGet[]>> {
-  return await axios.get<Dnd5eWorldGet[]>('/api/v1/dnd5e/worlds/mine')
+  return await axios.get<Dnd5eWorldGet[]>('/api/v1/dnd5e/worlds/assigned')
 }
 
 export {
