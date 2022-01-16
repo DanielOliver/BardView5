@@ -157,6 +157,13 @@ components:
           minLength: 1
           x-oapi-codegen-extra-tags:
             binding: "required,min=1,max=512"
+        module:
+          type: string
+          example: A Hidden Module
+          maxLength: 512
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            binding: "required,min=1,max=512"
         active:
           type: boolean
           example: true
@@ -166,7 +173,7 @@ components:
           maxLength: 20
           minLength: 1
           x-oapi-codegen-extra-tags:
-            binding: "required,oneof=private public"
+            binding: "required,oneof=private anyuser public"
         userTags:
           $ref: '#/components/schemas/UserTags'
         systemTags:
@@ -215,7 +222,7 @@ components:
           maxLength: 20
           minLength: 1
           x-oapi-codegen-extra-tags:
-            binding: "required,oneof=private public"
+            binding: "required,oneof=private anyuser public"
         email:
           $ref: '#/components/schemas/Email'
         userTags:

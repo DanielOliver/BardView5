@@ -6,7 +6,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -283,7 +282,7 @@ func (q *Queries) Dnd5eSizeCategoryFindAll(ctx context.Context) ([]Dnd5eSizeCate
 }
 
 const dnd5eWorldFindById = `-- name: Dnd5eWorldFindById :many
-SELECT dnd5e_world_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, derived_from_world, name
+SELECT dnd5e_world_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, derived_from_world, name, module
 FROM "dnd5e_world" w
 WHERE w.dnd5e_world_id = $1
 `
@@ -308,6 +307,7 @@ func (q *Queries) Dnd5eWorldFindById(ctx context.Context, dnd5eWorldID int64) ([
 			pq.Array(&i.SystemTags),
 			&i.DerivedFromWorld,
 			&i.Name,
+			&i.Module,
 		); err != nil {
 			return nil, err
 		}
@@ -354,71 +354,6 @@ func (q *Queries) Dnd5eWorldInsert(ctx context.Context, arg Dnd5eWorldInsertPara
 		return 0, err
 	}
 	return result.RowsAffected()
-}
-
-const getAclBySubject = `-- name: GetAclBySubject :many
-SELECT ra.user_id
-     , rp.subject
-     , rp.conditions
-     , rp.action
-     , rp.subject_id
-     , r.name "role_name"
-     , r.role_id
-FROM "role_assignment" ra
-         INNER JOIN "role" r on ra.role_id = r.role_id AND r.is_active = true
-         INNER JOIN role_permission rp on r.role_id = rp.role_id AND rp.is_active = true
-WHERE rp.subject = $1
-  AND (rp.subject_id IS NULL
-    OR rp.subject_id = $2)
-  AND ra.user_id = $3
-  AND ra.is_active = true
-`
-
-type GetAclBySubjectParams struct {
-	Subject   string        `db:"subject"`
-	SubjectID sql.NullInt64 `db:"subject_id"`
-	UserID    int64         `db:"user_id"`
-}
-
-type GetAclBySubjectRow struct {
-	UserID     int64           `db:"user_id"`
-	Subject    string          `db:"subject"`
-	Conditions json.RawMessage `db:"conditions"`
-	Action     string          `db:"action"`
-	SubjectID  sql.NullInt64   `db:"subject_id"`
-	RoleName   string          `db:"role_name"`
-	RoleID     int64           `db:"role_id"`
-}
-
-func (q *Queries) GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams) ([]GetAclBySubjectRow, error) {
-	rows, err := q.query(ctx, q.getAclBySubjectStmt, getAclBySubject, arg.Subject, arg.SubjectID, arg.UserID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []GetAclBySubjectRow{}
-	for rows.Next() {
-		var i GetAclBySubjectRow
-		if err := rows.Scan(
-			&i.UserID,
-			&i.Subject,
-			&i.Conditions,
-			&i.Action,
-			&i.SubjectID,
-			&i.RoleName,
-			&i.RoleID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const userFindByEmail = `-- name: UserFindByEmail :many

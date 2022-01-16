@@ -16,7 +16,6 @@ type Querier interface {
 	Dnd5eSizeCategoryFindAll(ctx context.Context) ([]Dnd5eSizeCategory, error)
 	Dnd5eWorldFindById(ctx context.Context, dnd5eWorldID int64) ([]Dnd5eWorld, error)
 	Dnd5eWorldInsert(ctx context.Context, arg Dnd5eWorldInsertParams) (int64, error)
-	GetAclBySubject(ctx context.Context, arg GetAclBySubjectParams) ([]GetAclBySubjectRow, error)
 	UserFindByEmail(ctx context.Context, email string) ([]User, error)
 	UserFindById(ctx context.Context, userID int64) ([]User, error)
 	UserFindByUuid(ctx context.Context, uuid uuid.UUID) ([]User, error)

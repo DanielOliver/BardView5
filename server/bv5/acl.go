@@ -12,6 +12,7 @@ const (
 	Session   = "session"
 
 	CommonAccessPrivate = "private"
+	CommonAccessAnyUser = "anyuser"
 	CommonAccessPublic  = "public"
 )
 

@@ -12,6 +12,7 @@ create table "dnd5e_world"
     system_tags        text[]  not null,
     derived_from_world bigint  null,
     name               text    not null,
+    module             text    not null,
 
     CONSTRAINT fk_dnd5e_world_createdby
         FOREIGN KEY (created_by)
@@ -23,6 +24,29 @@ create table "dnd5e_world"
         FOREIGN KEY (derived_from_world)
             REFERENCES "dnd5e_world" (dnd5e_world_id)
 
+);
+
+create table "dnd5e_world_assignment"
+(
+    created_by     bigint null,
+    created_at     timestamp without time zone default (now() at time zone 'utc') not null,
+    version        bigint not null             default (0),
+    user_id        bigint not null,
+    dnd5e_world_id bigint not null,
+    role_action    text   not null,
+
+    CONSTRAINT dnd5e_world_assignment_pk
+        PRIMARY KEY (user_id, dnd5e_world_id),
+
+    CONSTRAINT fk_dnd5e_world_assignment_user
+        FOREIGN KEY (user_id)
+            REFERENCES "user" (user_id),
+    CONSTRAINT fk_dnd5e_world_assignment_world
+        FOREIGN KEY (dnd5e_world_id)
+            REFERENCES "dnd5e_world" (dnd5e_world_id),
+    CONSTRAINT fk_dnd5e_world_assignment_role_action
+        FOREIGN KEY (role_action)
+            REFERENCES "role_action" (name)
 );
 
 
@@ -67,11 +91,11 @@ create table "dnd5e_monster"
     first_world_id         bigint null,
     name                   text   not null,
     tags                   text[] not null,
-    monster_type     text   not null,
+    monster_type           text   not null,
     alignment              text   not null,
-    size_category    text   not null,
+    size_category          text   not null,
     milli_challenge_rating bigint not null,
-    languages        text[] not null,
+    languages              text[] not null,
     description            text   not null,
 
 

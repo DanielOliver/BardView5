@@ -4,7 +4,6 @@ package db
 
 import (
 	"database/sql"
-	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -77,63 +76,27 @@ type Dnd5eWorld struct {
 	SystemTags       []string      `db:"system_tags"`
 	DerivedFromWorld sql.NullInt64 `db:"derived_from_world"`
 	Name             string        `db:"name"`
+	Module           string        `db:"module"`
 }
 
-type Role struct {
-	RoleID        int64         `db:"role_id"`
-	CreatedBy     sql.NullInt64 `db:"created_by"`
-	CreatedAt     time.Time     `db:"created_at"`
-	EffectiveDate time.Time     `db:"effective_date"`
-	EndDate       sql.NullTime  `db:"end_date"`
-	IsActive      bool          `db:"is_active"`
-	Name          string        `db:"name"`
-	RoleTypeID    sql.NullInt64 `db:"role_type_id"`
-	Tags          []string      `db:"tags"`
+type Dnd5eWorldAssignment struct {
+	CreatedBy    sql.NullInt64 `db:"created_by"`
+	CreatedAt    time.Time     `db:"created_at"`
+	Version      int64         `db:"version"`
+	UserID       int64         `db:"user_id"`
+	Dnd5eWorldID int64         `db:"dnd5e_world_id"`
+	RoleAction   string        `db:"role_action"`
 }
 
 type RoleAction struct {
-	Name      string    `db:"name"`
-	CreatedAt time.Time `db:"created_at"`
-}
-
-type RoleAssignment struct {
-	RoleAssignmentID int64         `db:"role_assignment_id"`
-	CreatedBy        sql.NullInt64 `db:"created_by"`
-	CreatedAt        time.Time     `db:"created_at"`
-	EffectiveDate    time.Time     `db:"effective_date"`
-	EndDate          sql.NullTime  `db:"end_date"`
-	IsActive         bool          `db:"is_active"`
-	RoleID           int64         `db:"role_id"`
-	UserID           int64         `db:"user_id"`
-	Tags             []string      `db:"tags"`
-}
-
-type RolePermission struct {
-	RolePermissionID int64           `db:"role_permission_id"`
-	CreatedBy        sql.NullInt64   `db:"created_by"`
-	CreatedAt        time.Time       `db:"created_at"`
-	EffectiveDate    time.Time       `db:"effective_date"`
-	EndDate          sql.NullTime    `db:"end_date"`
-	IsActive         bool            `db:"is_active"`
-	RoleID           int64           `db:"role_id"`
-	Action           string          `db:"action"`
-	Subject          string          `db:"subject"`
-	SubjectID        sql.NullInt64   `db:"subject_id"`
-	Conditions       json.RawMessage `db:"conditions"`
-	Fields           []string        `db:"fields"`
+	Name        string    `db:"name"`
+	RoleSubject string    `db:"role_subject"`
+	CreatedAt   time.Time `db:"created_at"`
 }
 
 type RoleSubject struct {
 	Name      string    `db:"name"`
 	CreatedAt time.Time `db:"created_at"`
-}
-
-type RoleType struct {
-	RoleTypeID                 int64     `db:"role_type_id"`
-	CreatedAt                  time.Time `db:"created_at"`
-	Name                       string    `db:"name"`
-	MultipleAssignmentsAllowed bool      `db:"multiple_assignments_allowed"`
-	SystemManaged              bool      `db:"system_managed"`
 }
 
 type SchemaMigration struct {

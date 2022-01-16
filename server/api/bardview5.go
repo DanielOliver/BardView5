@@ -24,8 +24,9 @@ type Created string
 // Dnd5eWorld defines model for Dnd5eWorld.
 type Dnd5eWorld struct {
 	Active           *bool       `json:"active,omitempty"`
-	CommonAccess     *string     `binding:"required,oneof=private public" json:"commonAccess,omitempty"`
+	CommonAccess     *string     `binding:"required,oneof=private anyuser public" json:"commonAccess,omitempty"`
 	DerivedFromWorld *int64      `json:"derivedFromWorld,omitempty"`
+	Module           *string     `binding:"required,min=1,max=512" json:"module,omitempty"`
 	Name             *string     `binding:"required,min=1,max=512" json:"name,omitempty"`
 	SystemTags       *SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags,omitempty"`
 	UserTags         *UserTags   `binding:"required,max=64,dive,max=256" json:"userTags,omitempty"`
@@ -75,7 +76,7 @@ type SystemTags []string
 // User defines model for User.
 type User struct {
 	Active       bool       `json:"active"`
-	CommonAccess string     `binding:"required,oneof=private public" json:"commonAccess"`
+	CommonAccess string     `binding:"required,oneof=private anyuser public" json:"commonAccess"`
 	Email        Email      `binding:"required,email,min=1,max=512" json:"email"`
 	Name         string     `binding:"required,min=1,max=512" json:"name"`
 	SystemTags   SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags"`

@@ -43,9 +43,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.dnd5eWorldInsertStmt, err = db.PrepareContext(ctx, dnd5eWorldInsert); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eWorldInsert: %w", err)
 	}
-	if q.getAclBySubjectStmt, err = db.PrepareContext(ctx, getAclBySubject); err != nil {
-		return nil, fmt.Errorf("error preparing query GetAclBySubject: %w", err)
-	}
 	if q.userFindByEmailStmt, err = db.PrepareContext(ctx, userFindByEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query UserFindByEmail: %w", err)
 	}
@@ -99,11 +96,6 @@ func (q *Queries) Close() error {
 	if q.dnd5eWorldInsertStmt != nil {
 		if cerr := q.dnd5eWorldInsertStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing dnd5eWorldInsertStmt: %w", cerr)
-		}
-	}
-	if q.getAclBySubjectStmt != nil {
-		if cerr := q.getAclBySubjectStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getAclBySubjectStmt: %w", cerr)
 		}
 	}
 	if q.userFindByEmailStmt != nil {
@@ -177,7 +169,6 @@ type Queries struct {
 	dnd5eSizeCategoryFindAllStmt              *sql.Stmt
 	dnd5eWorldFindByIdStmt                    *sql.Stmt
 	dnd5eWorldInsertStmt                      *sql.Stmt
-	getAclBySubjectStmt                       *sql.Stmt
 	userFindByEmailStmt                       *sql.Stmt
 	userFindByIdStmt                          *sql.Stmt
 	userFindByUuidStmt                        *sql.Stmt
@@ -196,7 +187,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		dnd5eSizeCategoryFindAllStmt:              q.dnd5eSizeCategoryFindAllStmt,
 		dnd5eWorldFindByIdStmt:                    q.dnd5eWorldFindByIdStmt,
 		dnd5eWorldInsertStmt:                      q.dnd5eWorldInsertStmt,
-		getAclBySubjectStmt:                       q.getAclBySubjectStmt,
 		userFindByEmailStmt:                       q.userFindByEmailStmt,
 		userFindByIdStmt:                          q.userFindByIdStmt,
 		userFindByUuidStmt:                        q.userFindByUuidStmt,
