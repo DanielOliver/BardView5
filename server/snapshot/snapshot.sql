@@ -133,7 +133,8 @@ CREATE TABLE public.dnd5e_world (
     system_tags text[] NOT NULL,
     derived_from_world bigint,
     name text NOT NULL,
-    module text NOT NULL
+    module text,
+    description text NOT NULL
 );
 
 

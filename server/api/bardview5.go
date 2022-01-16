@@ -23,13 +23,14 @@ type Created string
 
 // Dnd5eWorld defines model for Dnd5eWorld.
 type Dnd5eWorld struct {
-	Active           *bool       `json:"active,omitempty"`
-	CommonAccess     *string     `binding:"required,oneof=private anyuser public" json:"commonAccess,omitempty"`
-	DerivedFromWorld *int64      `json:"derivedFromWorld,omitempty"`
-	Module           *string     `binding:"required,min=1,max=512" json:"module,omitempty"`
-	Name             *string     `binding:"required,min=1,max=512" json:"name,omitempty"`
-	SystemTags       *SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags,omitempty"`
-	UserTags         *UserTags   `binding:"required,max=64,dive,max=256" json:"userTags,omitempty"`
+	Active           bool       `json:"active"`
+	CommonAccess     string     `binding:"required,oneof=private anyuser public" json:"commonAccess"`
+	DerivedFromWorld *int64     `json:"derivedFromWorld,omitempty"`
+	Description      string     `binding:"required,min=1,max=1024" json:"description"`
+	Module           *string    `binding:"required,min=1,max=512" json:"module,omitempty"`
+	Name             string     `binding:"required,min=1,max=512" json:"name"`
+	SystemTags       SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags"`
+	UserTags         UserTags   `binding:"required,max=64,dive,max=256" json:"userTags"`
 }
 
 // Dnd5eWorldGet defines model for Dnd5eWorldGet.
@@ -106,6 +107,9 @@ type UserId int64
 
 // UserUUID defines model for UserUUID.
 type UserUUID string
+
+// Dnd5eWorldArrayGetOk defines model for Dnd5eWorldArrayGetOk.
+type Dnd5eWorldArrayGetOk []Dnd5eWorld
 
 // Dnd5eWorldGetOk defines model for Dnd5eWorldGetOk.
 type Dnd5eWorldGetOk Dnd5eWorld

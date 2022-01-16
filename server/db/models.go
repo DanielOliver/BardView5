@@ -66,17 +66,18 @@ type Dnd5eSizeCategory struct {
 }
 
 type Dnd5eWorld struct {
-	Dnd5eWorldID     int64         `db:"dnd5e_world_id"`
-	CreatedBy        sql.NullInt64 `db:"created_by"`
-	CreatedAt        time.Time     `db:"created_at"`
-	Version          int64         `db:"version"`
-	IsActive         bool          `db:"is_active"`
-	CommonAccess     string        `db:"common_access"`
-	UserTags         []string      `db:"user_tags"`
-	SystemTags       []string      `db:"system_tags"`
-	DerivedFromWorld sql.NullInt64 `db:"derived_from_world"`
-	Name             string        `db:"name"`
-	Module           string        `db:"module"`
+	Dnd5eWorldID     int64          `db:"dnd5e_world_id"`
+	CreatedBy        sql.NullInt64  `db:"created_by"`
+	CreatedAt        time.Time      `db:"created_at"`
+	Version          int64          `db:"version"`
+	IsActive         bool           `db:"is_active"`
+	CommonAccess     string         `db:"common_access"`
+	UserTags         []string       `db:"user_tags"`
+	SystemTags       []string       `db:"system_tags"`
+	DerivedFromWorld sql.NullInt64  `db:"derived_from_world"`
+	Name             string         `db:"name"`
+	Module           sql.NullString `db:"module"`
+	Description      string         `db:"description"`
 }
 
 type Dnd5eWorldAssignment struct {

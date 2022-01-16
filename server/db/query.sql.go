@@ -281,8 +281,96 @@ func (q *Queries) Dnd5eSizeCategoryFindAll(ctx context.Context) ([]Dnd5eSizeCate
 	return items, nil
 }
 
+const dnd5eWorldFindAssignment = `-- name: Dnd5eWorldFindAssignment :many
+SELECT wa.created_by, wa.created_at, wa.version, wa.user_id, wa.dnd5e_world_id, wa.role_action
+FROM "dnd5e_world_assignment" wa
+WHERE wa.user_id = $1
+    AND wa.dnd5e_world_id = $2
+ORDER BY w.dnd5e_world_id desc
+`
+
+type Dnd5eWorldFindAssignmentParams struct {
+	UserID       int64 `db:"user_id"`
+	Dnd5eWorldID int64 `db:"dnd5e_world_id"`
+}
+
+func (q *Queries) Dnd5eWorldFindAssignment(ctx context.Context, arg Dnd5eWorldFindAssignmentParams) ([]Dnd5eWorldAssignment, error) {
+	rows, err := q.query(ctx, q.dnd5eWorldFindAssignmentStmt, dnd5eWorldFindAssignment, arg.UserID, arg.Dnd5eWorldID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Dnd5eWorldAssignment{}
+	for rows.Next() {
+		var i Dnd5eWorldAssignment
+		if err := rows.Scan(
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.UserID,
+			&i.Dnd5eWorldID,
+			&i.RoleAction,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const dnd5eWorldFindByAssignment = `-- name: Dnd5eWorldFindByAssignment :many
+SELECT DISTINCT w.dnd5e_world_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.derived_from_world, w.name, w.module, w.description
+FROM "dnd5e_world" w
+INNER JOIN "dnd5e_world_assignment" wa ON
+    w.dnd5e_world_id = wa.dnd5e_world_id
+WHERE wa.user_id = $1
+ORDER BY w.dnd5e_world_id desc
+`
+
+func (q *Queries) Dnd5eWorldFindByAssignment(ctx context.Context, userID int64) ([]Dnd5eWorld, error) {
+	rows, err := q.query(ctx, q.dnd5eWorldFindByAssignmentStmt, dnd5eWorldFindByAssignment, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Dnd5eWorld{}
+	for rows.Next() {
+		var i Dnd5eWorld
+		if err := rows.Scan(
+			&i.Dnd5eWorldID,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.IsActive,
+			&i.CommonAccess,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
+			&i.DerivedFromWorld,
+			&i.Name,
+			&i.Module,
+			&i.Description,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const dnd5eWorldFindById = `-- name: Dnd5eWorldFindById :many
-SELECT dnd5e_world_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, derived_from_world, name, module
+SELECT dnd5e_world_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, derived_from_world, name, module, description
 FROM "dnd5e_world" w
 WHERE w.dnd5e_world_id = $1
 `
@@ -308,6 +396,7 @@ func (q *Queries) Dnd5eWorldFindById(ctx context.Context, dnd5eWorldID int64) ([
 			&i.DerivedFromWorld,
 			&i.Name,
 			&i.Module,
+			&i.Description,
 		); err != nil {
 			return nil, err
 		}

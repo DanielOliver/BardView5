@@ -29,7 +29,7 @@ export function Layout ({ logout }: {
         {state.isAuthenticated
           ? (
                 <Nav>
-                  <NavDropdown title={data?.name}>
+                  <NavDropdown title={data?.name ?? 'me'}>
                     <NavDropdown.Item>Profile</NavDropdown.Item>
                     <NavDropdown.Divider />
                     <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>

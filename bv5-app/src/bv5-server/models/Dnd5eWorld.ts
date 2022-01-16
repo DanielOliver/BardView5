@@ -2,16 +2,16 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Email } from './Email';
 import type { SystemTags } from './SystemTags';
 import type { UserTags } from './UserTags';
 
-export type User = {
-    uuid?: string;
+export type Dnd5eWorld = {
     name: string;
+    description: string;
+    module?: string;
     active: boolean;
     commonAccess: string;
-    email: Email;
     userTags: UserTags;
     systemTags: SystemTags;
+    derivedFromWorld?: number;
 }

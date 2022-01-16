@@ -73,6 +73,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Dnd5eWorld'
+    Dnd5eWorldArrayGetOk:
+      description: Dnd5eWorldGet
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Dnd5eWorld'
   schemas:
     PatchDocument:
       description: A JSONPatch document as defined by RFC 6902
@@ -157,6 +165,13 @@ components:
           minLength: 1
           x-oapi-codegen-extra-tags:
             binding: "required,min=1,max=512"
+        description:
+          type: string
+          example: A whole new world!
+          maxLength: 1024
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            binding: "required,min=1,max=1024"
         module:
           type: string
           example: A Hidden Module
@@ -181,6 +196,13 @@ components:
         derivedFromWorld:
           type: integer
           format: int64
+      required:
+        - systemTags
+        - userTags
+        - name
+        - description
+        - commonAccess
+        - active
     Dnd5eWorldGet:
       allOf:
         - $ref: '#/components/schemas/Dnd5eWorld'
@@ -254,6 +276,14 @@ components:
             - created
             - version
 paths:
+  /api/v1/dnd5e/worlds/mine:
+    get:
+      summary: Returns all Dnd5e Worlds that I have explicit access to.
+      tags:
+        - Dnd5eWorld
+      responses:
+        '200':
+          $ref: '#/components/responses/Dnd5eWorldArrayGetOk'
   /api/v1/dnd5e/worlds/{dnd5eWorldId}:
     get:
       summary: Returns Dnd5e World

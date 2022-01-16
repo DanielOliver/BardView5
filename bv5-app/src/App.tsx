@@ -50,12 +50,9 @@ function App () {
                     dispatch
                   }}
           >
-           <Layout logout={submitLogout}/>
+            <Layout logout={submitLogout}/>
             <div className="App">
               <Outlet/>
-              {state.isAuthenticated && <p>
-                WASSSSSSUUUPPP!!!
-              </p>}
             </div>
           </AuthContext.Provider>
   )

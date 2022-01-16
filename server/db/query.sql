@@ -39,6 +39,21 @@ SELECT *
 FROM "dnd5e_world" w
 WHERE w.dnd5e_world_id = @dnd5e_world_id;
 
+-- name: Dnd5eWorldFindByAssignment :many
+SELECT DISTINCT w.*
+FROM "dnd5e_world" w
+INNER JOIN "dnd5e_world_assignment" wa ON
+    w.dnd5e_world_id = wa.dnd5e_world_id
+WHERE wa.user_id = @user_id
+ORDER BY w.dnd5e_world_id desc;
+
+-- name: Dnd5eWorldFindAssignment :many
+SELECT wa.*
+FROM "dnd5e_world_assignment" wa
+WHERE wa.user_id = @user_id
+    AND wa.dnd5e_world_id = @dnd5e_world_id
+ORDER BY w.dnd5e_world_id desc;
+
 -- name: Dnd5eMonsterFindById :many
 SELECT *
 FROM "dnd5e_monster" m

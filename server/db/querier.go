@@ -14,6 +14,8 @@ type Querier interface {
 	Dnd5eLanguageFindAll(ctx context.Context) ([]Dnd5eLanguage, error)
 	Dnd5eMonsterFindById(ctx context.Context, dnd5eMonsterID int64) ([]Dnd5eMonster, error)
 	Dnd5eSizeCategoryFindAll(ctx context.Context) ([]Dnd5eSizeCategory, error)
+	Dnd5eWorldFindAssignment(ctx context.Context, arg Dnd5eWorldFindAssignmentParams) ([]Dnd5eWorldAssignment, error)
+	Dnd5eWorldFindByAssignment(ctx context.Context, userID int64) ([]Dnd5eWorld, error)
 	Dnd5eWorldFindById(ctx context.Context, dnd5eWorldID int64) ([]Dnd5eWorld, error)
 	Dnd5eWorldInsert(ctx context.Context, arg Dnd5eWorldInsertParams) (int64, error)
 	UserFindByEmail(ctx context.Context, email string) ([]User, error)

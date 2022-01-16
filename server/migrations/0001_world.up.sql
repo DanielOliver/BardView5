@@ -12,7 +12,8 @@ create table "dnd5e_world"
     system_tags        text[]  not null,
     derived_from_world bigint  null,
     name               text    not null,
-    module             text    not null,
+    module             text    null,
+    description        text    not null,
 
     CONSTRAINT fk_dnd5e_world_createdby
         FOREIGN KEY (created_by)

@@ -9,6 +9,7 @@ import RegisterRoute from './routes/register.route'
 // import 'semantic-ui-css/semantic.min.css'
 import './App.scss'
 import LoginRoute from './routes/login.route'
+import HomeRoute from './routes/home.route'
 
 const queryClient = new QueryClient()
 
@@ -18,6 +19,7 @@ ReactDOM.render(
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<App/>}>
+                  <Route path="/" element={<HomeRoute/>}/>
                   <Route path="/register" element={<RegisterRoute/>}/>
                   <Route path="/login" element={<LoginRoute/>}/>
                 </Route>

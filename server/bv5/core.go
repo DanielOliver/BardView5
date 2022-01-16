@@ -113,3 +113,7 @@ func (b *BardView5) WrapRequest(pipe func(request *BardView5Http)) func(*gin.Con
 		})
 	}
 }
+
+func (b *BardView5Http) Querier() db.Querier {
+	return b.BardView5.querier
+}

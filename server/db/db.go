@@ -37,6 +37,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.dnd5eSizeCategoryFindAllStmt, err = db.PrepareContext(ctx, dnd5eSizeCategoryFindAll); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eSizeCategoryFindAll: %w", err)
 	}
+	if q.dnd5eWorldFindAssignmentStmt, err = db.PrepareContext(ctx, dnd5eWorldFindAssignment); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eWorldFindAssignment: %w", err)
+	}
+	if q.dnd5eWorldFindByAssignmentStmt, err = db.PrepareContext(ctx, dnd5eWorldFindByAssignment); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eWorldFindByAssignment: %w", err)
+	}
 	if q.dnd5eWorldFindByIdStmt, err = db.PrepareContext(ctx, dnd5eWorldFindById); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eWorldFindById: %w", err)
 	}
@@ -86,6 +92,16 @@ func (q *Queries) Close() error {
 	if q.dnd5eSizeCategoryFindAllStmt != nil {
 		if cerr := q.dnd5eSizeCategoryFindAllStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing dnd5eSizeCategoryFindAllStmt: %w", cerr)
+		}
+	}
+	if q.dnd5eWorldFindAssignmentStmt != nil {
+		if cerr := q.dnd5eWorldFindAssignmentStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eWorldFindAssignmentStmt: %w", cerr)
+		}
+	}
+	if q.dnd5eWorldFindByAssignmentStmt != nil {
+		if cerr := q.dnd5eWorldFindByAssignmentStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eWorldFindByAssignmentStmt: %w", cerr)
 		}
 	}
 	if q.dnd5eWorldFindByIdStmt != nil {
@@ -167,6 +183,8 @@ type Queries struct {
 	dnd5eLanguageFindAllStmt                  *sql.Stmt
 	dnd5eMonsterFindByIdStmt                  *sql.Stmt
 	dnd5eSizeCategoryFindAllStmt              *sql.Stmt
+	dnd5eWorldFindAssignmentStmt              *sql.Stmt
+	dnd5eWorldFindByAssignmentStmt            *sql.Stmt
 	dnd5eWorldFindByIdStmt                    *sql.Stmt
 	dnd5eWorldInsertStmt                      *sql.Stmt
 	userFindByEmailStmt                       *sql.Stmt
@@ -185,6 +203,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		dnd5eLanguageFindAllStmt:                  q.dnd5eLanguageFindAllStmt,
 		dnd5eMonsterFindByIdStmt:                  q.dnd5eMonsterFindByIdStmt,
 		dnd5eSizeCategoryFindAllStmt:              q.dnd5eSizeCategoryFindAllStmt,
+		dnd5eWorldFindAssignmentStmt:              q.dnd5eWorldFindAssignmentStmt,
+		dnd5eWorldFindByAssignmentStmt:            q.dnd5eWorldFindByAssignmentStmt,
 		dnd5eWorldFindByIdStmt:                    q.dnd5eWorldFindByIdStmt,
 		dnd5eWorldInsertStmt:                      q.dnd5eWorldInsertStmt,
 		userFindByEmailStmt:                       q.userFindByEmailStmt,
