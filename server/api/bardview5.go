@@ -21,6 +21,27 @@ const (
 // The created time of this record
 type Created string
 
+// Dnd5eWorld defines model for Dnd5eWorld.
+type Dnd5eWorld struct {
+	Active           *bool       `json:"active,omitempty"`
+	CommonAccess     *string     `binding:"required,oneof=private public" json:"commonAccess,omitempty"`
+	DerivedFromWorld *int64      `json:"derivedFromWorld,omitempty"`
+	Name             *string     `binding:"required,min=1,max=512" json:"name,omitempty"`
+	SystemTags       *SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags,omitempty"`
+	UserTags         *UserTags   `binding:"required,max=64,dive,max=256" json:"userTags,omitempty"`
+}
+
+// Dnd5eWorldGet defines model for Dnd5eWorldGet.
+type Dnd5eWorldGet struct {
+	// Embedded struct due to allOf(#/components/schemas/Dnd5eWorld)
+	Dnd5eWorld `yaml:",inline"`
+	// Embedded fields due to inline allOf schema
+	// The created time of this record
+	Created      Created `json:"created"`
+	Dnd5eWorldId int64   `json:"dnd5eWorldId"`
+	Version      int64   `json:"version"`
+}
+
 // Email defines model for Email.
 type Email string
 
@@ -76,11 +97,17 @@ type UserGet struct {
 // UserTags defines model for UserTags.
 type UserTags []string
 
+// Dnd5eWorldId defines model for Dnd5eWorldId.
+type Dnd5eWorldId int64
+
 // UserId defines model for UserId.
 type UserId int64
 
 // UserUUID defines model for UserUUID.
 type UserUUID string
+
+// Dnd5eWorldGetOk defines model for Dnd5eWorldGetOk.
+type Dnd5eWorldGetOk Dnd5eWorld
 
 // UserGetOk defines model for UserGetOk.
 type UserGetOk UserGet

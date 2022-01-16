@@ -21,6 +21,12 @@ components:
       schema:
         type: string
         format: uuid
+    Dnd5eWorldId:
+      in: path
+      name: dnd5eWorldId
+      schema:
+        type: integer
+        format: int64
   requestBodies:
     Patch:
       description: JsonPatch
@@ -37,6 +43,7 @@ components:
           schema:
             $ref: '#/components/schemas/UserGet'
     UserPostOk:
+      description: UserPost
       content:
         application/json:
           schema:
@@ -60,6 +67,12 @@ components:
           schema:
             type: string
           description: Known Location
+    Dnd5eWorldGetOk:
+      description: Dnd5eWorldGet
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Dnd5eWorld'
   schemas:
     PatchDocument:
       description: A JSONPatch document as defined by RFC 6902
@@ -134,6 +147,50 @@ components:
         type: string
         maxLength: 256
         example: LookingForPlayers
+    Dnd5eWorld:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Forgiven Songs
+          maxLength: 512
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            binding: "required,min=1,max=512"
+        active:
+          type: boolean
+          example: true
+        commonAccess:
+          type: string
+          example: private
+          maxLength: 20
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            binding: "required,oneof=private public"
+        userTags:
+          $ref: '#/components/schemas/UserTags'
+        systemTags:
+          $ref: '#/components/schemas/SystemTags'
+        derivedFromWorld:
+          type: integer
+          format: int64
+    Dnd5eWorldGet:
+      allOf:
+        - $ref: '#/components/schemas/Dnd5eWorld'
+        - type: object
+          properties:
+            dnd5eWorldId:
+              type: integer
+              format: int64
+            created:
+              $ref: '#/components/schemas/Created'
+            version:
+              type: integer
+              format: int64
+          required:
+            - dnd5eWorldId
+            - created
+            - version
     User:
       type: object
       properties:
@@ -190,11 +247,21 @@ components:
             - created
             - version
 paths:
+  /api/v1/dnd5e/worlds/{dnd5eWorldId}:
+    get:
+      summary: Returns Dnd5e World
+      tags:
+        - Dnd5eWorld
+      parameters:
+        - $ref: '#/components/parameters/Dnd5eWorldId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Dnd5eWorldGetOk'
   /api/v1/users/me:
     get:
       summary: Returns current user
       tags:
-        - user
+        - User
       responses:
         '200':
           $ref: '#/components/responses/UserGetOk'
@@ -202,7 +269,7 @@ paths:
     get:
       summary: Returns a user by UUID.
       tags:
-        - user
+        - User
       parameters:
         - $ref: '#/components/parameters/UserUUID'
       responses:
@@ -212,7 +279,7 @@ paths:
     get:
       summary: Returns a user by ID.
       tags:
-        - user
+        - User
       parameters:
         - $ref: '#/components/parameters/UserId'
       responses:
@@ -221,7 +288,7 @@ paths:
     patch:
       summary: Patches a user
       tags:
-        - user
+        - User
       parameters:
         - $ref: '#/components/parameters/UserId'
       requestBody:
@@ -234,7 +301,7 @@ paths:
     post:
       summary: Creates a new user or updates a user.
       tags:
-        - user
+        - User
       requestBody:
         required: true
         content:
