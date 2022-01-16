@@ -6,7 +6,8 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import RegisterRoute from './routes/register.route'
 
-import 'semantic-ui-css/semantic.min.css'
+// import 'semantic-ui-css/semantic.min.css'
+import './App.scss'
 import LoginRoute from './routes/login.route'
 
 const queryClient = new QueryClient()

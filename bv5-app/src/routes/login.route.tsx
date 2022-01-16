@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react'
 import { AuthContext } from '../context/Auth.context'
 import { RegisterForm } from '../components/RegisterForm'
 import { useNavigate } from 'react-router-dom'
+import { Container } from 'react-bootstrap'
 
 function LoginRoute () {
   const navigate = useNavigate()
@@ -85,7 +86,9 @@ function LoginRoute () {
           {JSON.stringify(loginData, null, 2)}
           </pre>
       }
-      return <RegisterForm formType="Login" ui={loginData.ui} onSubmit={onSubmit}/>
+      return <Container>
+        <RegisterForm formType="Login" ui={loginData.ui} onSubmit={onSubmit}/>
+      </Container>
     default:
       return <pre>
     {JSON.stringify(loginData, null, 2)}
