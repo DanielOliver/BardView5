@@ -84,8 +84,8 @@ func DumpSchema() error {
 	return sh.RunV("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/src", strings.ReplaceAll(pwd, "\\", "/")), "-w", "/src", "kjconroy/sqlc", "generate")
 }
 
-func DockerComposeDown() {
-	dockerCompose("down")
+func DockerComposeDown() error {
+	return dockerCompose("down")
 }
 
 func DockerComposeUp() error {
@@ -126,6 +126,21 @@ func Test() error {
 		return err
 	}
 
+	return nil
+}
+
+func Up() error {
+	if err := DockerComposeUp(); err != nil {
+		return err
+	}
+	mg.Deps(InternalMigrate)
+	return nil
+}
+
+func Down() error {
+	if err := DockerComposeDown(); err != nil {
+		return err
+	}
 	return nil
 }
 
