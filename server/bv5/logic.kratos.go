@@ -77,7 +77,7 @@ func getUserByUuid(b *BardView5Http, userUuid uuid.UUID) {
 	}
 
 	user := users[0]
-	if user.CommonAccess == CommonAccessPublic || b.Session.sessionId == user.UserID {
+	if user.CommonAccess == CommonAccessPublic || b.Session.SessionId == user.UserID {
 		b.Context.Header("ETag", strconv.FormatInt(user.Version, 10))
 		b.Context.Header("Location", fmt.Sprintf("/v1/users/%d/", user.UserID))
 		b.Context.JSON(http.StatusOK, api.UserGet{

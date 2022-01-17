@@ -18,22 +18,18 @@ const (
 	RoleActionOwner = "owner"
 )
 
-type sessionContext struct {
+type SessionContext struct {
 	AvailableFields map[string]string
-	sessionId       int64
+	SessionId       int64
 	Anonymous       bool
 }
 
-func (s *sessionContext) SessionId() int64 {
-	return s.sessionId
+func SessionCriteria(context context.Context) *SessionContext {
+	return context.Value(Session).(*SessionContext)
 }
 
-func SessionCriteria(context context.Context) *sessionContext {
-	return context.Value(Session).(*sessionContext)
-}
-
-func MakeAnonymousSession() *sessionContext {
-	return &sessionContext{
+func MakeAnonymousSession() *SessionContext {
+	return &SessionContext{
 		map[string]string{
 			SessionId: "",
 		},
@@ -42,8 +38,8 @@ func MakeAnonymousSession() *sessionContext {
 	}
 }
 
-func MakeSession(sessionId int64) *sessionContext {
-	return &sessionContext{
+func MakeSession(sessionId int64) *SessionContext {
+	return &SessionContext{
 		map[string]string{
 			SessionId: strconv.FormatInt(sessionId, 10),
 		},

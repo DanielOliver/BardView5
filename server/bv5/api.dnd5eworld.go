@@ -82,7 +82,7 @@ func GetDnd5eWorldById(b *BardView5Http) {
 	}
 
 	worldAssignments, err := b.Querier().Dnd5eWorldFindAssignment(b.Context, db.Dnd5eWorldFindAssignmentParams{
-		UserID:       b.Session.sessionId,
+		UserID:       b.Session.SessionId,
 		Dnd5eWorldID: dnd5eWorld.Dnd5eWorldID,
 	})
 	if len(worldAssignments) == 0 || err != nil {
@@ -94,10 +94,10 @@ func GetDnd5eWorldById(b *BardView5Http) {
 }
 
 func GetMyDnd5eWorlds(b *BardView5Http) {
-	dnd5eWorlds, err := b.Querier().Dnd5eWorldFindByAssignment(b.Context, b.Session.sessionId)
+	dnd5eWorlds, err := b.Querier().Dnd5eWorldFindByAssignment(b.Context, b.Session.SessionId)
 
 	if err != nil {
-		b.Logger.Err(err).Int64("id", b.Session.sessionId).Msg("Failed to get mine dnd5eworld")
+		b.Logger.Err(err).Int64("id", b.Session.SessionId).Msg("Failed to get mine dnd5eworld")
 		b.Context.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -137,7 +137,7 @@ func Dnd5eWorldCreate(b *BardView5Http, body *api.PostApiV1Dnd5eWorldsJSONBody) 
 		Dnd5eWorldID:     newDnd5eWorldId,
 		DerivedFromWorld: MaybeInt64(body.DerivedFromWorld),
 		CommonAccess:     body.CommonAccess,
-		CreatedBy:        MaybeInt64(&b.Session.sessionId),
+		CreatedBy:        MaybeInt64(&b.Session.SessionId),
 		IsActive:         body.Active,
 		SystemTags:       body.SystemTags,
 		UserTags:         body.UserTags,
@@ -154,8 +154,8 @@ func Dnd5eWorldCreate(b *BardView5Http, body *api.PostApiV1Dnd5eWorldsJSONBody) 
 	}
 
 	_, err = b.Querier().Dnd5eWorldUpsertAssignment(b.Context, db.Dnd5eWorldUpsertAssignmentParams{
-		CreatedBy:    MaybeInt64(&b.Session.sessionId),
-		UserID:       b.Session.sessionId,
+		CreatedBy:    MaybeInt64(&b.Session.SessionId),
+		UserID:       b.Session.SessionId,
 		Dnd5eWorldID: newDnd5eWorldId,
 		RoleAction:   RoleActionOwner,
 	})

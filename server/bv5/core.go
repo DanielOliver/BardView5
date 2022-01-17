@@ -41,7 +41,7 @@ type BardView5 struct {
 type BardView5Http struct {
 	BardView5 *BardView5
 	Logger    zerolog.Logger
-	Session   sessionContext
+	Session   SessionContext
 	Context   *gin.Context
 }
 

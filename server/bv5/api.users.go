@@ -71,7 +71,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 			SystemTags:   body.SystemTags,
 			CommonAccess: body.CommonAccess,
 			CreatedBy: sql.NullInt64{
-				session.SessionId(),
+				session.SessionId,
 				true,
 			},
 			IsActive: body.Active,
