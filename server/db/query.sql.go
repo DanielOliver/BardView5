@@ -286,7 +286,6 @@ SELECT wa.created_by, wa.created_at, wa.version, wa.user_id, wa.dnd5e_world_id, 
 FROM "dnd5e_world_assignment" wa
 WHERE wa.user_id = $1
   AND wa.dnd5e_world_id = $2
-ORDER BY w.dnd5e_world_id desc
 `
 
 type Dnd5eWorldFindAssignmentParams struct {

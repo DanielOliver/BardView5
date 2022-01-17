@@ -20,6 +20,18 @@ func TestDnd5eWorldCreate(t *testing.T) {
 		SystemTags:       []string{},
 		UserTags:         []string{},
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.NotZero(t, newDnd5eWorldId)
+
+	_, err = Dnd5eWorldById(bv5Http, -100)
+	assert.Error(t, err)
+	assert.IsType(t, &CrudError{}, err)
+
+	getThatWorld, err := Dnd5eWorldById(bv5Http, newDnd5eWorldId)
+	assert.NoError(t, err)
+	assert.Equal(t, "Named", getThatWorld.Name)
+	assert.Equal(t, "Describe", getThatWorld.Description)
+
+	err = Dnd5eWorldHasAccess(bv5Http, &getThatWorld)
+	assert.NoError(t, err)
 }

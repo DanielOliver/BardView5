@@ -62,8 +62,7 @@ ORDER BY w.dnd5e_world_id desc;
 SELECT wa.*
 FROM "dnd5e_world_assignment" wa
 WHERE wa.user_id = @user_id
-  AND wa.dnd5e_world_id = @dnd5e_world_id
-ORDER BY w.dnd5e_world_id desc;
+  AND wa.dnd5e_world_id = @dnd5e_world_id;
 
 -- name: Dnd5eMonsterFindById :many
 SELECT *

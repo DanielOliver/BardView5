@@ -130,6 +130,8 @@ func Dnd5eWorldHasAccess(b *BardView5Http, dnd5eWorld *db.Dnd5eWorld) error {
 			Dnd5eWorldID: dnd5eWorld.Dnd5eWorldID,
 		})
 		if err != nil {
+			fmt.Println(err.Error())
+			b.Logger.Err(err).Msg(ObjDnd5eWorldAssignment)
 			return ErrFailedRead(ObjDnd5eWorldAssignment, dnd5eWorld.Dnd5eWorldID, true)
 		}
 		if len(worldAssignments) == 0 {
