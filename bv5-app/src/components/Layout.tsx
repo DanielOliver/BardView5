@@ -18,7 +18,7 @@ export function Layout ({ logout }: {
   })
 
   return <Navbar bg="light" expand="md">
-    <Container>
+    <Container fluid="lg">
       <Navbar.Brand href="/">BardView5</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav"/>
       <Navbar.Collapse id="basic-navbar-nav">

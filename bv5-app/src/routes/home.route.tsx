@@ -13,7 +13,7 @@ function HomeRoute () {
     return (await bv5V1GetDnd5eWorldsMine()).data
   })
 
-  return <Container>
+  return <Container fluid="lg">
     <Row><Col><h1 className="m-1">D&D 5e</h1></Col></Row>
     <Row>
       <Col md={6}>
