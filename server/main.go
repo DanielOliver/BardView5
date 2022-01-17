@@ -48,12 +48,11 @@ var migrateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		connectionString := viper.GetString("connection")
 		if connectionString == "" {
-			log.Fatal().Msg ("Expected a connection string")
+			log.Fatal().Msg("Expected a connection string")
 		}
 		db.Migrate(connectionString)
 	},
 }
-
 
 func configure() {
 	viper.SetConfigName("config") // name of config file (without extension)

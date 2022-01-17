@@ -116,6 +116,22 @@ func PostDnd5eWorldsCreate(b *BardView5Http) {
 		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	newDnd5eWorldId, err := Dnd5eWorldCreate(b, &body)
+	if err != nil {
+		WriteErrorToContext(b, err)
+		return
+	}
+
+	b.Context.Header("ETag", "0")
+	b.Context.Header("Location", fmt.Sprintf("/v1/dnd5e/world/%d/", newDnd5eWorldId))
+	b.Context.JSON(http.StatusCreated, api.UserPostOk{
+		UserId:  newDnd5eWorldId,
+		Version: 0,
+	})
+}
+
+func Dnd5eWorldCreate(b *BardView5Http, body *api.PostApiV1Dnd5eWorldsJSONBody) (int64, error) {
 	newDnd5eWorldId := b.GenDnd5eWorld().Generate().Int64()
 	changedRows, err := b.Querier().Dnd5eWorldInsert(b.Context, db.Dnd5eWorldInsertParams{
 		Dnd5eWorldID:     newDnd5eWorldId,
@@ -130,13 +146,11 @@ func PostDnd5eWorldsCreate(b *BardView5Http) {
 		Description:      body.Description,
 	})
 	if err != nil {
-		b.Logger.Err(err).Msg("Failed to create new dnd5eworld")
-		b.Context.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to create new dnd5eworld")
-		return
+		b.Logger.Err(err).Msg(ObjDnd5eWorld)
+		return 0, ErrFailedCreate(ObjDnd5eWorld, newDnd5eWorldId, true)
 	}
 	if changedRows == 0 {
-		b.Context.JSON(http.StatusBadRequest, "Failed to create new dnd5eworld")
-		return
+		return 0, ErrUnknownStatusCreate(ObjDnd5eWorld, newDnd5eWorldId, true)
 	}
 
 	_, err = b.Querier().Dnd5eWorldUpsertAssignment(b.Context, db.Dnd5eWorldUpsertAssignmentParams{
@@ -146,15 +160,9 @@ func PostDnd5eWorldsCreate(b *BardView5Http) {
 		RoleAction:   RoleActionOwner,
 	})
 	if err != nil {
-		b.Logger.Err(err).Msg("Failed to assign new dnd5eworld")
-		b.Context.AbortWithStatusJSON(http.StatusInternalServerError, "Troubled creating new dnd5eworld")
-		return
+		b.Logger.Err(err).Msg(ObjDnd5eWorldAssignment)
+		return 0, ErrFailedCreate(ObjDnd5eWorldAssignment, newDnd5eWorldId, true)
 	}
 
-	b.Context.Header("ETag", "0")
-	b.Context.Header("Location", fmt.Sprintf("/v1/dnd5e/world/%d/", newDnd5eWorldId))
-	b.Context.JSON(http.StatusCreated, api.UserPostOk{
-		UserId:  newDnd5eWorldId,
-		Version: 0,
-	})
+	return newDnd5eWorldId, nil
 }

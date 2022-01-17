@@ -21,8 +21,8 @@ type Generators struct {
 	dnd5eWorldNode *snowflake.Node
 }
 
-type bardView5Configuration struct {
-	kratosBaseUrl string
+type BardView5Configuration struct {
+	KratosBaseUrl string
 }
 
 type bardView5Sessions struct {
@@ -34,7 +34,7 @@ type BardView5 struct {
 	querier    db.Querier
 	generators *Generators
 	dbMetrics  *db.WithDbMetrics
-	conf       *bardView5Configuration
+	Conf       *BardView5Configuration
 	sessions   *bardView5Sessions
 }
 
@@ -45,12 +45,13 @@ type BardView5Http struct {
 	Context   *gin.Context
 }
 
-func NewBardView5() (bv5 *BardView5, err error) {
-	connectionString := viper.GetString("CONNECTION")
-	if connectionString == "" {
-		return nil, fmt.Errorf("expected bardview5 sql connection string")
-	}
-	pgConnection, err := sql.Open("postgres", connectionString)
+type BardView5InitConfig struct {
+	ConnectionString string
+	KratosBaseUrl    string
+}
+
+func ConfigNewBardView5(config *BardView5InitConfig) (bv5 *BardView5, err error) {
+	pgConnection, err := sql.Open("postgres", config.ConnectionString)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to open bardview5 connection string")
 	}
@@ -69,13 +70,24 @@ func NewBardView5() (bv5 *BardView5, err error) {
 			dnd5eWorldNode: dnd5eWorldNode,
 		},
 		dbMetrics: metricsPg,
-		conf: &bardView5Configuration{
-			kratosBaseUrl: "http://proxy.local",
+		Conf: &BardView5Configuration{
+			KratosBaseUrl: config.KratosBaseUrl,
 		},
 		sessions: &bardView5Sessions{
 			sessionIdCache: sessionIdCache,
 		},
 	}, nil
+}
+
+func NewBardView5() (bv5 *BardView5, err error) {
+	connectionString := viper.GetString("CONNECTION")
+	if connectionString == "" {
+		return nil, fmt.Errorf("expected bardview5 sql connection string")
+	}
+	return ConfigNewBardView5(&BardView5InitConfig{
+		ConnectionString: connectionString,
+		KratosBaseUrl:    "http://proxy.local",
+	})
 }
 
 func (b *BardView5) Metrics() []prometheus.Collector {

@@ -2,35 +2,16 @@ package bv5
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	kratos "github.com/ory/kratos-client-go"
-	"io"
 	"net/http"
 	"server/api"
 	"server/bardlog"
 	"server/db"
 	"strconv"
 	"time"
-)
-
-type SessionError struct {
-	msg string
-}
-
-func (s *SessionError) Error() string {
-	return s.msg
-}
-
-var (
-	session401 = &SessionError{
-		msg: "401",
-	}
-	sessionInactiveUser = &SessionError{
-		msg: "User not active",
-	}
 )
 
 func getUserByUuid(b *BardView5Http, userUuid uuid.UUID) {
@@ -41,7 +22,7 @@ func getUserByUuid(b *BardView5Http, userUuid uuid.UUID) {
 		return
 	}
 	if len(users) == 0 {
-		session, err := b.BardView5.getKratosSession(b.Context)
+		session, err := GetKratosSession(b)
 		if err != nil {
 			b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to get user")
 			b.Context.AbortWithStatus(http.StatusNotFound)
@@ -168,40 +149,6 @@ func (b *BardView5) createOrGetUserByUuid(c *gin.Context, session *kratos.Sessio
 	}
 }
 
-func (b *BardView5) getKratosSession(c *gin.Context) (*kratos.Session, error) {
-	logger := bardlog.GetLogger(c)
-	req, err := http.NewRequest("GET", b.conf.kratosBaseUrl+"/sessions/whoami", nil)
-	if err != nil {
-		logger.Err(err)
-		return nil, err
-	}
-
-	req.Header.Add("Cookie", c.Request.Header.Get("Cookie"))
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		logger.Err(err)
-		return nil, err
-	}
-
-	if resp.StatusCode == http.StatusUnauthorized {
-		return nil, session401
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		logger.Err(err)
-		return nil, err
-	}
-
-	var result kratos.Session
-	if err := json.Unmarshal(body, &result); err != nil {
-		logger.Err(err)
-		return nil, err
-	}
-	return &result, nil
-}
-
 func (b *BardView5) AddSessionToContext(c *gin.Context) {
 	oryKratosSession, err := c.Cookie("ory_kratos_session")
 	if err == http.ErrNoCookie {
@@ -214,7 +161,7 @@ func (b *BardView5) AddSessionToContext(c *gin.Context) {
 		return
 	}
 
-	session, err := b.getKratosSession(c)
+	session, err := GetKratosSessionM(b, c)
 	if err != nil {
 		c.Set(Session, MakeAnonymousSession())
 		return

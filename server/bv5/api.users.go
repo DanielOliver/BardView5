@@ -95,7 +95,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 }
 
 func GetUserThatIsMe(b *BardView5Http) {
-	session, err := b.BardView5.getKratosSession(b.Context)
+	session, err := GetKratosSession(b)
 	if err != nil {
 		b.Logger.Err(err).Msg("Failed to find me")
 		b.Context.AbortWithStatus(http.StatusNotFound)
