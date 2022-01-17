@@ -95,15 +95,22 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 }
 
 func GetUserThatIsMe(b *BardView5Http) {
-	session, err := GetKratosSession(b)
+	session, err := b.BardView5.DepKratos.GetKratosSession(b)
 	if err != nil {
-		b.Logger.Err(err).Msg("Failed to find me")
-		b.Context.AbortWithStatus(http.StatusNotFound)
+		WriteErrorToContext(b, err)
 		return
 	}
 
 	userUuid := uuid.MustParse(session.Identity.Id)
-	getUserByUuid(b, userUuid)
+	userGet, err := ensureKratosUserByUuid(b, userUuid)
+	if err != nil {
+		WriteErrorToContext(b, err)
+		return
+	}
+
+	b.Context.Header("ETag", strconv.FormatInt(userGet.Version, 10))
+	b.Context.Header("Location", fmt.Sprintf("/v1/users/%d/", userGet.UserId))
+	b.Context.JSON(http.StatusOK, userGet)
 }
 
 type GetUserByIdParams struct {
@@ -124,37 +131,40 @@ func GetUsersById(b *BardView5Http) {
 			return
 		}
 
-		getUserByUuid(b, uuid.MustParse(uuidParams.UserID))
+		userGet, err := ensureKratosUserByUuid(b, uuid.MustParse(uuidParams.UserID))
+		if err != nil {
+			WriteErrorToContext(b, err)
+			return
+		}
+		b.Context.Header("ETag", strconv.FormatInt(userGet.Version, 10))
+		b.Context.Header("Location", fmt.Sprintf("/v1/users/%d/", userGet.UserId))
+		b.Context.JSON(http.StatusOK, userGet)
 		return
 	}
-	getUserById(b, params.UserID)
+	userGet, err := getUserById(b, params.UserID)
+	if err != nil {
+		WriteErrorToContext(b, err)
+		return
+	}
+	b.Context.Header("ETag", strconv.FormatInt(userGet.Version, 10))
+	b.Context.Header("Location", fmt.Sprintf("/v1/users/%d/", userGet.UserId))
+	b.Context.JSON(http.StatusOK, userGet)
 }
 
-func getUserById(b *BardView5Http, userId int64) {
+func getUserById(b *BardView5Http, userId int64) (*api.UserGet, error) {
 	users, err := b.BardView5.Querier().UserFindById(b.Context, userId)
 	if err != nil {
 		b.Logger.Err(err).Int64("id", userId).Msg("Failed to get user")
-		b.Context.AbortWithStatusJSON(http.StatusBadRequest, "Failed to return user")
-		return
+		return nil, ErrUnknownStatusRead(ObjUser, userId, true)
 	}
 	if len(users) == 0 {
-		b.Context.AbortWithStatusJSON(http.StatusNotFound, "Failed to return user")
-		return
+		return nil, ErrNotFound(ObjUser, userId)
 	}
 	user := users[0]
-	b.Context.JSON(http.StatusOK, api.UserGet{
-		User: api.User{
-			CommonAccess: user.CommonAccess,
-			Email:        api.Email(user.Email),
-			Name:         user.Name,
-			SystemTags:   user.SystemTags,
-			UserTags:     user.UserTags,
-			Active:       user.IsActive,
-		},
-		Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
-		UserId:  user.UserID,
-		Version: user.Version,
-	})
+	if err = UserHasAccess(b, &user); err != nil {
+		return nil, err
+	}
+	return mapUserToJsonBody(&user), nil
 }
 
 func (b *BardView5) PatchUserById(c *gin.Context) {
@@ -254,4 +264,23 @@ func (b *BardView5) PatchUserById(c *gin.Context) {
 		UserId:  updatedUser.UserID,
 		Version: updatedUser.Version,
 	})
+}
+
+func UserHasAccess(b *BardView5Http, user *db.User) error {
+	switch user.CommonAccess {
+	case CommonAccessPublic:
+		return nil
+	case CommonAccessAnyUser:
+		if b.Session.Anonymous {
+			return ErrNotAuthorized(ObjUser, user.UserID)
+		}
+		return nil
+	case CommonAccessPrivate:
+		if b.Session.SessionId != user.UserID {
+			return ErrNotAuthorized(ObjUser, user.UserID)
+		}
+		return nil
+	default:
+		return ErrNotAuthorized(ObjUser, user.UserID)
+	}
 }

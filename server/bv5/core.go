@@ -36,6 +36,7 @@ type BardView5 struct {
 	dbMetrics  *db.WithDbMetrics
 	Conf       *BardView5Configuration
 	sessions   *bardView5Sessions
+	DepKratos  KratosDep
 }
 
 type BardView5Http struct {
@@ -75,6 +76,9 @@ func ConfigNewBardView5(config *BardView5InitConfig) (bv5 *BardView5, err error)
 		},
 		sessions: &bardView5Sessions{
 			sessionIdCache: sessionIdCache,
+		},
+		DepKratos: &HttpKratos{
+			KratosBaseUrl: config.KratosBaseUrl,
 		},
 	}, nil
 }

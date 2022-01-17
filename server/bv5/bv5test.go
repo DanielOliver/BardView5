@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	kratos "github.com/ory/kratos-client-go"
 	"github.com/rs/zerolog"
 	"net/http/httptest"
+	"os"
 	"server/db"
 )
 
@@ -15,6 +17,33 @@ var (
 	DefaultUserId         = int64(5)
 )
 
+type TestKratosImpl struct {
+	EnsureUuid uuid.UUID
+}
+
+func (t *TestKratosImpl) GetKratosSessionM(c *gin.Context) (*kratos.Session, error) {
+	everything := t.EnsureUuid.String()
+
+	return kratos.NewSession(uuid.NewString(), kratos.Identity{
+		CreatedAt:         nil,
+		Credentials:       nil,
+		Id:                everything,
+		RecoveryAddresses: nil,
+		SchemaId:          "",
+		SchemaUrl:         "",
+		State:             nil,
+		StateChangedAt:    nil,
+		Traits: map[string]interface{}{
+			"username": everything,
+			"email":    fmt.Sprintf("%s@test.com", everything),
+		},
+	}), nil
+}
+
+func (t *TestKratosImpl) GetKratosSession(b *BardView5Http) (*kratos.Session, error) {
+	return t.GetKratosSessionM(b.Context)
+}
+
 func CreateBv5Test(sessionId int64) *BardView5Http {
 	w := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)
@@ -22,12 +51,15 @@ func CreateBv5Test(sessionId int64) *BardView5Http {
 		ConnectionString: LocalConnectionString,
 		KratosBaseUrl:    "",
 	})
+	bardview5.DepKratos = &TestKratosImpl{
+		EnsureUuid: uuid.New(),
+	}
 	if err != nil {
 		panic(err)
 	}
 	return &BardView5Http{
 		BardView5: bardview5,
-		Logger:    zerolog.Nop(),
+		Logger:    zerolog.New(os.Stdout),
 		Session:   *MakeSession(sessionId),
 		Context:   ctx,
 	}

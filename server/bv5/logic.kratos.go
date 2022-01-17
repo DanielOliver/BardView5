@@ -2,7 +2,6 @@ package bv5
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	kratos "github.com/ory/kratos-client-go"
@@ -10,35 +9,48 @@ import (
 	"server/api"
 	"server/bardlog"
 	"server/db"
-	"strconv"
 	"time"
 )
 
-func getUserByUuid(b *BardView5Http, userUuid uuid.UUID) {
+func mapUserToJsonBody(user *db.User) *api.UserGet {
+	return &api.UserGet{
+		User: api.User{
+			CommonAccess: user.CommonAccess,
+			Email:        api.Email(user.Email),
+			Name:         user.Name,
+			SystemTags:   user.SystemTags,
+			UserTags:     user.UserTags,
+			Active:       user.IsActive,
+		},
+		Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
+		UserId:  user.UserID,
+		Uuid:    user.Uuid.String(),
+		Version: user.Version,
+	}
+}
+
+func ensureKratosUserByUuid(b *BardView5Http, userUuid uuid.UUID) (*api.UserGet, error) {
 	users, err := b.BardView5.Querier().UserFindByUuid(b.Context, userUuid)
 	if err != nil {
 		b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to get user")
-		b.Context.AbortWithStatus(http.StatusInternalServerError)
-		return
+		return nil, ErrUnknownStatusRead(ObjUser, 0, true)
 	}
 	if len(users) == 0 {
-		session, err := GetKratosSession(b)
+		session, err := b.BardView5.DepKratos.GetKratosSession(b)
 		if err != nil {
 			b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to get user")
-			b.Context.AbortWithStatus(http.StatusNotFound)
-			return
+			return nil, ErrNotFound(ObjUser, 0)
 		}
 
 		traits, ok := session.Identity.Traits.(map[string]interface{})
 		if !ok {
 			b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to understand user")
-			b.Context.AbortWithStatus(http.StatusInternalServerError)
-			return
+			return nil, ErrUnknownStatusRead(ObjUser, 0, true)
 		}
 
 		newUserId := b.BardView5.generators.userNode.Generate().Int64()
 		newUserUuid := uuid.MustParse(session.Identity.Id)
-		b.Logger.Info().Str("uuid", userUuid.String()).Int64("userid", newUserId).Msg("Creating user in BardView5")
+		b.Logger.Info().Str("uuid", userUuid.String()).Int64("id", newUserId).Msg("Creating user in BardView5")
 		changedRows, err := b.BardView5.Querier().UserInsert(b.Context, db.UserInsertParams{
 			UserID:       newUserId,
 			Uuid:         newUserUuid,
@@ -51,53 +63,31 @@ func getUserByUuid(b *BardView5Http, userUuid uuid.UUID) {
 			IsActive:     true,
 		})
 		if err != nil {
-			b.Logger.Err(err).Msg("Failed to confirm new user")
-			b.Context.AbortWithStatus(http.StatusBadRequest)
-			return
+			b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to understand user")
+			return nil, ErrUnknownStatusRead(ObjUser, newUserId, true)
 		}
 		if changedRows == 0 {
-			b.Logger.Err(err).Msg("No rows changed for user")
-			b.Context.AbortWithStatus(http.StatusBadRequest)
-			return
+			b.Logger.Err(err).Str("uuid", userUuid.String()).Int64("id", newUserId).Msg("No rows changed for user. Some conflict exists.")
+			return nil, ErrNotFound(ObjUser, newUserId)
 		}
-		b.Context.Header("ETag", "0")
-		b.Context.Header("Location", fmt.Sprintf("/v1/users/%d/", newUserId))
-		b.Context.JSON(http.StatusCreated, api.UserGetOk{
-			UserId:  newUserId,
-			Version: 0,
-		})
 
 		//Prime user array for next fetch.
 		users, err = b.BardView5.Querier().UserFindByUuid(b.Context, userUuid)
-	}
-
-	if len(users) == 0 {
-		b.Context.AbortWithStatus(http.StatusNotFound)
-		return
+		if err != nil {
+			b.Logger.Err(err).Str("uuid", userUuid.String()).Int64("id", newUserId).Msg("Failed to get user")
+			return nil, ErrFailedRead(ObjUser, newUserId, true)
+		}
+		if len(users) == 0 {
+			return nil, ErrNotFound(ObjUser, newUserId)
+		}
 	}
 
 	user := users[0]
-	if user.CommonAccess == CommonAccessPublic || b.Session.SessionId == user.UserID {
-		b.Context.Header("ETag", strconv.FormatInt(user.Version, 10))
-		b.Context.Header("Location", fmt.Sprintf("/v1/users/%d/", user.UserID))
-		b.Context.JSON(http.StatusOK, api.UserGet{
-			User: api.User{
-				CommonAccess: user.CommonAccess,
-				Email:        api.Email(user.Email),
-				Name:         user.Name,
-				SystemTags:   user.SystemTags,
-				UserTags:     user.UserTags,
-				Active:       user.IsActive,
-			},
-			Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
-			UserId:  user.UserID,
-			Version: user.Version,
-		})
-		return
+	if err = UserHasAccess(b, &user); err != nil {
+		return nil, err
 	}
 
-	b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("NotAuthorized")
-	b.Context.AbortWithStatus(http.StatusNotFound)
+	return mapUserToJsonBody(&user), nil
 }
 
 func (b *BardView5) createOrGetUserByUuid(c *gin.Context, session *kratos.Session) (int64, error) {
@@ -161,7 +151,7 @@ func (b *BardView5) AddSessionToContext(c *gin.Context) {
 		return
 	}
 
-	session, err := GetKratosSessionM(b, c)
+	session, err := b.DepKratos.GetKratosSessionM(c)
 	if err != nil {
 		c.Set(Session, MakeAnonymousSession())
 		return

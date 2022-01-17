@@ -248,11 +248,6 @@ components:
     User:
       type: object
       properties:
-        uuid:
-          type: string
-          format: uuid
-          x-oapi-codegen-extra-tags:
-            binding: "required,uuid"
         name:
           type: string
           example: Arthur Dent
@@ -296,10 +291,16 @@ components:
             version:
               type: integer
               format: int64
+            uuid:
+              type: string
+              format: uuid
+              x-oapi-codegen-extra-tags:
+                binding: "required,uuid"
           required:
             - userId
             - created
             - version
+            - uuid
 paths:
   /api/v1/dnd5e/worlds/assigned:
     get:

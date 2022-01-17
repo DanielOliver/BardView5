@@ -82,7 +82,6 @@ type User struct {
 	Name         string     `binding:"required,min=1,max=512" json:"name"`
 	SystemTags   SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags"`
 	UserTags     UserTags   `binding:"required,max=64,dive,max=256" json:"userTags"`
-	Uuid         *string    `binding:"required,uuid" json:"uuid,omitempty"`
 }
 
 // UserGet defines model for UserGet.
@@ -93,6 +92,7 @@ type UserGet struct {
 	// The created time of this record
 	Created Created `json:"created"`
 	UserId  int64   `json:"userId"`
+	Uuid    string  `binding:"required,uuid" json:"uuid"`
 	Version int64   `json:"version"`
 }
 
