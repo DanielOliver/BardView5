@@ -5,6 +5,16 @@ import (
 	"net/http"
 )
 
+type ErrorType int
+
+const (
+	ErrTUnknown ErrorType = iota
+	ErrTNotFound
+	ErrTNotAuthorized
+	ErrTFailedToCreate
+	ErrTFailedToRead
+)
+
 type SessionError struct {
 	msg string
 }
@@ -18,6 +28,7 @@ type CrudError struct {
 	Object     string
 	Id         int64
 	IsInternal bool
+	ErrorType  ErrorType
 }
 
 func (s *CrudError) Error() string {
@@ -33,6 +44,15 @@ func (s *CrudError) WriteToContext(b *BardView5Http) {
 	status := http.StatusBadRequest
 	if s.IsInternal {
 		status = http.StatusInternalServerError
+	}
+	switch s.ErrorType {
+	case ErrTNotFound:
+		status = http.StatusNotFound
+		break
+	case ErrTNotAuthorized:
+		status = http.StatusUnauthorized
+		b.Context.AbortWithStatus(status)
+		return
 	}
 	b.Context.AbortWithStatusJSON(status, s.msg)
 }
@@ -55,6 +75,7 @@ func ErrFailedCreate(obj string, id int64, internal bool) *CrudError {
 		Object:     obj,
 		Id:         id,
 		IsInternal: internal,
+		ErrorType:  ErrTFailedToCreate,
 	}
 }
 func ErrUnknownStatusCreate(obj string, id int64, internal bool) *CrudError {
@@ -63,6 +84,17 @@ func ErrUnknownStatusCreate(obj string, id int64, internal bool) *CrudError {
 		Object:     obj,
 		Id:         id,
 		IsInternal: internal,
+		ErrorType:  ErrTFailedToCreate,
+	}
+}
+
+func ErrUnknownStatusRead(obj string, id int64, internal bool) *CrudError {
+	return &CrudError{
+		msg:        fmt.Sprintf("Read failed by unknown state: %s, %d", obj, id),
+		Object:     obj,
+		Id:         id,
+		IsInternal: internal,
+		ErrorType:  ErrTFailedToRead,
 	}
 }
 
@@ -72,6 +104,25 @@ func ErrFailedRead(obj string, id int64, internal bool) *CrudError {
 		Object:     obj,
 		Id:         id,
 		IsInternal: internal,
+		ErrorType:  ErrTFailedToRead,
+	}
+}
+func ErrNotFound(obj string, id int64) *CrudError {
+	return &CrudError{
+		msg:        fmt.Sprintf("Not Found: %s, %d", obj, id),
+		Object:     obj,
+		Id:         id,
+		IsInternal: false,
+		ErrorType:  ErrTNotFound,
+	}
+}
+func ErrNotAuthorized(obj string, id int64) *CrudError {
+	return &CrudError{
+		msg:        fmt.Sprintf("Not Authorized: %s, %d", obj, id),
+		Object:     obj,
+		Id:         id,
+		IsInternal: false,
+		ErrorType:  ErrTNotAuthorized,
 	}
 }
 

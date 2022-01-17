@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"server/api"
 	"server/db"
+	"strconv"
 	"time"
 )
 
@@ -45,52 +46,21 @@ func GetDnd5eWorldById(b *BardView5Http) {
 		return
 	}
 
-	dnd5eWorlds, err := b.Querier().Dnd5eWorldFindById(b.Context, params.Dnd5eWorldId)
-
+	dnd5eWorld, err := Dnd5eWorldById(b, params.Dnd5eWorldId)
 	if err != nil {
-		b.Logger.Err(err).Int64("id", params.Dnd5eWorldId).Msg("Failed to get dnd5eworld")
-		b.Context.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	if len(dnd5eWorlds) == 0 {
-		b.Context.AbortWithStatus(http.StatusNotFound)
+		WriteErrorToContext(b, err)
 		return
 	}
 
-	dnd5eWorld := dnd5eWorlds[0]
-	createReturn := func() {
-		b.Context.JSON(http.StatusOK, mapDnd5eWorldToJsonBody(&dnd5eWorld))
-	}
-
-	if dnd5eWorld.CommonAccess == CommonAccessPublic {
-		createReturn()
-		return
-	}
-	if b.Session.Anonymous {
-		b.Context.AbortWithStatus(http.StatusNotFound)
+	err = Dnd5eWorldHasAccess(b, &dnd5eWorld)
+	if err != nil {
+		WriteErrorToContext(b, err)
 		return
 	}
 
-	if dnd5eWorld.CommonAccess == CommonAccessAnyUser && !b.Session.Anonymous {
-		createReturn()
-		return
-	}
-
-	if dnd5eWorld.CommonAccess != CommonAccessPrivate {
-		b.Context.AbortWithStatus(http.StatusNotFound)
-		return
-	}
-
-	worldAssignments, err := b.Querier().Dnd5eWorldFindAssignment(b.Context, db.Dnd5eWorldFindAssignmentParams{
-		UserID:       b.Session.SessionId,
-		Dnd5eWorldID: dnd5eWorld.Dnd5eWorldID,
-	})
-	if len(worldAssignments) == 0 || err != nil {
-		b.Context.AbortWithStatus(http.StatusNotFound)
-		return
-	}
-
-	createReturn()
+	b.Context.Header("ETag", strconv.FormatInt(dnd5eWorld.Version, 10))
+	b.Context.Header("Location", fmt.Sprintf("/v1/dnd5e/world/%d/", dnd5eWorld.Dnd5eWorldID))
+	b.Context.JSON(http.StatusOK, mapDnd5eWorldToJsonBody(&dnd5eWorld))
 }
 
 func GetMyDnd5eWorlds(b *BardView5Http) {
@@ -129,6 +99,46 @@ func PostDnd5eWorldsCreate(b *BardView5Http) {
 		UserId:  newDnd5eWorldId,
 		Version: 0,
 	})
+}
+
+func Dnd5eWorldById(b *BardView5Http, dnd5eWorldId int64) (db.Dnd5eWorld, error) {
+	dnd5eWorlds, err := b.Querier().Dnd5eWorldFindById(b.Context, dnd5eWorldId)
+
+	empty := db.Dnd5eWorld{}
+	if err != nil {
+		b.Logger.Err(err).Msg(ObjDnd5eWorld)
+		return empty, ErrFailedRead(ObjDnd5eWorld, dnd5eWorldId, true)
+	}
+	if len(dnd5eWorlds) == 0 {
+		return empty, ErrNotFound(ObjDnd5eWorld, dnd5eWorldId)
+	}
+	return dnd5eWorlds[0], nil
+}
+
+func Dnd5eWorldHasAccess(b *BardView5Http, dnd5eWorld *db.Dnd5eWorld) error {
+	switch dnd5eWorld.CommonAccess {
+	case CommonAccessPublic:
+		return nil
+	case CommonAccessAnyUser:
+		if b.Session.Anonymous {
+			return ErrNotAuthorized(ObjDnd5eWorld, dnd5eWorld.Dnd5eWorldID)
+		}
+		return nil
+	case CommonAccessPrivate:
+		worldAssignments, err := b.Querier().Dnd5eWorldFindAssignment(b.Context, db.Dnd5eWorldFindAssignmentParams{
+			UserID:       b.Session.SessionId,
+			Dnd5eWorldID: dnd5eWorld.Dnd5eWorldID,
+		})
+		if err != nil {
+			return ErrFailedRead(ObjDnd5eWorldAssignment, dnd5eWorld.Dnd5eWorldID, true)
+		}
+		if len(worldAssignments) == 0 {
+			return ErrNotAuthorized(ObjDnd5eWorld, dnd5eWorld.Dnd5eWorldID)
+		}
+		return nil
+	default:
+		return ErrNotAuthorized(ObjDnd5eWorld, dnd5eWorld.Dnd5eWorldID)
+	}
 }
 
 func Dnd5eWorldCreate(b *BardView5Http, body *api.PostApiV1Dnd5eWorldsJSONBody) (int64, error) {
