@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	kratos "github.com/ory/kratos-client-go"
+	"github.com/rs/zerolog"
 	"net/http"
 	"server/api"
 	"server/bardlog"
@@ -29,6 +30,39 @@ func mapUserToJsonBody(user *db.User) *api.UserGet {
 	}
 }
 
+func createUserBySession(c *gin.Context, b *BardView5, logger zerolog.Logger, session *kratos.Session) (int64, error) {
+	userUuid := uuid.MustParse(session.Identity.Id)
+
+	traits, ok := session.Identity.Traits.(map[string]interface{})
+	if !ok {
+		logger.Error().Str("uuid", userUuid.String()).Msg("Failed to understand user session")
+		return 0, ErrUnknownStatusRead(ObjUser, 0, true)
+	}
+
+	newUserId := b.generators.userNode.Generate().Int64()
+	logger.Info().Str("uuid", userUuid.String()).Int64("id", newUserId).Msg("Creating user in BardView5")
+	changedRows, err := b.Querier().UserInsert(c, db.UserInsertParams{
+		UserID:       newUserId,
+		Uuid:         userUuid,
+		Name:         traits["username"].(string),
+		Email:        traits["email"].(string),
+		UserTags:     []string{},
+		SystemTags:   []string{"implicit_registration"},
+		CommonAccess: CommonAccessPrivate,
+		CreatedBy:    sql.NullInt64{},
+		IsActive:     true,
+	})
+	if err != nil {
+		logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to understand user")
+		return 0, ErrUnknownStatusRead(ObjUser, newUserId, true)
+	}
+	if changedRows == 0 {
+		logger.Err(err).Str("uuid", userUuid.String()).Int64("id", newUserId).Msg("No rows changed for user. Some conflict exists.")
+		return 0, ErrNotFound(ObjUser, newUserId)
+	}
+	return newUserId, nil
+}
+
 func ensureKratosUserByUuid(b *BardView5Http, userUuid uuid.UUID) (*api.UserGet, error) {
 	users, err := b.BardView5.Querier().UserFindByUuid(b.Context, userUuid)
 	if err != nil {
@@ -42,34 +76,7 @@ func ensureKratosUserByUuid(b *BardView5Http, userUuid uuid.UUID) (*api.UserGet,
 			return nil, ErrNotFound(ObjUser, 0)
 		}
 
-		traits, ok := session.Identity.Traits.(map[string]interface{})
-		if !ok {
-			b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to understand user")
-			return nil, ErrUnknownStatusRead(ObjUser, 0, true)
-		}
-
-		newUserId := b.BardView5.generators.userNode.Generate().Int64()
-		newUserUuid := uuid.MustParse(session.Identity.Id)
-		b.Logger.Info().Str("uuid", userUuid.String()).Int64("id", newUserId).Msg("Creating user in BardView5")
-		changedRows, err := b.BardView5.Querier().UserInsert(b.Context, db.UserInsertParams{
-			UserID:       newUserId,
-			Uuid:         newUserUuid,
-			Name:         traits["username"].(string),
-			Email:        traits["email"].(string),
-			UserTags:     []string{},
-			SystemTags:   []string{"implicit_registration"},
-			CommonAccess: CommonAccessPrivate,
-			CreatedBy:    sql.NullInt64{},
-			IsActive:     true,
-		})
-		if err != nil {
-			b.Logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to understand user")
-			return nil, ErrUnknownStatusRead(ObjUser, newUserId, true)
-		}
-		if changedRows == 0 {
-			b.Logger.Err(err).Str("uuid", userUuid.String()).Int64("id", newUserId).Msg("No rows changed for user. Some conflict exists.")
-			return nil, ErrNotFound(ObjUser, newUserId)
-		}
+		newUserId, err := createUserBySession(b.Context, b.BardView5, b.Logger, session)
 
 		//Prime user array for next fetch.
 		users, err = b.BardView5.Querier().UserFindByUuid(b.Context, userUuid)
@@ -84,7 +91,7 @@ func ensureKratosUserByUuid(b *BardView5Http, userUuid uuid.UUID) (*api.UserGet,
 
 	user := users[0]
 	if err = UserHasAccess(b, &user); err != nil {
-		return nil, err
+		return mapUserToJsonBody(&user), err
 	}
 
 	return mapUserToJsonBody(&user), nil
@@ -100,41 +107,12 @@ func (b *BardView5) createOrGetUserByUuid(c *gin.Context, session *kratos.Sessio
 		return 0, err
 	}
 	if len(users) == 0 {
-		traits, ok := session.Identity.Traits.(map[string]interface{})
-		if !ok {
-			logger.Err(err).Str("uuid", userUuid.String()).Msg("Failed to understand user")
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return 0, err
-		}
-
-		newUserId := b.generators.userNode.Generate().Int64()
-		changedRows, err := b.Querier().UserInsert(c, db.UserInsertParams{
-			UserID:       newUserId,
-			Uuid:         userUuid,
-			Name:         traits["username"].(string),
-			Email:        traits["email"].(string),
-			UserTags:     []string{},
-			SystemTags:   []string{"implicit_registration"},
-			CommonAccess: CommonAccessPrivate,
-			CreatedBy:    sql.NullInt64{},
-			IsActive:     true,
-		})
-		if err != nil {
-			logger.Err(err).Msg("Failed to confirm new user")
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return 0, err
-		}
-		if changedRows == 0 {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return 0, err
-		}
-		return newUserId, nil
+		return createUserBySession(c, b, logger, session)
 	} else {
 		user := users[0]
 		if !user.IsActive {
 			return 0, sessionInactiveUser
 		}
-
 		return user.UserID, nil
 	}
 }
@@ -157,7 +135,7 @@ func (b *BardView5) AddSessionToContext(c *gin.Context) {
 		return
 	}
 	userId, err := b.createOrGetUserByUuid(c, session)
-	if err != nil {
+	if err != nil || userId == 0 {
 		c.Set(Session, MakeAnonymousSession())
 		return
 	}
