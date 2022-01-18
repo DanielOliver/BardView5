@@ -13,8 +13,8 @@ components:
       in: path
       name: userId
       schema:
-        type: integer
-        format: int64
+        type: string
+        example: 123
     UserUUID:
       in: path
       name: userUuid
@@ -50,8 +50,8 @@ components:
             type: object
             properties:
               userId:
-                type: integer
-                format: int64
+                type: string
+                example: 123
               version:
                 type: integer
                 format: int64
@@ -72,7 +72,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Dnd5eWorld'
+            $ref: '#/components/schemas/Dnd5eWorldGet'
     Dnd5eWorldArrayGetOk:
       description: Dnd5eWorldGet
       content:
@@ -80,7 +80,7 @@ components:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Dnd5eWorld'
+              $ref: '#/components/schemas/Dnd5eWorldGet'
     Dnd5eWorldPostOk:
       description: Dnd5eWorldPost
       content:
@@ -219,8 +219,8 @@ components:
         systemTags:
           $ref: '#/components/schemas/SystemTags'
         derivedFromWorld:
-          type: integer
-          format: int64
+          type: string
+          example: 123
       required:
         - systemTags
         - userTags
@@ -234,8 +234,8 @@ components:
         - type: object
           properties:
             dnd5eWorldId:
-              type: integer
-              format: int64
+              type: string
+              example: 123
             created:
               $ref: '#/components/schemas/Created'
             version:
@@ -284,8 +284,8 @@ components:
         - type: object
           properties:
             userId:
-              type: integer
-              format: int64
+              type: string
+              example: 123
             created:
               $ref: '#/components/schemas/Created'
             version:

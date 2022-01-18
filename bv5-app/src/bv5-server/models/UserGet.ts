@@ -6,7 +6,8 @@ import type { Created } from './Created';
 import type { User } from './User';
 
 export type UserGet = (User & {
-    userId: number;
+    userId: string;
     created: Created;
     version: number;
+    uuid: string;
 });

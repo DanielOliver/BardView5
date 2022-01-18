@@ -10,6 +10,7 @@ import RegisterRoute from './routes/register.route'
 import './App.scss'
 import LoginRoute from './routes/login.route'
 import HomeRoute from './routes/home.route'
+import Dnd5eWorldView from './routes/dnd5e/worlds/view.route'
 
 const queryClient = new QueryClient()
 
@@ -20,6 +21,7 @@ ReactDOM.render(
               <Routes>
                 <Route path="/" element={<App/>}>
                   <Route path="/" element={<HomeRoute/>}/>
+                  <Route path="/dnd5e/worlds/:dnd5eWorldId" element={<Dnd5eWorldView/>}/>
                   <Route path="/register" element={<RegisterRoute/>}/>
                   <Route path="/login" element={<LoginRoute/>}/>
                 </Route>

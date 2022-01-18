@@ -58,8 +58,8 @@ func ConfigNewBardView5(config *BardView5InitConfig) (bv5 *BardView5, err error)
 	}
 	metricsPg := db.NewDbMetrics(pgConnection, "bardview5")
 
-	userNode, _ := snowflake.NewNode(1)
-	dnd5eWorldNode, _ := snowflake.NewNode(1)
+	userNode, _ := snowflake.NewNode(0)
+	dnd5eWorldNode, _ := snowflake.NewNode(0)
 
 	sessionIdCache, _ := bigcache.NewBigCache(bigcache.DefaultConfig(1 * time.Minute))
 

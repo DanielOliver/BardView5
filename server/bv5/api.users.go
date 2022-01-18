@@ -56,7 +56,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 		c.Header("ETag", strconv.FormatInt(updatedUser.Version, 10))
 		c.Header("Location", fmt.Sprintf("/v1/users%d/", updatedUser.UserID))
 		c.JSON(http.StatusOK, api.UserPostOk{
-			UserId:  updatedUser.UserID,
+			UserId:  strconv.FormatInt(updatedUser.UserID, 10),
 			Version: updatedUser.Version,
 		})
 	} else {
@@ -88,7 +88,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 		c.Header("ETag", "0")
 		c.Header("Location", fmt.Sprintf("/v1/users/%d/", newUserId))
 		c.JSON(http.StatusCreated, api.UserPostOk{
-			UserId:  newUserId,
+			UserId:  strconv.FormatInt(newUserId, 10),
 			Version: 0,
 		})
 	}
@@ -109,7 +109,7 @@ func GetUserThatIsMe(b *BardView5Http) {
 	}
 
 	b.Context.Header("ETag", strconv.FormatInt(userGet.Version, 10))
-	b.Context.Header("Location", fmt.Sprintf("/v1/users/%d/", userGet.UserId))
+	b.Context.Header("Location", fmt.Sprintf("/v1/users/%s/", userGet.UserId))
 	b.Context.JSON(http.StatusOK, userGet)
 }
 
@@ -137,7 +137,7 @@ func GetUsersById(b *BardView5Http) {
 			return
 		}
 		b.Context.Header("ETag", strconv.FormatInt(userGet.Version, 10))
-		b.Context.Header("Location", fmt.Sprintf("/v1/users/%d/", userGet.UserId))
+		b.Context.Header("Location", fmt.Sprintf("/v1/users/%s/", userGet.UserId))
 		b.Context.JSON(http.StatusOK, userGet)
 		return
 	}
@@ -147,7 +147,7 @@ func GetUsersById(b *BardView5Http) {
 		return
 	}
 	b.Context.Header("ETag", strconv.FormatInt(userGet.Version, 10))
-	b.Context.Header("Location", fmt.Sprintf("/v1/users/%d/", userGet.UserId))
+	b.Context.Header("Location", fmt.Sprintf("/v1/users/%s/", userGet.UserId))
 	b.Context.JSON(http.StatusOK, userGet)
 }
 
@@ -196,7 +196,7 @@ func (b *BardView5) PatchUserById(c *gin.Context) {
 			Active:       user.IsActive,
 		},
 		Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
-		UserId:  user.UserID,
+		UserId:  strconv.FormatInt(user.UserID, 10),
 		Version: user.Version,
 	})
 	if err != nil {
@@ -261,7 +261,7 @@ func (b *BardView5) PatchUserById(c *gin.Context) {
 			Active:       updatedUser.IsActive,
 		},
 		Created: api.Created(updatedUser.CreatedAt.Format(time.RFC3339)),
-		UserId:  updatedUser.UserID,
+		UserId:  strconv.FormatInt(updatedUser.UserID, 10),
 		Version: updatedUser.Version,
 	})
 }

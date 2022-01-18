@@ -7,7 +7,6 @@ import type { SystemTags } from './SystemTags';
 import type { UserTags } from './UserTags';
 
 export type User = {
-    uuid?: string;
     name: string;
     active: boolean;
     commonAccess: string;

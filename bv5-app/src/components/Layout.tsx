@@ -19,11 +19,11 @@ export function Layout ({ logout }: {
 
   return <Navbar bg="light" expand="md">
     <Container fluid="lg">
-      <Navbar.Brand href="/">BardView5</Navbar.Brand>
+      <Navbar.Brand><Link style={{ textDecoration: 'none' }} className="link-primary" to="/">BardView5</Link></Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav"/>
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="me-auto">
-          <Nav.Link href="/">Home</Nav.Link>
+          {/* <Nav.Link><Link style={{ textDecoration: 'none' }} to="/">Home</Link></Nav.Link> */}
         </Nav>
 
         {state.isAuthenticated

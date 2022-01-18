@@ -23,11 +23,12 @@ func mapDnd5eWorldToJsonBody(dnd5eWorld *db.Dnd5eWorld) *api.Dnd5eWorldGet {
 			UserTags:         dnd5eWorld.UserTags,
 		},
 		Created:      api.Created(dnd5eWorld.CreatedAt.Format(time.RFC3339)),
-		Dnd5eWorldId: dnd5eWorld.Dnd5eWorldID,
+		Dnd5eWorldId: strconv.FormatInt(dnd5eWorld.Dnd5eWorldID, 10),
 		Version:      dnd5eWorld.Version,
 	}
 	if dnd5eWorld.DerivedFromWorld.Valid {
-		ret.Dnd5eWorld.DerivedFromWorld = &dnd5eWorld.DerivedFromWorld.Int64
+		val := strconv.FormatInt(dnd5eWorld.DerivedFromWorld.Int64, 10)
+		ret.Dnd5eWorld.DerivedFromWorld = &val
 	}
 	if dnd5eWorld.Module.Valid {
 		ret.Dnd5eWorld.Module = &dnd5eWorld.Module.String
@@ -96,7 +97,7 @@ func PostDnd5eWorldsCreate(b *BardView5Http) {
 	b.Context.Header("ETag", "0")
 	b.Context.Header("Location", fmt.Sprintf("/v1/dnd5e/world/%d/", newDnd5eWorldId))
 	b.Context.JSON(http.StatusCreated, api.UserPostOk{
-		UserId:  newDnd5eWorldId,
+		UserId:  strconv.FormatInt(newDnd5eWorldId, 10),
 		Version: 0,
 	})
 }
@@ -147,7 +148,7 @@ func Dnd5eWorldCreate(b *BardView5Http, body *api.PostApiV1Dnd5eWorldsJSONBody) 
 	newDnd5eWorldId := b.GenDnd5eWorld().Generate().Int64()
 	changedRows, err := b.Querier().Dnd5eWorldInsert(b.Context, db.Dnd5eWorldInsertParams{
 		Dnd5eWorldID:     newDnd5eWorldId,
-		DerivedFromWorld: MaybeInt64(body.DerivedFromWorld),
+		DerivedFromWorld: MaybeInt64S(body.DerivedFromWorld),
 		CommonAccess:     body.CommonAccess,
 		CreatedBy:        MaybeInt64(&b.Session.SessionId),
 		IsActive:         body.Active,

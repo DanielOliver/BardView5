@@ -25,7 +25,7 @@ type Created string
 type Dnd5eWorld struct {
 	Active           bool       `json:"active"`
 	CommonAccess     string     `binding:"required,oneof=private anyuser public" json:"commonAccess"`
-	DerivedFromWorld *int64     `json:"derivedFromWorld,omitempty"`
+	DerivedFromWorld *string    `json:"derivedFromWorld,omitempty"`
 	Description      string     `binding:"required,min=1,max=1024" json:"description"`
 	Module           *string    `binding:"min=1,max=512" json:"module,omitempty"`
 	Name             string     `binding:"required,min=1,max=512" json:"name"`
@@ -40,7 +40,7 @@ type Dnd5eWorldGet struct {
 	// Embedded fields due to inline allOf schema
 	// The created time of this record
 	Created      Created `json:"created"`
-	Dnd5eWorldId int64   `json:"dnd5eWorldId"`
+	Dnd5eWorldId string  `json:"dnd5eWorldId"`
 	Version      int64   `json:"version"`
 }
 
@@ -91,7 +91,7 @@ type UserGet struct {
 	// Embedded fields due to inline allOf schema
 	// The created time of this record
 	Created Created `json:"created"`
-	UserId  int64   `json:"userId"`
+	UserId  string  `json:"userId"`
 	Uuid    string  `binding:"required,uuid" json:"uuid"`
 	Version int64   `json:"version"`
 }
@@ -103,16 +103,16 @@ type UserTags []string
 type Dnd5eWorldId int64
 
 // UserId defines model for UserId.
-type UserId int64
+type UserId string
 
 // UserUUID defines model for UserUUID.
 type UserUUID string
 
 // Dnd5eWorldArrayGetOk defines model for Dnd5eWorldArrayGetOk.
-type Dnd5eWorldArrayGetOk []Dnd5eWorld
+type Dnd5eWorldArrayGetOk []Dnd5eWorldGet
 
 // Dnd5eWorldGetOk defines model for Dnd5eWorldGetOk.
-type Dnd5eWorldGetOk Dnd5eWorld
+type Dnd5eWorldGetOk Dnd5eWorldGet
 
 // Dnd5eWorldPostOk defines model for Dnd5eWorldPostOk.
 type Dnd5eWorldPostOk struct {
@@ -125,8 +125,8 @@ type UserGetOk UserGet
 
 // UserPostOk defines model for UserPostOk.
 type UserPostOk struct {
-	UserId  int64 `json:"userId"`
-	Version int64 `json:"version"`
+	UserId  string `json:"userId"`
+	Version int64  `json:"version"`
 }
 
 // A JSONPatch document as defined by RFC 6902
