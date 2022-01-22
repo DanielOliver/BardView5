@@ -1,12 +1,13 @@
 # BardView5
 
-A Fifth Edition Dungeons & Dragons Campaign Management Tool 
+A Fifth Edition Dungeons & Dragons Campaign Management Tool.
 
 ## Roadmap
 
-- [ ] User
+- User
     - [X] Login
     - [X] Registration
+    - [X] Authenticate
     - [ ] Email verification
     - [ ] Password reset
 - D&D 5e
@@ -15,6 +16,36 @@ A Fifth Edition Dungeons & Dragons Campaign Management Tool
         - [X] Create
         - [ ] Update
         - [ ] Delete
+        - [ ] Query
+        - [ ] Assigning user permissions
+    - Monster
+        - [ ] Read
+        - [ ] Create
+        - [ ] Update
+        - [ ] Delete
+        - [ ] Query
+        - [ ] Associating with worlds
+    - Campaign
+        - [ ] Read
+        - [ ] Create
+        - [ ] Update
+        - [ ] Delete
+        - [ ] Query
+        - [ ] Associating with players
+    - Session
+        - [ ] Read
+        - [ ] Create
+        - [ ] Update
+        - [ ] Delete
+        - [ ] Query
+        - [ ] Associating with Campaign
+    - Encounter
+        - [ ] Read
+        - [ ] Create
+        - [ ] Update
+        - [ ] Delete
+        - [ ] Query
+        - [ ] Associating with Session
 - Instrumentation
     - [X] Prometheus
 
@@ -87,5 +118,44 @@ Operating system: I alternate development on openSUSE Tumbleweed and Windows 10 
    npm run start-windows
    ```
 9. Open "http://proxy.local/"
+
+## Changing OpenAPI surface.
+
+[OpenAPI](server/bardview5.yaml) shows the API surface and schema definitions for the API.
+
+1. Edit schema.
+2. Generate Go files
+   ```powershell
+   cd server
+   go generate ./...
+   ```
+3. Generate TypeScript files
+   ```powershell
+   cd bv5-app
+   npm run generate
+   ```
+4. Implement API endpoints in Go.
+
+## Changing Database
+
+[Migrations](server/migrations) shows the database migrations.
+
+1. Add database migration
+2. Add queries to be translated to Go using [sqlc](https://sqlc.dev/) to [query.sql](server/db/query.sql)
+3. Generate Go files
+   ```
+   cd server
+   mage -v InternalMigrate
+   ```
+
+## Methodology
+
+Development proceeds as I have time, usually a couple lines very late at night or very early in the morning. Further, I have no plans of monetization at this time. Neither am I optimizing for "web-scale" As such, the development habits here generally reflect my mood of what I want to explore at the time. Further, this isn't my job, so please don't judge me too harshly on what I write here and shortcuts taken since my free time is valuable.
+
+The things I value here are:
+
+* Automating as much boilerplate as possible.
+* Using stable technologies in order to smooth out difficulties. The adventure here is in building a complete application instead of bleeding edge technology.
+* Speed of development.
 
 

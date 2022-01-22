@@ -36,8 +36,6 @@
     "build": "react-scripts --openssl-legacy-provider build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "storybook": "cross-env NODE_OPTIONS=--openssl-legacy-provider start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public",
     "generate": "openapi --input ../server/bardview5.yaml --output ./src/bv5-server --exportServices false --exportCore false"
   },
   "eslintConfig": {
@@ -69,12 +67,6 @@
     ]
   },
   "devDependencies": {
-    "@storybook/addon-actions": "^6.3.12",
-    "@storybook/addon-essentials": "^6.3.12",
-    "@storybook/addon-links": "^6.3.12",
-    "@storybook/node-logger": "^6.3.12",
-    "@storybook/preset-create-react-app": "^3.2.0",
-    "@storybook/react": "^6.3.12",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
     "@typescript-eslint/parser": "^5.3.1",
     "cross-env": "^7.0.3",
