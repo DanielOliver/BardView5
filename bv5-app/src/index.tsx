@@ -3,30 +3,16 @@ import ReactDOM from 'react-dom'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import RegisterRoute from './routes/register.route'
 
 // import 'semantic-ui-css/semantic.min.css'
 import './App.scss'
-import LoginRoute from './routes/login.route'
-import HomeRoute from './routes/home.route'
-import Dnd5eWorldView from './routes/dnd5e/worlds/view.route'
 
 const queryClient = new QueryClient()
 
 ReactDOM.render(
         <React.StrictMode>
           <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<App/>}>
-                  <Route path="/" element={<HomeRoute/>}/>
-                  <Route path="/dnd5e/worlds/:dnd5eWorldId" element={<Dnd5eWorldView/>}/>
-                  <Route path="/register" element={<RegisterRoute/>}/>
-                  <Route path="/login" element={<LoginRoute/>}/>
-                </Route>
-              </Routes>
-            </BrowserRouter>
+            <App/>
           </QueryClientProvider>
         </React.StrictMode>,
         document.getElementById('root')

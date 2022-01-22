@@ -1,24 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthContext, AuthInitialState, AuthReducer } from './context/Auth.context'
-import { getSelfServiceLogout, getSession } from './services/auth'
-import { Layout } from './components/Layout'
+import { getSession } from './services/auth'
+import HomeRoute from './routes/home.route'
+import Dnd5eWorldView from './routes/dnd5e/worlds/view.route'
+import RegisterRoute from './routes/register.route'
+import LoginRoute from './routes/login.route'
+import LayoutWrapper from './components/LayoutWrapper'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App () {
   const [state, dispatch] = React.useReducer(AuthReducer, AuthInitialState)
   const [checking, setChecking] = useState<'CHECKED' | 'CHECKING_SESSION' | 'UNCHECKED'>('UNCHECKED')
-
-  const submitLogout = () => {
-    getSelfServiceLogout().then(value => {
-      dispatch({
-        type: 'LOGOUT',
-        isRegistrationComplete: false
-      })
-      if (value) {
-        window.location.href = value.data.logout_url
-      }
-    })
-  }
 
   useEffect(() => {
     if (checking === 'UNCHECKED') {
@@ -50,11 +43,21 @@ function App () {
                     dispatch
                   }}
           >
-            <Layout logout={submitLogout}/>
             <div className="App">
-              <Outlet/>
-            </div>
-          </AuthContext.Provider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/register" element={<LayoutWrapper><RegisterRoute/></LayoutWrapper>}/>
+                  <Route path="/login" element={<LayoutWrapper><LoginRoute/></LayoutWrapper>}/>
+                  <Route path="/" element={<ProtectedRoute isAuthenticated={state.isAuthenticated}/>}>
+                    <Route path="/" element={<LayoutWrapper><HomeRoute/> </LayoutWrapper>}/>
+                    <Route path="/dnd5e/worlds/:dnd5eWorldId"
+                           element={<LayoutWrapper><Dnd5eWorldView/></LayoutWrapper>}/>
+                    <Route path="/*" element={<h1>Unknown</h1>}/>
+                  </Route>
+              </Routes>
+            </BrowserRouter>
+          </div>
+</AuthContext.Provider>
   )
 }
 

@@ -16,37 +16,37 @@ function HomeRoute () {
   })
 
   return <Container fluid="lg">
-    <Row><Col><h1 className="m-1">D&D 5e</h1></Col></Row>
-    <Row>
-      <Col md={6}>
-        <h2>Worlds</h2>
-        <ListGroup>
-          {dnd5eWorlds?.map((world) => {
-            const daysAgo = formatDistance(new Date(world.created), new Date(), { addSuffix: true })
-            const shortDescription = world.description.substring(0, 200) + (world.description.length > 200 ? ' ...' : '')
+      <Row><Col><h1 className="m-1">D&D 5e</h1></Col></Row>
+      <Row>
+        <Col md={6}>
+          <h2>Worlds</h2>
+          <ListGroup>
+            {dnd5eWorlds?.map((world) => {
+              const daysAgo = formatDistance(new Date(world.created), new Date(), { addSuffix: true })
+              const shortDescription = world.description.substring(0, 200) + (world.description.length > 200 ? ' ...' : '')
 
-            return (
-                    <ListGroup.Item key={world.dnd5eWorldId} as={Link} to={`/dnd5e/worlds/${world.dnd5eWorldId}`}>
-                      {/* <Link to={`/dnd5e/worlds/${world.dnd5eWorldId}`} > */}
-                      <div className="d-flex justify-content-between flex-column flex-md-row">
-                        <h5 className="mb-1">{world.name}</h5>
-                        <div className="mb-1 justify-content-between d-flex">
-                          <small className="me-1">{daysAgo}</small>
-                          <AccessBadge accessType={world.commonAccess}/>
+              return (
+                      <ListGroup.Item key={world.dnd5eWorldId} as={Link} to={`/dnd5e/worlds/${world.dnd5eWorldId}`}>
+                        {/* <Link to={`/dnd5e/worlds/${world.dnd5eWorldId}`} > */}
+                        <div className="d-flex justify-content-between flex-column flex-md-row">
+                          <h5 className="mb-1">{world.name}</h5>
+                          <div className="mb-1 justify-content-between d-flex">
+                            <small className="me-1">{daysAgo}</small>
+                            <AccessBadge accessType={world.commonAccess}/>
+                          </div>
                         </div>
-                      </div>
-                      <p className="mb-1"><i>{shortDescription}</i></p>
-                      {/* </Link> */}
-                    </ListGroup.Item>
-            )
-          })
-          }
-        </ListGroup>
-      </Col>
-      <Col md={6}>
-      </Col>
-    </Row>
-  </Container>
+                        <p className="mb-1"><i>{shortDescription}</i></p>
+                        {/* </Link> */}
+                      </ListGroup.Item>
+              )
+            })
+            }
+          </ListGroup>
+        </Col>
+        <Col md={6}>
+        </Col>
+      </Row>
+    </Container>
 }
 
 export default HomeRoute

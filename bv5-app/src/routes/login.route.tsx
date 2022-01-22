@@ -87,8 +87,8 @@ function LoginRoute () {
           </pre>
       }
       return <Container>
-        <RegisterForm formType="Login" ui={loginData.ui} onSubmit={onSubmit}/>
-      </Container>
+          <RegisterForm formType="Login" ui={loginData.ui} onSubmit={onSubmit}/>
+        </Container>
     default:
       return <pre>
     {JSON.stringify(loginData, null, 2)}

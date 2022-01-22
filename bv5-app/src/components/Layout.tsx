@@ -5,11 +5,22 @@ import { AuthContext } from '../context/Auth.context'
 import { bv5V1GetMe } from '../services/bardview5'
 import { UserGet } from '../bv5-server'
 import { useQuery } from 'react-query'
+import { getSelfServiceLogout } from '../services/auth'
 
-export function Layout ({ logout }: {
-  logout: () => void
-}) {
-  const { state } = React.useContext(AuthContext)
+export function Layout () {
+  const { state, dispatch } = React.useContext(AuthContext)
+
+  const submitLogout = () => {
+    getSelfServiceLogout().then(value => {
+      dispatch({
+        type: 'LOGOUT',
+        isRegistrationComplete: false
+      })
+      if (value) {
+        window.location.href = value.data.logout_url
+      }
+    })
+  }
 
   const {
     data
@@ -23,7 +34,6 @@ export function Layout ({ logout }: {
       <Navbar.Toggle aria-controls="basic-navbar-nav"/>
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="me-auto">
-          {/* <Nav.Link><Link style={{ textDecoration: 'none' }} to="/">Home</Link></Nav.Link> */}
         </Nav>
 
         {state.isAuthenticated
@@ -32,13 +42,13 @@ export function Layout ({ logout }: {
                   <NavDropdown title={data?.name ?? 'me'}>
                     <NavDropdown.Item>Profile</NavDropdown.Item>
                     <NavDropdown.Divider />
-                    <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>
+                    <NavDropdown.Item onClick={submitLogout}>Logout</NavDropdown.Item>
                   </NavDropdown>
                 </Nav>)
           : (
                 <Nav>
-                  <Nav.Link><Link to="/login"><i className="bi-box-arrow-in-right"></i>Login</Link></Nav.Link>
-                  <Nav.Link><Link to="/register"><i className="bi-box-arrow-in-right"></i>Register</Link></Nav.Link>
+                  <Nav.Item><Link to="/login"><i className="bi-box-arrow-in-right"></i>Login</Link></Nav.Item>
+                  <Nav.Item><Link to="/register"><i className="bi-box-arrow-in-right"></i>Register</Link></Nav.Item>
                 </Nav>
             )
         }
