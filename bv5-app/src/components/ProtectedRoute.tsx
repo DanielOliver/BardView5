@@ -17,7 +17,9 @@ export default function ProtectedRoute ({
   } else {
     return <LayoutWrapper>
       <Container fluid="lg">
-        <p>Unauthenticated</p>
+        <p>A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool.</p>
+        <br/>
+        <p>Go ahead and login. Adventure awaits!</p>
       </Container>
     </LayoutWrapper>
   }
