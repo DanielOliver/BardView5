@@ -4,7 +4,13 @@ A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool.
 
 ## Screenshots
 
+### Landing Page
+
 ![Landing page](e2e/screenshots/unauth_landing.png)
+
+### New user registered
+
+![Registered](e2e/screenshots/registered.png)
 
 ## Roadmap
 
