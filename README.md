@@ -1,8 +1,16 @@
 # BardView5
 
-A Fifth Edition Dungeons & Dragons Campaign Management Tool.
+A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool. 
 
 ## Roadmap
+
+1. [X] Start with basic user management
+2. [ ] Become a compendium of worlds and monsters.
+3. [ ] Become a campaign/session/encounter tracker for the game master.
+4. [ ] Create a display window for tv so that DM can share information with players. 
+5. [ ] Explore player data management.
+
+### Roadmap Details
 
 - User
     - [X] Login
@@ -11,28 +19,40 @@ A Fifth Edition Dungeons & Dragons Campaign Management Tool.
     - [ ] Email verification
     - [ ] Password reset
 - D&D 5e
-    - World
+    - World: A general setting to play in
         - [X] Read
         - [X] Create
         - [ ] Update
         - [ ] Delete
         - [ ] Query
         - [ ] Assigning user permissions
-    - Monster
+    - Monster: A single monster with statblocks and info
         - [ ] Read
         - [ ] Create
         - [ ] Update
         - [ ] Delete
         - [ ] Query
         - [ ] Associating with worlds
-    - Campaign
+    - Inhabitant: Associating a monster with one or more worlds
+        - [ ] Read
+        - [ ] Create
+        - [ ] Update
+        - [ ] Delete
+        - [ ] Query
+        - [ ] Associating with worlds
+    - Data pack: An entire collection of worlds, monsters, and associated information. Meant to be imported or exported and shared.
+        - [ ] Export
+        - [ ] Import
+    - Player tv display:
+        - [ ] Display encounter information on secondary webpage with a sharable link.
+    - Campaign: A collection of players and game masters associated with sessions and encounters
         - [ ] Read
         - [ ] Create
         - [ ] Update
         - [ ] Delete
         - [ ] Query
         - [ ] Associating with players
-    - Session
+    - Session: zero or more encounters
         - [ ] Read
         - [ ] Create
         - [ ] Update
@@ -48,6 +68,9 @@ A Fifth Edition Dungeons & Dragons Campaign Management Tool.
         - [ ] Associating with Session
 - Instrumentation
     - [X] Prometheus
+- Configuration
+    - [X] Local development
+    - [ ] Production
 
 ## Development
 
