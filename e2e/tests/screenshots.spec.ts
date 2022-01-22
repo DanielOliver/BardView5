@@ -23,7 +23,7 @@ test('landing page to register', async ({ page }) => {
   await usernameSelector.isVisible();
   await page.screenshot({ path: 'screenshots/unauth_register.png' });
 
-  const userId = (new Date()).getTime().toString();
+  const userId = "user" + (new Date()).getTime().toString();
   const password = createGuid();
   const email = userId + "@test.com";
 
