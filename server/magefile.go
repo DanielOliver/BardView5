@@ -106,6 +106,10 @@ func InternalMigrate() error {
 		return err
 	}
 
+	if err := sh.Run("go", "generate", "./..."); err != nil {
+		return err
+	}
+
 	if err := sh.RunWith(map[string]string{
 		"BARDVIEW5_CONNECTION": localhostPostgresql,
 	}, "go", "run", ".", "migrate"); err != nil {

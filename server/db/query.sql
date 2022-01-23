@@ -69,42 +69,19 @@ SELECT *
 FROM "dnd5e_monster" m
 WHERE m.dnd5e_monster_id = @dnd5e_monster_id;
 
--- name: Dnd5eInhabitantsFindByWorldAndMonster :many
-SELECT wm.dnd5e_inhabitant_id,
-       m.dnd5e_monster_id,
-       wm.dnd5e_world_id,
+-- name: Dnd5eMonstersFindByWorld :many
+SELECT m.dnd5e_monster_id,
+       m.dnd5e_world_id,
        m.name,
-       m.tags,
        m.monster_type,
        m.alignment,
        m.size_category,
        m.milli_challenge_rating,
        m.languages,
        m.description,
-       wm.user_tags,
-       wm.system_tags
+       m.user_tags,
+       m.system_tags
 FROM "dnd5e_monster" m
-         INNER JOIN "dnd5e_inhabitant" wm ON wm.dnd5e_monster_id = m.dnd5e_monster_id
-WHERE m.dnd5e_monster_id = @dnd5e_monster_id
-  AND wm.dnd5e_monster_id = @dnd5e_monster_id
-  AND wm.dnd5e_world_id = @dnd5e_world_id;
-
--- name: Dnd5eInhabitantsFindByWorld :many
-SELECT wm.dnd5e_inhabitant_id,
-       m.dnd5e_monster_id,
-       wm.dnd5e_world_id,
-       m.name,
-       m.tags,
-       m.monster_type,
-       m.alignment,
-       m.size_category,
-       m.milli_challenge_rating,
-       m.languages,
-       m.description,
-       wm.user_tags,
-       wm.system_tags
-FROM "dnd5e_monster" m
-         INNER JOIN "dnd5e_inhabitant" wm ON wm.dnd5e_monster_id = m.dnd5e_monster_id
 WHERE wm.dnd5e_world_id = @dnd5e_world_id
 ORDER BY wm.dnd5e_world_id, wm.dnd5e_monster_id
 OFFSET @row_offset LIMIT @row_limit;

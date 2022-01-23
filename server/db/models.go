@@ -14,18 +14,6 @@ type CommonAccess struct {
 	CreatedAt time.Time `db:"created_at"`
 }
 
-type Dnd5eInhabitant struct {
-	Dnd5eInhabitantID int64         `db:"dnd5e_inhabitant_id"`
-	CreatedBy         sql.NullInt64 `db:"created_by"`
-	CreatedAt         time.Time     `db:"created_at"`
-	Version           int64         `db:"version"`
-	UserTags          []string      `db:"user_tags"`
-	SystemTags        []string      `db:"system_tags"`
-	Dnd5eWorldID      int64         `db:"dnd5e_world_id"`
-	Dnd5eMonsterID    int64         `db:"dnd5e_monster_id"`
-	OriginalWorld     bool          `db:"original_world"`
-}
-
 type Dnd5eLanguage struct {
 	Dnd5eLanguageID int64         `db:"dnd5e_language_id"`
 	CreatedBy       sql.NullInt64 `db:"created_by"`
@@ -39,9 +27,10 @@ type Dnd5eMonster struct {
 	CreatedBy            sql.NullInt64 `db:"created_by"`
 	CreatedAt            time.Time     `db:"created_at"`
 	Version              int64         `db:"version"`
-	FirstWorldID         sql.NullInt64 `db:"first_world_id"`
+	Dnd5eWorldID         sql.NullInt64 `db:"dnd5e_world_id"`
 	Name                 string        `db:"name"`
-	Tags                 []string      `db:"tags"`
+	UserTags             []string      `db:"user_tags"`
+	SystemTags           []string      `db:"system_tags"`
 	MonsterType          string        `db:"monster_type"`
 	Alignment            string        `db:"alignment"`
 	SizeCategory         string        `db:"size_category"`

@@ -1,6 +1,6 @@
 # BardView5
 
-A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool. 
+A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool.  
 
 ## Screenshots
 
@@ -37,13 +37,6 @@ A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool.
         - [ ] Query
         - [ ] Assigning user permissions
     - Monster: A single monster with statblocks and info
-        - [ ] Read
-        - [ ] Create
-        - [ ] Update
-        - [ ] Delete
-        - [ ] Query
-        - [ ] Associating with worlds
-    - Inhabitant: Associating a monster with one or more worlds
         - [ ] Read
         - [ ] Create
         - [ ] Update
@@ -181,14 +174,15 @@ Operating system: I alternate development on openSUSE Tumbleweed and Windows 10 
    mage -v InternalMigrate
    ```
 
-## Methodology
+## Methodology and philosophy
 
-Development proceeds as I have time, usually a couple lines very late at night or very early in the morning. Further, I have no plans of monetization at this time. Neither am I optimizing for "web-scale" As such, the development habits here generally reflect my mood of what I want to explore at the time. Further, this isn't my job, so please don't judge me too harshly on what I write here and shortcuts taken since my free time is valuable.
+Development proceeds as I have time, usually a couple lines very late at night or very early in the morning. Neither am I optimizing for "web-scale" As such, the development habits here generally reflect my mood of what I want to explore at the time. Further, this isn't my job, so please don't judge me too harshly on what I write here and shortcuts taken since my free time is valuable.
 
 The things I value here are:
 
 * Automating as much boilerplate as possible.
 * Using stable technologies in order to smooth out difficulties. The adventure here is in building a complete application instead of bleeding edge technology.
 * Speed of development.
-
-
+* Simple user flows and logical interactions.
+* Freedom of data. I don't want your data. Self-host for yourself and your friends and do whatever.
+* No data entry. I hate typing more than required. Accurate importing and exporting of data is important.

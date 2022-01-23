@@ -9,10 +9,9 @@ import (
 )
 
 type Querier interface {
-	Dnd5eInhabitantsFindByWorld(ctx context.Context, arg Dnd5eInhabitantsFindByWorldParams) ([]Dnd5eInhabitantsFindByWorldRow, error)
-	Dnd5eInhabitantsFindByWorldAndMonster(ctx context.Context, arg Dnd5eInhabitantsFindByWorldAndMonsterParams) ([]Dnd5eInhabitantsFindByWorldAndMonsterRow, error)
 	Dnd5eLanguageFindAll(ctx context.Context) ([]Dnd5eLanguage, error)
 	Dnd5eMonsterFindById(ctx context.Context, dnd5eMonsterID int64) ([]Dnd5eMonster, error)
+	Dnd5eMonstersFindByWorld(ctx context.Context, arg Dnd5eMonstersFindByWorldParams) ([]Dnd5eMonstersFindByWorldRow, error)
 	Dnd5eSizeCategoryFindAll(ctx context.Context) ([]Dnd5eSizeCategory, error)
 	Dnd5eWorldFindAssignment(ctx context.Context, arg Dnd5eWorldFindAssignmentParams) ([]Dnd5eWorldAssignment, error)
 	Dnd5eWorldFindByAssignment(ctx context.Context, userID int64) ([]Dnd5eWorld, error)

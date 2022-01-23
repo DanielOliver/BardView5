@@ -11,165 +11,6 @@ import (
 	"github.com/lib/pq"
 )
 
-const dnd5eInhabitantsFindByWorld = `-- name: Dnd5eInhabitantsFindByWorld :many
-SELECT wm.dnd5e_inhabitant_id,
-       m.dnd5e_monster_id,
-       wm.dnd5e_world_id,
-       m.name,
-       m.tags,
-       m.monster_type,
-       m.alignment,
-       m.size_category,
-       m.milli_challenge_rating,
-       m.languages,
-       m.description,
-       wm.user_tags,
-       wm.system_tags
-FROM "dnd5e_monster" m
-         INNER JOIN "dnd5e_inhabitant" wm ON wm.dnd5e_monster_id = m.dnd5e_monster_id
-WHERE wm.dnd5e_world_id = $1
-ORDER BY wm.dnd5e_world_id, wm.dnd5e_monster_id
-OFFSET $2 LIMIT $3
-`
-
-type Dnd5eInhabitantsFindByWorldParams struct {
-	Dnd5eWorldID int64 `db:"dnd5e_world_id"`
-	RowOffset    int32 `db:"row_offset"`
-	RowLimit     int32 `db:"row_limit"`
-}
-
-type Dnd5eInhabitantsFindByWorldRow struct {
-	Dnd5eInhabitantID    int64    `db:"dnd5e_inhabitant_id"`
-	Dnd5eMonsterID       int64    `db:"dnd5e_monster_id"`
-	Dnd5eWorldID         int64    `db:"dnd5e_world_id"`
-	Name                 string   `db:"name"`
-	Tags                 []string `db:"tags"`
-	MonsterType          string   `db:"monster_type"`
-	Alignment            string   `db:"alignment"`
-	SizeCategory         string   `db:"size_category"`
-	MilliChallengeRating int64    `db:"milli_challenge_rating"`
-	Languages            []string `db:"languages"`
-	Description          string   `db:"description"`
-	UserTags             []string `db:"user_tags"`
-	SystemTags           []string `db:"system_tags"`
-}
-
-func (q *Queries) Dnd5eInhabitantsFindByWorld(ctx context.Context, arg Dnd5eInhabitantsFindByWorldParams) ([]Dnd5eInhabitantsFindByWorldRow, error) {
-	rows, err := q.query(ctx, q.dnd5eInhabitantsFindByWorldStmt, dnd5eInhabitantsFindByWorld, arg.Dnd5eWorldID, arg.RowOffset, arg.RowLimit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Dnd5eInhabitantsFindByWorldRow{}
-	for rows.Next() {
-		var i Dnd5eInhabitantsFindByWorldRow
-		if err := rows.Scan(
-			&i.Dnd5eInhabitantID,
-			&i.Dnd5eMonsterID,
-			&i.Dnd5eWorldID,
-			&i.Name,
-			pq.Array(&i.Tags),
-			&i.MonsterType,
-			&i.Alignment,
-			&i.SizeCategory,
-			&i.MilliChallengeRating,
-			pq.Array(&i.Languages),
-			&i.Description,
-			pq.Array(&i.UserTags),
-			pq.Array(&i.SystemTags),
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const dnd5eInhabitantsFindByWorldAndMonster = `-- name: Dnd5eInhabitantsFindByWorldAndMonster :many
-SELECT wm.dnd5e_inhabitant_id,
-       m.dnd5e_monster_id,
-       wm.dnd5e_world_id,
-       m.name,
-       m.tags,
-       m.monster_type,
-       m.alignment,
-       m.size_category,
-       m.milli_challenge_rating,
-       m.languages,
-       m.description,
-       wm.user_tags,
-       wm.system_tags
-FROM "dnd5e_monster" m
-         INNER JOIN "dnd5e_inhabitant" wm ON wm.dnd5e_monster_id = m.dnd5e_monster_id
-WHERE m.dnd5e_monster_id = $1
-  AND wm.dnd5e_monster_id = $1
-  AND wm.dnd5e_world_id = $2
-`
-
-type Dnd5eInhabitantsFindByWorldAndMonsterParams struct {
-	Dnd5eMonsterID int64 `db:"dnd5e_monster_id"`
-	Dnd5eWorldID   int64 `db:"dnd5e_world_id"`
-}
-
-type Dnd5eInhabitantsFindByWorldAndMonsterRow struct {
-	Dnd5eInhabitantID    int64    `db:"dnd5e_inhabitant_id"`
-	Dnd5eMonsterID       int64    `db:"dnd5e_monster_id"`
-	Dnd5eWorldID         int64    `db:"dnd5e_world_id"`
-	Name                 string   `db:"name"`
-	Tags                 []string `db:"tags"`
-	MonsterType          string   `db:"monster_type"`
-	Alignment            string   `db:"alignment"`
-	SizeCategory         string   `db:"size_category"`
-	MilliChallengeRating int64    `db:"milli_challenge_rating"`
-	Languages            []string `db:"languages"`
-	Description          string   `db:"description"`
-	UserTags             []string `db:"user_tags"`
-	SystemTags           []string `db:"system_tags"`
-}
-
-func (q *Queries) Dnd5eInhabitantsFindByWorldAndMonster(ctx context.Context, arg Dnd5eInhabitantsFindByWorldAndMonsterParams) ([]Dnd5eInhabitantsFindByWorldAndMonsterRow, error) {
-	rows, err := q.query(ctx, q.dnd5eInhabitantsFindByWorldAndMonsterStmt, dnd5eInhabitantsFindByWorldAndMonster, arg.Dnd5eMonsterID, arg.Dnd5eWorldID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Dnd5eInhabitantsFindByWorldAndMonsterRow{}
-	for rows.Next() {
-		var i Dnd5eInhabitantsFindByWorldAndMonsterRow
-		if err := rows.Scan(
-			&i.Dnd5eInhabitantID,
-			&i.Dnd5eMonsterID,
-			&i.Dnd5eWorldID,
-			&i.Name,
-			pq.Array(&i.Tags),
-			&i.MonsterType,
-			&i.Alignment,
-			&i.SizeCategory,
-			&i.MilliChallengeRating,
-			pq.Array(&i.Languages),
-			&i.Description,
-			pq.Array(&i.UserTags),
-			pq.Array(&i.SystemTags),
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const dnd5eLanguageFindAll = `-- name: Dnd5eLanguageFindAll :many
 SELECT dnd5e_language_id, created_by, created_at, version, name
 FROM "dnd5e_language" l
@@ -205,7 +46,7 @@ func (q *Queries) Dnd5eLanguageFindAll(ctx context.Context) ([]Dnd5eLanguage, er
 }
 
 const dnd5eMonsterFindById = `-- name: Dnd5eMonsterFindById :many
-SELECT dnd5e_monster_id, created_by, created_at, version, first_world_id, name, tags, monster_type, alignment, size_category, milli_challenge_rating, languages, description
+SELECT dnd5e_monster_id, created_by, created_at, version, dnd5e_world_id, name, user_tags, system_tags, monster_type, alignment, size_category, milli_challenge_rating, languages, description
 FROM "dnd5e_monster" m
 WHERE m.dnd5e_monster_id = $1
 `
@@ -224,15 +65,89 @@ func (q *Queries) Dnd5eMonsterFindById(ctx context.Context, dnd5eMonsterID int64
 			&i.CreatedBy,
 			&i.CreatedAt,
 			&i.Version,
-			&i.FirstWorldID,
+			&i.Dnd5eWorldID,
 			&i.Name,
-			pq.Array(&i.Tags),
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
 			&i.MonsterType,
 			&i.Alignment,
 			&i.SizeCategory,
 			&i.MilliChallengeRating,
 			pq.Array(&i.Languages),
 			&i.Description,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const dnd5eMonstersFindByWorld = `-- name: Dnd5eMonstersFindByWorld :many
+SELECT m.dnd5e_monster_id,
+       m.dnd5e_world_id,
+       m.name,
+       m.monster_type,
+       m.alignment,
+       m.size_category,
+       m.milli_challenge_rating,
+       m.languages,
+       m.description,
+       m.user_tags,
+       m.system_tags
+FROM "dnd5e_monster" m
+WHERE wm.dnd5e_world_id = $1
+ORDER BY wm.dnd5e_world_id, wm.dnd5e_monster_id
+OFFSET $2 LIMIT $3
+`
+
+type Dnd5eMonstersFindByWorldParams struct {
+	Dnd5eWorldID sql.NullInt64 `db:"dnd5e_world_id"`
+	RowOffset    int32         `db:"row_offset"`
+	RowLimit     int32         `db:"row_limit"`
+}
+
+type Dnd5eMonstersFindByWorldRow struct {
+	Dnd5eMonsterID       int64         `db:"dnd5e_monster_id"`
+	Dnd5eWorldID         sql.NullInt64 `db:"dnd5e_world_id"`
+	Name                 string        `db:"name"`
+	MonsterType          string        `db:"monster_type"`
+	Alignment            string        `db:"alignment"`
+	SizeCategory         string        `db:"size_category"`
+	MilliChallengeRating int64         `db:"milli_challenge_rating"`
+	Languages            []string      `db:"languages"`
+	Description          string        `db:"description"`
+	UserTags             []string      `db:"user_tags"`
+	SystemTags           []string      `db:"system_tags"`
+}
+
+func (q *Queries) Dnd5eMonstersFindByWorld(ctx context.Context, arg Dnd5eMonstersFindByWorldParams) ([]Dnd5eMonstersFindByWorldRow, error) {
+	rows, err := q.query(ctx, q.dnd5eMonstersFindByWorldStmt, dnd5eMonstersFindByWorld, arg.Dnd5eWorldID, arg.RowOffset, arg.RowLimit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Dnd5eMonstersFindByWorldRow{}
+	for rows.Next() {
+		var i Dnd5eMonstersFindByWorldRow
+		if err := rows.Scan(
+			&i.Dnd5eMonsterID,
+			&i.Dnd5eWorldID,
+			&i.Name,
+			&i.MonsterType,
+			&i.Alignment,
+			&i.SizeCategory,
+			&i.MilliChallengeRating,
+			pq.Array(&i.Languages),
+			&i.Description,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
 		); err != nil {
 			return nil, err
 		}

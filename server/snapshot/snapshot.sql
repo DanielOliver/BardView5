@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.4 (Debian 13.4-1.pgdg100+1)
--- Dumped by pg_dump version 13.4 (Debian 13.4-1.pgdg100+1)
+-- Dumped from database version 13.4 (Debian 13.4-4.pgdg110+1)
+-- Dumped by pg_dump version 13.4 (Debian 13.4-4.pgdg110+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -33,25 +33,6 @@ CREATE TABLE public.common_access (
 ALTER TABLE public.common_access OWNER TO postgres;
 
 --
--- Name: dnd5e_inhabitant; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.dnd5e_inhabitant (
-    dnd5e_inhabitant_id bigint NOT NULL,
-    created_by bigint,
-    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    version bigint DEFAULT 0 NOT NULL,
-    user_tags text[] NOT NULL,
-    system_tags text[] NOT NULL,
-    dnd5e_world_id bigint NOT NULL,
-    dnd5e_monster_id bigint NOT NULL,
-    original_world boolean DEFAULT false NOT NULL
-);
-
-
-ALTER TABLE public.dnd5e_inhabitant OWNER TO postgres;
-
---
 -- Name: dnd5e_language; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -75,9 +56,10 @@ CREATE TABLE public.dnd5e_monster (
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     version bigint DEFAULT 0 NOT NULL,
-    first_world_id bigint,
+    dnd5e_world_id bigint,
     name text NOT NULL,
-    tags text[] NOT NULL,
+    user_tags text[] NOT NULL,
+    system_tags text[] NOT NULL,
     monster_type text NOT NULL,
     alignment text NOT NULL,
     size_category text NOT NULL,
@@ -246,14 +228,6 @@ ALTER TABLE ONLY public.common_access
 
 
 --
--- Name: dnd5e_inhabitant dnd5e_inhabitant_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_inhabitant
-    ADD CONSTRAINT dnd5e_inhabitant_pk PRIMARY KEY (dnd5e_inhabitant_id);
-
-
---
 -- Name: dnd5e_language dnd5e_language_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -342,10 +316,17 @@ ALTER TABLE ONLY public."user"
 
 
 --
--- Name: dnd5e_inhabitant_world_monster; Type: INDEX; Schema: public; Owner: postgres
+-- Name: dnd5e_monster_world; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX dnd5e_inhabitant_world_monster ON public.dnd5e_inhabitant USING btree (dnd5e_world_id, dnd5e_monster_id);
+CREATE INDEX dnd5e_monster_world ON public.dnd5e_monster USING btree (dnd5e_world_id, dnd5e_monster_id);
+
+
+--
+-- Name: dnd5e_monster_world_name; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX dnd5e_monster_world_name ON public.dnd5e_monster USING btree (dnd5e_world_id, name) INCLUDE (dnd5e_monster_id);
 
 
 --
@@ -360,30 +341,6 @@ CREATE UNIQUE INDEX user_email_uindex ON public."user" USING btree (email);
 --
 
 CREATE UNIQUE INDEX user_uuid_uindex ON public."user" USING btree (uuid);
-
-
---
--- Name: dnd5e_inhabitant fk_dnd5e_inhabitant_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_inhabitant
-    ADD CONSTRAINT fk_dnd5e_inhabitant_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
-
-
---
--- Name: dnd5e_inhabitant fk_dnd5e_inhabitant_monster; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_inhabitant
-    ADD CONSTRAINT fk_dnd5e_inhabitant_monster FOREIGN KEY (dnd5e_monster_id) REFERENCES public.dnd5e_monster(dnd5e_monster_id);
-
-
---
--- Name: dnd5e_inhabitant fk_dnd5e_inhabitant_world; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_inhabitant
-    ADD CONSTRAINT fk_dnd5e_inhabitant_world FOREIGN KEY (dnd5e_world_id) REFERENCES public.dnd5e_world(dnd5e_world_id);
 
 
 --
@@ -431,7 +388,7 @@ ALTER TABLE ONLY public.dnd5e_monster_type
 --
 
 ALTER TABLE ONLY public.dnd5e_monster
-    ADD CONSTRAINT fk_dnd5e_monster_world FOREIGN KEY (first_world_id) REFERENCES public.dnd5e_world(dnd5e_world_id);
+    ADD CONSTRAINT fk_dnd5e_monster_world FOREIGN KEY (dnd5e_world_id) REFERENCES public.dnd5e_world(dnd5e_world_id);
 
 
 --

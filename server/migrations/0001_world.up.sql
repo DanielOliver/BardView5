@@ -95,9 +95,10 @@ create table "dnd5e_monster"
     created_by             bigint null,
     created_at             timestamp without time zone default (now() at time zone 'utc') not null,
     version                bigint not null             default (0),
-    first_world_id         bigint null,
+    dnd5e_world_id         bigint null,
     name                   text   not null,
-    tags                   text[] not null,
+    user_tags              text[] not null,
+    system_tags            text[] not null,
     monster_type           text   not null,
     alignment              text   not null,
     size_category          text   not null,
@@ -110,7 +111,7 @@ create table "dnd5e_monster"
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id),
     CONSTRAINT fk_dnd5e_monster_world
-        FOREIGN KEY (first_world_id)
+        FOREIGN KEY (dnd5e_world_id)
             REFERENCES "dnd5e_world" (dnd5e_world_id),
     CONSTRAINT fk_dnd5e_monster_dnd5e_size_category
         FOREIGN KEY (size_category)
@@ -120,33 +121,9 @@ create table "dnd5e_monster"
             REFERENCES "dnd5e_monster_type" (name)
 );
 
-create table "dnd5e_inhabitant"
-(
+create index dnd5e_monster_world on dnd5e_monster (dnd5e_world_id, dnd5e_monster_id);
 
-    dnd5e_inhabitant_id bigint
-        constraint dnd5e_inhabitant_pk
-            primary key,
-    created_by          bigint  null,
-    created_at          timestamp without time zone default (now() at time zone 'utc') not null,
-    version             bigint  not null            default (0),
-    user_tags           text[]  not null,
-    system_tags         text[]  not null,
-    dnd5e_world_id      bigint  not null,
-    dnd5e_monster_id    bigint  not null,
-    original_world      boolean not null            default (false),
-
-    CONSTRAINT fk_dnd5e_inhabitant_createdby
-        FOREIGN KEY (created_by)
-            REFERENCES "user" (user_id),
-    CONSTRAINT fk_dnd5e_inhabitant_world
-        FOREIGN KEY (dnd5e_world_id)
-            REFERENCES "dnd5e_world" (dnd5e_world_id),
-    CONSTRAINT fk_dnd5e_inhabitant_monster
-        FOREIGN KEY (dnd5e_monster_id)
-            REFERENCES "dnd5e_monster" (dnd5e_monster_id)
-);
-
-create index dnd5e_inhabitant_world_monster on dnd5e_inhabitant (dnd5e_world_id, dnd5e_monster_id);
+create index dnd5e_monster_world_name on dnd5e_monster (dnd5e_world_id, name) include (dnd5e_monster_id);
 
 create table "dnd5e_language"
 (
