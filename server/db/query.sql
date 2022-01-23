@@ -72,8 +72,8 @@ WHERE m.dnd5e_monster_id = @dnd5e_monster_id;
 -- name: Dnd5eMonstersFindByWorld :many
 SELECT *
 FROM "dnd5e_monster" m
-WHERE wm.dnd5e_world_id = @dnd5e_world_id
-ORDER BY wm.dnd5e_world_id, wm.dnd5e_monster_id
+WHERE m.dnd5e_world_id = @dnd5e_world_id
+ORDER BY m.dnd5e_world_id, m.dnd5e_monster_id
 OFFSET @row_offset LIMIT @row_limit;
 
 -- name: Dnd5eSizeCategoryFindAll :many

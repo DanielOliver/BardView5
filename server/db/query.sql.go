@@ -92,8 +92,8 @@ func (q *Queries) Dnd5eMonsterFindById(ctx context.Context, dnd5eMonsterID int64
 const dnd5eMonstersFindByWorld = `-- name: Dnd5eMonstersFindByWorld :many
 SELECT dnd5e_monster_id, created_by, created_at, version, dnd5e_world_id, name, user_tags, system_tags, monster_type, alignment, size_category, milli_challenge_rating, languages, description
 FROM "dnd5e_monster" m
-WHERE wm.dnd5e_world_id = $1
-ORDER BY wm.dnd5e_world_id, wm.dnd5e_monster_id
+WHERE m.dnd5e_world_id = $1
+ORDER BY m.dnd5e_world_id, m.dnd5e_monster_id
 OFFSET $2 LIMIT $3
 `
 
