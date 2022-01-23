@@ -13,22 +13,17 @@ import (
 func mapDnd5eWorldToJsonBody(dnd5eWorld *db.Dnd5eWorld) *api.Dnd5eWorldGet {
 	ret := &api.Dnd5eWorldGet{
 		Dnd5eWorld: api.Dnd5eWorld{
-			Active:           dnd5eWorld.IsActive,
-			CommonAccess:     dnd5eWorld.CommonAccess,
-			DerivedFromWorld: nil,
-			Module:           nil,
-			Name:             dnd5eWorld.Name,
-			Description:      dnd5eWorld.Description,
-			SystemTags:       dnd5eWorld.SystemTags,
-			UserTags:         dnd5eWorld.UserTags,
+			Active:       dnd5eWorld.IsActive,
+			CommonAccess: dnd5eWorld.CommonAccess,
+			Module:       nil,
+			Name:         dnd5eWorld.Name,
+			Description:  dnd5eWorld.Description,
+			SystemTags:   dnd5eWorld.SystemTags,
+			UserTags:     dnd5eWorld.UserTags,
 		},
 		Created:      api.Created(dnd5eWorld.CreatedAt.Format(time.RFC3339)),
 		Dnd5eWorldId: strconv.FormatInt(dnd5eWorld.Dnd5eWorldID, 10),
 		Version:      dnd5eWorld.Version,
-	}
-	if dnd5eWorld.DerivedFromWorld.Valid {
-		val := strconv.FormatInt(dnd5eWorld.DerivedFromWorld.Int64, 10)
-		ret.Dnd5eWorld.DerivedFromWorld = &val
 	}
 	if dnd5eWorld.Module.Valid {
 		ret.Dnd5eWorld.Module = &dnd5eWorld.Module.String
@@ -147,16 +142,15 @@ func Dnd5eWorldHasAccess(b *BardView5Http, dnd5eWorld *db.Dnd5eWorld) error {
 func Dnd5eWorldCreate(b *BardView5Http, body *api.PostApiV1Dnd5eWorldsJSONBody) (int64, error) {
 	newDnd5eWorldId := b.GenDnd5eWorld().Generate().Int64()
 	changedRows, err := b.Querier().Dnd5eWorldInsert(b.Context, db.Dnd5eWorldInsertParams{
-		Dnd5eWorldID:     newDnd5eWorldId,
-		DerivedFromWorld: MaybeInt64S(body.DerivedFromWorld),
-		CommonAccess:     body.CommonAccess,
-		CreatedBy:        MaybeInt64(&b.Session.SessionId),
-		IsActive:         body.Active,
-		SystemTags:       body.SystemTags,
-		UserTags:         body.UserTags,
-		Name:             body.Name,
-		Module:           MaybeString(body.Module),
-		Description:      body.Description,
+		Dnd5eWorldID: newDnd5eWorldId,
+		CommonAccess: body.CommonAccess,
+		CreatedBy:    MaybeInt64(&b.Session.SessionId),
+		IsActive:     body.Active,
+		SystemTags:   body.SystemTags,
+		UserTags:     body.UserTags,
+		Name:         body.Name,
+		Module:       MaybeString(body.Module),
+		Description:  body.Description,
 	})
 	if err != nil {
 		b.Logger.Err(err).Msg(ObjDnd5eWorld)

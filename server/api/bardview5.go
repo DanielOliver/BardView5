@@ -23,14 +23,13 @@ type Created string
 
 // Dnd5eWorld defines model for Dnd5eWorld.
 type Dnd5eWorld struct {
-	Active           bool       `json:"active"`
-	CommonAccess     string     `binding:"required,oneof=private anyuser public" json:"commonAccess"`
-	DerivedFromWorld *string    `json:"derivedFromWorld,omitempty"`
-	Description      string     `binding:"required,min=1,max=1024" json:"description"`
-	Module           *string    `binding:"min=1,max=512" json:"module,omitempty"`
-	Name             string     `binding:"required,min=1,max=512" json:"name"`
-	SystemTags       SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags"`
-	UserTags         UserTags   `binding:"required,max=64,dive,max=256" json:"userTags"`
+	Active       bool       `json:"active"`
+	CommonAccess string     `binding:"required,oneof=private anyuser public" json:"commonAccess"`
+	Description  string     `binding:"required,min=1,max=1024" json:"description"`
+	Module       *string    `binding:"min=1,max=512" json:"module,omitempty"`
+	Name         string     `binding:"required,min=1,max=512" json:"name"`
+	SystemTags   SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags"`
+	UserTags     UserTags   `binding:"required,max=64,dive,max=256" json:"userTags"`
 }
 
 // Dnd5eWorldGet defines model for Dnd5eWorldGet.
