@@ -13,5 +13,4 @@ export type Dnd5eWorld = {
     commonAccess: string;
     userTags: UserTags;
     systemTags: SystemTags;
-    derivedFromWorld?: string;
 }

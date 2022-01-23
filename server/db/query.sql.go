@@ -90,17 +90,7 @@ func (q *Queries) Dnd5eMonsterFindById(ctx context.Context, dnd5eMonsterID int64
 }
 
 const dnd5eMonstersFindByWorld = `-- name: Dnd5eMonstersFindByWorld :many
-SELECT m.dnd5e_monster_id,
-       m.dnd5e_world_id,
-       m.name,
-       m.monster_type,
-       m.alignment,
-       m.size_category,
-       m.milli_challenge_rating,
-       m.languages,
-       m.description,
-       m.user_tags,
-       m.system_tags
+SELECT dnd5e_monster_id, created_by, created_at, version, dnd5e_world_id, name, user_tags, system_tags, monster_type, alignment, size_category, milli_challenge_rating, languages, description
 FROM "dnd5e_monster" m
 WHERE wm.dnd5e_world_id = $1
 ORDER BY wm.dnd5e_world_id, wm.dnd5e_monster_id
@@ -113,41 +103,30 @@ type Dnd5eMonstersFindByWorldParams struct {
 	RowLimit     int32         `db:"row_limit"`
 }
 
-type Dnd5eMonstersFindByWorldRow struct {
-	Dnd5eMonsterID       int64         `db:"dnd5e_monster_id"`
-	Dnd5eWorldID         sql.NullInt64 `db:"dnd5e_world_id"`
-	Name                 string        `db:"name"`
-	MonsterType          string        `db:"monster_type"`
-	Alignment            string        `db:"alignment"`
-	SizeCategory         string        `db:"size_category"`
-	MilliChallengeRating int64         `db:"milli_challenge_rating"`
-	Languages            []string      `db:"languages"`
-	Description          string        `db:"description"`
-	UserTags             []string      `db:"user_tags"`
-	SystemTags           []string      `db:"system_tags"`
-}
-
-func (q *Queries) Dnd5eMonstersFindByWorld(ctx context.Context, arg Dnd5eMonstersFindByWorldParams) ([]Dnd5eMonstersFindByWorldRow, error) {
+func (q *Queries) Dnd5eMonstersFindByWorld(ctx context.Context, arg Dnd5eMonstersFindByWorldParams) ([]Dnd5eMonster, error) {
 	rows, err := q.query(ctx, q.dnd5eMonstersFindByWorldStmt, dnd5eMonstersFindByWorld, arg.Dnd5eWorldID, arg.RowOffset, arg.RowLimit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Dnd5eMonstersFindByWorldRow{}
+	items := []Dnd5eMonster{}
 	for rows.Next() {
-		var i Dnd5eMonstersFindByWorldRow
+		var i Dnd5eMonster
 		if err := rows.Scan(
 			&i.Dnd5eMonsterID,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
 			&i.Dnd5eWorldID,
 			&i.Name,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
 			&i.MonsterType,
 			&i.Alignment,
 			&i.SizeCategory,
 			&i.MilliChallengeRating,
 			pq.Array(&i.Languages),
 			&i.Description,
-			pq.Array(&i.UserTags),
-			pq.Array(&i.SystemTags),
 		); err != nil {
 			return nil, err
 		}
@@ -239,7 +218,7 @@ func (q *Queries) Dnd5eWorldFindAssignment(ctx context.Context, arg Dnd5eWorldFi
 }
 
 const dnd5eWorldFindByAssignment = `-- name: Dnd5eWorldFindByAssignment :many
-SELECT DISTINCT w.dnd5e_world_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.derived_from_world, w.name, w.module, w.description, w.external_source_id, w.external_source_key
+SELECT DISTINCT w.dnd5e_world_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.name, w.module, w.description, w.external_source_id, w.external_source_key
 FROM "dnd5e_world" w
          INNER JOIN "dnd5e_world_assignment" wa ON
     w.dnd5e_world_id = wa.dnd5e_world_id
@@ -265,7 +244,6 @@ func (q *Queries) Dnd5eWorldFindByAssignment(ctx context.Context, userID int64) 
 			&i.CommonAccess,
 			pq.Array(&i.UserTags),
 			pq.Array(&i.SystemTags),
-			&i.DerivedFromWorld,
 			&i.Name,
 			&i.Module,
 			&i.Description,
@@ -286,7 +264,7 @@ func (q *Queries) Dnd5eWorldFindByAssignment(ctx context.Context, userID int64) 
 }
 
 const dnd5eWorldFindById = `-- name: Dnd5eWorldFindById :many
-SELECT dnd5e_world_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, derived_from_world, name, module, description, external_source_id, external_source_key
+SELECT dnd5e_world_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, name, module, description, external_source_id, external_source_key
 FROM "dnd5e_world" w
 WHERE w.dnd5e_world_id = $1
 `
@@ -309,7 +287,6 @@ func (q *Queries) Dnd5eWorldFindById(ctx context.Context, dnd5eWorldID int64) ([
 			&i.CommonAccess,
 			pq.Array(&i.UserTags),
 			pq.Array(&i.SystemTags),
-			&i.DerivedFromWorld,
 			&i.Name,
 			&i.Module,
 			&i.Description,
@@ -330,29 +307,27 @@ func (q *Queries) Dnd5eWorldFindById(ctx context.Context, dnd5eWorldID int64) ([
 }
 
 const dnd5eWorldInsert = `-- name: Dnd5eWorldInsert :execrows
-insert into "dnd5e_world" (dnd5e_world_id, derived_from_world, common_access, created_by, is_active, system_tags,
+insert into "dnd5e_world" (dnd5e_world_id, common_access, created_by, is_active, system_tags,
                            user_tags, "name", module, description)
-VALUES ($1, $2, $3, $4, $5,
-        $6, $7, $8, $9, $10)
+VALUES ($1, $2, $3, $4,
+        $5, $6, $7, $8, $9)
 `
 
 type Dnd5eWorldInsertParams struct {
-	Dnd5eWorldID     int64          `db:"dnd5e_world_id"`
-	DerivedFromWorld sql.NullInt64  `db:"derived_from_world"`
-	CommonAccess     string         `db:"common_access"`
-	CreatedBy        sql.NullInt64  `db:"created_by"`
-	IsActive         bool           `db:"is_active"`
-	SystemTags       []string       `db:"system_tags"`
-	UserTags         []string       `db:"user_tags"`
-	Name             string         `db:"name"`
-	Module           sql.NullString `db:"module"`
-	Description      string         `db:"description"`
+	Dnd5eWorldID int64          `db:"dnd5e_world_id"`
+	CommonAccess string         `db:"common_access"`
+	CreatedBy    sql.NullInt64  `db:"created_by"`
+	IsActive     bool           `db:"is_active"`
+	SystemTags   []string       `db:"system_tags"`
+	UserTags     []string       `db:"user_tags"`
+	Name         string         `db:"name"`
+	Module       sql.NullString `db:"module"`
+	Description  string         `db:"description"`
 }
 
 func (q *Queries) Dnd5eWorldInsert(ctx context.Context, arg Dnd5eWorldInsertParams) (int64, error) {
 	result, err := q.exec(ctx, q.dnd5eWorldInsertStmt, dnd5eWorldInsert,
 		arg.Dnd5eWorldID,
-		arg.DerivedFromWorld,
 		arg.CommonAccess,
 		arg.CreatedBy,
 		arg.IsActive,

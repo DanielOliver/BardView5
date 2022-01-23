@@ -113,7 +113,6 @@ CREATE TABLE public.dnd5e_world (
     common_access text NOT NULL,
     user_tags text[] NOT NULL,
     system_tags text[] NOT NULL,
-    derived_from_world bigint,
     name text NOT NULL,
     module text,
     description text NOT NULL,
@@ -437,14 +436,6 @@ ALTER TABLE ONLY public.dnd5e_world
 
 ALTER TABLE ONLY public.dnd5e_world
     ADD CONSTRAINT fk_dnd5e_world_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
-
-
---
--- Name: dnd5e_world fk_dnd5e_world_derived_from; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_world
-    ADD CONSTRAINT fk_dnd5e_world_derived_from FOREIGN KEY (derived_from_world) REFERENCES public.dnd5e_world(dnd5e_world_id);
 
 
 --

@@ -63,7 +63,6 @@ type Dnd5eWorld struct {
 	CommonAccess      string         `db:"common_access"`
 	UserTags          []string       `db:"user_tags"`
 	SystemTags        []string       `db:"system_tags"`
-	DerivedFromWorld  sql.NullInt64  `db:"derived_from_world"`
 	Name              string         `db:"name"`
 	Module            sql.NullString `db:"module"`
 	Description       string         `db:"description"`

@@ -10,7 +10,6 @@ create table "dnd5e_world"
     common_access       text    not null,
     user_tags           text[]  not null,
     system_tags         text[]  not null,
-    derived_from_world  bigint  null,
     name                text    not null,
     module              text    null,
     description         text    not null,
@@ -23,9 +22,6 @@ create table "dnd5e_world"
     CONSTRAINT fk_dnd5e_world_commonaccess
         FOREIGN KEY (common_access)
             REFERENCES common_access (name),
-    CONSTRAINT fk_dnd5e_world_derived_from
-        FOREIGN KEY (derived_from_world)
-            REFERENCES "dnd5e_world" (dnd5e_world_id),
 
     CONSTRAINT fk_dnd5e_world_derived_from_external_source
         FOREIGN KEY (external_source_id)

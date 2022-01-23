@@ -30,9 +30,9 @@ WHERE u.user_id = @user_id
   AND u.version = @version RETURNING *;
 
 -- name: Dnd5eWorldInsert :execrows
-insert into "dnd5e_world" (dnd5e_world_id, derived_from_world, common_access, created_by, is_active, system_tags,
+insert into "dnd5e_world" (dnd5e_world_id, common_access, created_by, is_active, system_tags,
                            user_tags, "name", module, description)
-VALUES (@dnd5e_world_id, @derived_from_world, @common_access, @created_by, @is_active,
+VALUES (@dnd5e_world_id, @common_access, @created_by, @is_active,
         @system_tags, @user_tags, @name, @module, @description);
 
 -- name: Dnd5eWorldFindById :many
@@ -70,17 +70,7 @@ FROM "dnd5e_monster" m
 WHERE m.dnd5e_monster_id = @dnd5e_monster_id;
 
 -- name: Dnd5eMonstersFindByWorld :many
-SELECT m.dnd5e_monster_id,
-       m.dnd5e_world_id,
-       m.name,
-       m.monster_type,
-       m.alignment,
-       m.size_category,
-       m.milli_challenge_rating,
-       m.languages,
-       m.description,
-       m.user_tags,
-       m.system_tags
+SELECT *
 FROM "dnd5e_monster" m
 WHERE wm.dnd5e_world_id = @dnd5e_world_id
 ORDER BY wm.dnd5e_world_id, wm.dnd5e_monster_id
