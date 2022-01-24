@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useMutation } from 'react-query'
 import { bv5V1CreateDnd5eWorld } from '../../../services/bardview5'
+import { Dnd5eWorldPostOk } from '../../../bv5-server'
 
 const CommonAccessValues = ['private', 'anyuser', 'public'] as const
 const CommonAccessText = ['Private', 'Any User', 'Public'] as const
@@ -22,10 +23,8 @@ const WorldCreateSchema = z.object({
 type WorldCreate = z.infer<typeof WorldCreateSchema>
 
 function Dnd5eWorldCreate () {
-  const mutation = useMutation(async (world: WorldCreate) => {
-    console.log(world)
-
-    await bv5V1CreateDnd5eWorld({
+  const mutation = useMutation<Dnd5eWorldPostOk, unknown, WorldCreate>(async (world: WorldCreate) => {
+    const { data } = await bv5V1CreateDnd5eWorld({
       name: world.name,
       description: world.description,
       module: world.module,
@@ -34,6 +33,7 @@ function Dnd5eWorldCreate () {
       commonAccess: world.commonAccess,
       active: world.active
     })
+    return data
   })
 
   const {
@@ -48,7 +48,7 @@ function Dnd5eWorldCreate () {
     <Row>
       <h1>D&D 5e World: Create</h1>
     </Row>
-    <Form onSubmit={handleSubmit(mutation.mutate)}>
+    <Form onSubmit={handleSubmit((d) => mutation.mutate(d))}>
 
       <Row>
         <Form.Group as={Col} className="mb-3">
