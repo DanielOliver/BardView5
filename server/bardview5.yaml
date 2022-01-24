@@ -236,8 +236,8 @@ components:
       type: object
       properties:
         dnd5eWorldId:
-          type: integer
-          format: int64
+          type: string
+          example: 123
         version:
           type: integer
           format: int64

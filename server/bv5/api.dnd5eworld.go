@@ -91,9 +91,9 @@ func PostDnd5eWorldsCreate(b *BardView5Http) {
 
 	b.Context.Header("ETag", "0")
 	b.Context.Header("Location", fmt.Sprintf("/v1/dnd5e/world/%d/", newDnd5eWorldId))
-	b.Context.JSON(http.StatusCreated, api.UserPostOk{
-		UserId:  strconv.FormatInt(newDnd5eWorldId, 10),
-		Version: 0,
+	b.Context.JSON(http.StatusCreated, api.Dnd5eWorldPostOk{
+		Dnd5eWorldId: strconv.FormatInt(newDnd5eWorldId, 10),
+		Version:      0,
 	})
 }
 

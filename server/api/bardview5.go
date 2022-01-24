@@ -45,8 +45,8 @@ type Dnd5eWorldGet struct {
 
 // Dnd5eWorldPostOk defines model for Dnd5eWorldPostOk.
 type Dnd5eWorldPostOk struct {
-	Dnd5eWorldId int64 `json:"dnd5eWorldId"`
-	Version      int64 `json:"version"`
+	Dnd5eWorldId string `json:"dnd5eWorldId"`
+	Version      int64  `json:"version"`
 }
 
 // Email defines model for Email.

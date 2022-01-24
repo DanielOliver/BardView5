@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Button, Col, Container, Form, Row, Spinner } from 'react-bootstrap'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { useMutation } from 'react-query'
 import { bv5V1CreateDnd5eWorld } from '../../../services/bardview5'
 import { Dnd5eWorldPostOk } from '../../../bv5-server'
+import { useNavigate } from 'react-router-dom'
 
 const CommonAccessValues = ['private', 'anyuser', 'public'] as const
 const CommonAccessText = ['Private', 'Any User', 'Public'] as const
@@ -36,6 +37,8 @@ function Dnd5eWorldCreate () {
     return data
   })
 
+  const navigate = useNavigate()
+
   const {
     register,
     handleSubmit,
@@ -43,6 +46,12 @@ function Dnd5eWorldCreate () {
   } = useForm<WorldCreate>({
     resolver: zodResolver(WorldCreateSchema)
   })
+
+  useEffect(() => {
+    if (mutation.isSuccess && mutation.data?.dnd5eWorldId !== undefined) {
+      navigate(`/dnd5e/worlds/${mutation.data.dnd5eWorldId}`)
+    }
+  }, [mutation])
 
   return <Container fluid="lg">
     <Row>

@@ -53,10 +53,10 @@ function App () {
                     <Route path="/" element={<LayoutWrapper><HomeRoute/> </LayoutWrapper>}/>
                     <Route path="/dnd5e/worlds/create"
                            element={<LayoutWrapper><Dnd5eWorldCreate/></LayoutWrapper>}/>
-                    <Route path="/dnd5e/worlds/:dnd5eWorldId"
-                           element={<LayoutWrapper><Dnd5eWorldView/></LayoutWrapper>}/>
-                    <Route path="/*" element={<h1>Unknown</h1>}/>
                   </Route>
+                  <Route path="/dnd5e/worlds/:dnd5eWorldId"
+                         element={<LayoutWrapper><Dnd5eWorldView/></LayoutWrapper>}/>
+                  <Route path="/*" element={<h1>Unknown</h1>}/>
               </Routes>
             </BrowserRouter>
           </div>
