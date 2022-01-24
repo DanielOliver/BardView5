@@ -8,6 +8,7 @@ import RegisterRoute from './routes/register.route'
 import LoginRoute from './routes/login.route'
 import LayoutWrapper from './components/LayoutWrapper'
 import ProtectedRoute from './components/ProtectedRoute'
+import Dnd5eWorldCreate from './routes/dnd5e/worlds/create.route'
 
 function App () {
   const [state, dispatch] = React.useReducer(AuthReducer, AuthInitialState)
@@ -50,6 +51,8 @@ function App () {
                   <Route path="/login" element={<LayoutWrapper><LoginRoute/></LayoutWrapper>}/>
                   <Route path="/" element={<ProtectedRoute isAuthenticated={state.isAuthenticated}/>}>
                     <Route path="/" element={<LayoutWrapper><HomeRoute/> </LayoutWrapper>}/>
+                    <Route path="/dnd5e/worlds/create"
+                           element={<LayoutWrapper><Dnd5eWorldCreate/></LayoutWrapper>}/>
                     <Route path="/dnd5e/worlds/:dnd5eWorldId"
                            element={<LayoutWrapper><Dnd5eWorldView/></LayoutWrapper>}/>
                     <Route path="/*" element={<h1>Unknown</h1>}/>

@@ -86,17 +86,7 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              dnd5eWorldId:
-                type: integer
-                format: int64
-              version:
-                type: integer
-                format: int64
-            required:
-              - dnd5eWorldId
-              - version
+            $ref: '#/components/schemas/Dnd5eWorldPostOk'
       headers:
         ETag:
           schema:
@@ -203,7 +193,7 @@ components:
           maxLength: 512
           minLength: 1
           x-oapi-codegen-extra-tags:
-            binding: "min=1,max=512"
+            binding: "max=512"
         active:
           type: boolean
           example: true
@@ -242,6 +232,18 @@ components:
             - dnd5eWorldId
             - created
             - version
+    Dnd5eWorldPostOk:
+      type: object
+      properties:
+        dnd5eWorldId:
+          type: integer
+          format: int64
+        version:
+          type: integer
+          format: int64
+      required:
+        - dnd5eWorldId
+        - version
     User:
       type: object
       properties:

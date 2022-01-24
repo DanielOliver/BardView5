@@ -26,7 +26,7 @@ type Dnd5eWorld struct {
 	Active       bool       `json:"active"`
 	CommonAccess string     `binding:"required,oneof=private anyuser public" json:"commonAccess"`
 	Description  string     `binding:"required,min=1,max=1024" json:"description"`
-	Module       *string    `binding:"min=1,max=512" json:"module,omitempty"`
+	Module       *string    `binding:"max=512" json:"module,omitempty"`
 	Name         string     `binding:"required,min=1,max=512" json:"name"`
 	SystemTags   SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags"`
 	UserTags     UserTags   `binding:"required,max=64,dive,max=256" json:"userTags"`
@@ -41,6 +41,12 @@ type Dnd5eWorldGet struct {
 	Created      Created `json:"created"`
 	Dnd5eWorldId string  `json:"dnd5eWorldId"`
 	Version      int64   `json:"version"`
+}
+
+// Dnd5eWorldPostOk defines model for Dnd5eWorldPostOk.
+type Dnd5eWorldPostOk struct {
+	Dnd5eWorldId int64 `json:"dnd5eWorldId"`
+	Version      int64 `json:"version"`
 }
 
 // Email defines model for Email.
@@ -112,12 +118,6 @@ type Dnd5eWorldArrayGetOk []Dnd5eWorldGet
 
 // Dnd5eWorldGetOk defines model for Dnd5eWorldGetOk.
 type Dnd5eWorldGetOk Dnd5eWorldGet
-
-// Dnd5eWorldPostOk defines model for Dnd5eWorldPostOk.
-type Dnd5eWorldPostOk struct {
-	Dnd5eWorldId int64 `json:"dnd5eWorldId"`
-	Version      int64 `json:"version"`
-}
 
 // UserGetOk defines model for UserGetOk.
 type UserGetOk UserGet

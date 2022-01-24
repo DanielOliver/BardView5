@@ -4,6 +4,7 @@
 export type { Created } from './models/Created';
 export type { Dnd5eWorld } from './models/Dnd5eWorld';
 export type { Dnd5eWorldGet } from './models/Dnd5eWorldGet';
+export type { Dnd5eWorldPostOk } from './models/Dnd5eWorldPostOk';
 export type { Email } from './models/Email';
 export type { LastModified } from './models/LastModified';
 export type { PatchDocument } from './models/PatchDocument';
