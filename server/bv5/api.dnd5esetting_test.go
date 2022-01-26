@@ -6,11 +6,11 @@ import (
 	"testing"
 )
 
-func TestDnd5eWorldCreate(t *testing.T) {
+func TestDnd5eSettingCreate(t *testing.T) {
 	bv5Http := CreateBv5Test(6)
 	CreateBv5TestSessionUser(bv5Http)
 
-	newDnd5eWorldId, err := Dnd5eWorldCreate(bv5Http, &api.PostApiV1Dnd5eWorldsJSONBody{
+	newDnd5eSettingId, err := Dnd5eSettingCreate(bv5Http, &api.PostApiV1Dnd5eSettingsJSONBody{
 		Active:       true,
 		CommonAccess: CommonAccessPrivate,
 		Description:  "Describe",
@@ -20,17 +20,17 @@ func TestDnd5eWorldCreate(t *testing.T) {
 		UserTags:     []string{},
 	})
 	assert.NoError(t, err)
-	assert.NotZero(t, newDnd5eWorldId)
+	assert.NotZero(t, newDnd5eSettingId)
 
-	_, err = Dnd5eWorldById(bv5Http, -100)
+	_, err = Dnd5eSettingById(bv5Http, -100)
 	assert.Error(t, err)
 	assert.IsType(t, &CrudError{}, err)
 
-	getThatWorld, err := Dnd5eWorldById(bv5Http, newDnd5eWorldId)
+	getThatSetting, err := Dnd5eSettingById(bv5Http, newDnd5eSettingId)
 	assert.NoError(t, err)
-	assert.Equal(t, "Named", getThatWorld.Name)
-	assert.Equal(t, "Describe", getThatWorld.Description)
+	assert.Equal(t, "Named", getThatSetting.Name)
+	assert.Equal(t, "Describe", getThatSetting.Description)
 
-	err = Dnd5eWorldHasAccess(bv5Http, &getThatWorld)
+	err = Dnd5eSettingHasAccess(bv5Http, &getThatSetting)
 	assert.NoError(t, err)
 }

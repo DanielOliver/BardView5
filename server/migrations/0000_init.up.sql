@@ -55,12 +55,12 @@ create table "role_action"
 );
 
 INSERT INTO role_subject (name)
-VALUES ('dnd5eworld');
+VALUES ('dnd5esetting');
 
 INSERT INTO role_action (name, role_subject)
-VALUES ('manage', 'dnd5eworld'),
-       ('owner', 'dnd5eworld'),
-       ('view', 'dnd5eworld');
+VALUES ('manage', 'dnd5esetting'),
+       ('owner', 'dnd5esetting'),
+       ('view', 'dnd5esetting');
 
 INSERT INTO common_access (name)
 VALUES ('private'),

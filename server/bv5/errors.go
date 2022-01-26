@@ -16,9 +16,9 @@ const (
 	ErrTFailedToRead
 	ErrTInit
 
-	ObjDnd5eWorld           = "dnd5eworld"
-	ObjDnd5eWorldAssignment = "dnd5eworldassignment"
-	ObjUser                 = "user"
+	ObjDnd5eSetting           = "dnd5esetting"
+	ObjDnd5eSettingAssignment = "dnd5esettingassignment"
+	ObjUser                   = "user"
 
 	DepHttpKratos DepHttpType = "httpkratos"
 )

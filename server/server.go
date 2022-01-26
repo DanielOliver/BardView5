@@ -25,11 +25,11 @@ func registerRoutes(router *gin.Engine, b *bv5.BardView5) {
 		}
 		grpDnd5e := grpV1.Group("/dnd5e")
 		{
-			grpDnd5eWorlds := grpDnd5e.Group("/worlds")
+			grpDnd5eSettings := grpDnd5e.Group("/settings")
 			{
-				grpDnd5eWorlds.GET("/assigned", b.RequireValidSession, b.WrapRequest(bv5.GetMyDnd5eWorlds))
-				grpDnd5eWorlds.GET("/:dnd5eWorldId", b.WrapRequest(bv5.GetDnd5eWorldById))
-				grpDnd5eWorlds.POST("", b.RequireValidSession, b.WrapRequest(bv5.PostDnd5eWorldsCreate))
+				grpDnd5eSettings.GET("/assigned", b.RequireValidSession, b.WrapRequest(bv5.GetMyDnd5eSettings))
+				grpDnd5eSettings.GET("/:dnd5eSettingId", b.WrapRequest(bv5.GetDnd5eSettingById))
+				grpDnd5eSettings.POST("", b.RequireValidSession, b.WrapRequest(bv5.PostDnd5eSettingsCreate))
 			}
 		}
 		grpV1.GET("/session", b.GetWhoAmI)

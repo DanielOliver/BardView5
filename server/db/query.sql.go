@@ -46,7 +46,7 @@ func (q *Queries) Dnd5eLanguageFindAll(ctx context.Context) ([]Dnd5eLanguage, er
 }
 
 const dnd5eMonsterFindById = `-- name: Dnd5eMonsterFindById :many
-SELECT dnd5e_monster_id, created_by, created_at, version, dnd5e_world_id, name, user_tags, system_tags, monster_type, alignment, size_category, milli_challenge_rating, languages, description
+SELECT dnd5e_monster_id, created_by, created_at, version, dnd5e_setting_id, name, user_tags, system_tags, monster_type, alignment, size_category, milli_challenge_rating, languages, description
 FROM "dnd5e_monster" m
 WHERE m.dnd5e_monster_id = $1
 `
@@ -65,7 +65,7 @@ func (q *Queries) Dnd5eMonsterFindById(ctx context.Context, dnd5eMonsterID int64
 			&i.CreatedBy,
 			&i.CreatedAt,
 			&i.Version,
-			&i.Dnd5eWorldID,
+			&i.Dnd5eSettingID,
 			&i.Name,
 			pq.Array(&i.UserTags),
 			pq.Array(&i.SystemTags),
@@ -89,22 +89,22 @@ func (q *Queries) Dnd5eMonsterFindById(ctx context.Context, dnd5eMonsterID int64
 	return items, nil
 }
 
-const dnd5eMonstersFindByWorld = `-- name: Dnd5eMonstersFindByWorld :many
-SELECT dnd5e_monster_id, created_by, created_at, version, dnd5e_world_id, name, user_tags, system_tags, monster_type, alignment, size_category, milli_challenge_rating, languages, description
+const dnd5eMonstersFindBySetting = `-- name: Dnd5eMonstersFindBySetting :many
+SELECT dnd5e_monster_id, created_by, created_at, version, dnd5e_setting_id, name, user_tags, system_tags, monster_type, alignment, size_category, milli_challenge_rating, languages, description
 FROM "dnd5e_monster" m
-WHERE m.dnd5e_world_id = $1
-ORDER BY m.dnd5e_world_id, m.dnd5e_monster_id
+WHERE m.dnd5e_setting_id = $1
+ORDER BY m.dnd5e_setting_id, m.dnd5e_monster_id
 OFFSET $2 LIMIT $3
 `
 
-type Dnd5eMonstersFindByWorldParams struct {
-	Dnd5eWorldID sql.NullInt64 `db:"dnd5e_world_id"`
-	RowOffset    int32         `db:"row_offset"`
-	RowLimit     int32         `db:"row_limit"`
+type Dnd5eMonstersFindBySettingParams struct {
+	Dnd5eSettingID sql.NullInt64 `db:"dnd5e_setting_id"`
+	RowOffset      int32         `db:"row_offset"`
+	RowLimit       int32         `db:"row_limit"`
 }
 
-func (q *Queries) Dnd5eMonstersFindByWorld(ctx context.Context, arg Dnd5eMonstersFindByWorldParams) ([]Dnd5eMonster, error) {
-	rows, err := q.query(ctx, q.dnd5eMonstersFindByWorldStmt, dnd5eMonstersFindByWorld, arg.Dnd5eWorldID, arg.RowOffset, arg.RowLimit)
+func (q *Queries) Dnd5eMonstersFindBySetting(ctx context.Context, arg Dnd5eMonstersFindBySettingParams) ([]Dnd5eMonster, error) {
+	rows, err := q.query(ctx, q.dnd5eMonstersFindBySettingStmt, dnd5eMonstersFindBySetting, arg.Dnd5eSettingID, arg.RowOffset, arg.RowLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (q *Queries) Dnd5eMonstersFindByWorld(ctx context.Context, arg Dnd5eMonster
 			&i.CreatedBy,
 			&i.CreatedAt,
 			&i.Version,
-			&i.Dnd5eWorldID,
+			&i.Dnd5eSettingID,
 			&i.Name,
 			pq.Array(&i.UserTags),
 			pq.Array(&i.SystemTags),
@@ -139,6 +139,205 @@ func (q *Queries) Dnd5eMonstersFindByWorld(ctx context.Context, arg Dnd5eMonster
 		return nil, err
 	}
 	return items, nil
+}
+
+const dnd5eSettingFindAssignment = `-- name: Dnd5eSettingFindAssignment :many
+SELECT wa.created_by, wa.created_at, wa.version, wa.user_id, wa.dnd5e_setting_id, wa.role_action
+FROM "dnd5e_setting_assignment" wa
+WHERE wa.user_id = $1
+  AND wa.dnd5e_setting_id = $2
+`
+
+type Dnd5eSettingFindAssignmentParams struct {
+	UserID         int64 `db:"user_id"`
+	Dnd5eSettingID int64 `db:"dnd5e_setting_id"`
+}
+
+func (q *Queries) Dnd5eSettingFindAssignment(ctx context.Context, arg Dnd5eSettingFindAssignmentParams) ([]Dnd5eSettingAssignment, error) {
+	rows, err := q.query(ctx, q.dnd5eSettingFindAssignmentStmt, dnd5eSettingFindAssignment, arg.UserID, arg.Dnd5eSettingID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Dnd5eSettingAssignment{}
+	for rows.Next() {
+		var i Dnd5eSettingAssignment
+		if err := rows.Scan(
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.UserID,
+			&i.Dnd5eSettingID,
+			&i.RoleAction,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const dnd5eSettingFindByAssignment = `-- name: Dnd5eSettingFindByAssignment :many
+SELECT DISTINCT w.dnd5e_setting_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.name, w.module, w.description, w.external_source_id, w.external_source_key
+FROM "dnd5e_setting" w
+         INNER JOIN "dnd5e_setting_assignment" wa ON
+    w.dnd5e_setting_id = wa.dnd5e_setting_id
+WHERE wa.user_id = $1
+ORDER BY w.dnd5e_setting_id desc
+`
+
+func (q *Queries) Dnd5eSettingFindByAssignment(ctx context.Context, userID int64) ([]Dnd5eSetting, error) {
+	rows, err := q.query(ctx, q.dnd5eSettingFindByAssignmentStmt, dnd5eSettingFindByAssignment, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Dnd5eSetting{}
+	for rows.Next() {
+		var i Dnd5eSetting
+		if err := rows.Scan(
+			&i.Dnd5eSettingID,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.IsActive,
+			&i.CommonAccess,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
+			&i.Name,
+			&i.Module,
+			&i.Description,
+			&i.ExternalSourceID,
+			&i.ExternalSourceKey,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const dnd5eSettingFindById = `-- name: Dnd5eSettingFindById :many
+SELECT dnd5e_setting_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, name, module, description, external_source_id, external_source_key
+FROM "dnd5e_setting" w
+WHERE w.dnd5e_setting_id = $1
+`
+
+func (q *Queries) Dnd5eSettingFindById(ctx context.Context, dnd5eSettingID int64) ([]Dnd5eSetting, error) {
+	rows, err := q.query(ctx, q.dnd5eSettingFindByIdStmt, dnd5eSettingFindById, dnd5eSettingID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Dnd5eSetting{}
+	for rows.Next() {
+		var i Dnd5eSetting
+		if err := rows.Scan(
+			&i.Dnd5eSettingID,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.IsActive,
+			&i.CommonAccess,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
+			&i.Name,
+			&i.Module,
+			&i.Description,
+			&i.ExternalSourceID,
+			&i.ExternalSourceKey,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const dnd5eSettingInsert = `-- name: Dnd5eSettingInsert :execrows
+insert into "dnd5e_setting" (dnd5e_setting_id, common_access, created_by, is_active, system_tags,
+                           user_tags, "name", module, description)
+VALUES ($1, $2, $3, $4,
+        $5, $6, $7, $8, $9)
+`
+
+type Dnd5eSettingInsertParams struct {
+	Dnd5eSettingID int64          `db:"dnd5e_setting_id"`
+	CommonAccess   string         `db:"common_access"`
+	CreatedBy      sql.NullInt64  `db:"created_by"`
+	IsActive       bool           `db:"is_active"`
+	SystemTags     []string       `db:"system_tags"`
+	UserTags       []string       `db:"user_tags"`
+	Name           string         `db:"name"`
+	Module         sql.NullString `db:"module"`
+	Description    string         `db:"description"`
+}
+
+func (q *Queries) Dnd5eSettingInsert(ctx context.Context, arg Dnd5eSettingInsertParams) (int64, error) {
+	result, err := q.exec(ctx, q.dnd5eSettingInsertStmt, dnd5eSettingInsert,
+		arg.Dnd5eSettingID,
+		arg.CommonAccess,
+		arg.CreatedBy,
+		arg.IsActive,
+		pq.Array(arg.SystemTags),
+		pq.Array(arg.UserTags),
+		arg.Name,
+		arg.Module,
+		arg.Description,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const dnd5eSettingUpsertAssignment = `-- name: Dnd5eSettingUpsertAssignment :execrows
+insert into "dnd5e_setting_assignment" (created_by, user_id, dnd5e_setting_id, role_action)
+SELECT $1,
+       $2,
+       $3,
+       $4 WHERE NOT EXISTS (
+    SELECT 1 FROM dnd5e_setting_assignment
+    WHERE user_id = $2 AND dnd5e_setting_id = $3 AND role_action = $4
+)
+`
+
+type Dnd5eSettingUpsertAssignmentParams struct {
+	CreatedBy      sql.NullInt64 `db:"created_by"`
+	UserID         int64         `db:"user_id"`
+	Dnd5eSettingID int64         `db:"dnd5e_setting_id"`
+	RoleAction     string        `db:"role_action"`
+}
+
+func (q *Queries) Dnd5eSettingUpsertAssignment(ctx context.Context, arg Dnd5eSettingUpsertAssignmentParams) (int64, error) {
+	result, err := q.exec(ctx, q.dnd5eSettingUpsertAssignmentStmt, dnd5eSettingUpsertAssignment,
+		arg.CreatedBy,
+		arg.UserID,
+		arg.Dnd5eSettingID,
+		arg.RoleAction,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const dnd5eSizeCategoryFindAll = `-- name: Dnd5eSizeCategoryFindAll :many
@@ -173,205 +372,6 @@ func (q *Queries) Dnd5eSizeCategoryFindAll(ctx context.Context) ([]Dnd5eSizeCate
 		return nil, err
 	}
 	return items, nil
-}
-
-const dnd5eWorldFindAssignment = `-- name: Dnd5eWorldFindAssignment :many
-SELECT wa.created_by, wa.created_at, wa.version, wa.user_id, wa.dnd5e_world_id, wa.role_action
-FROM "dnd5e_world_assignment" wa
-WHERE wa.user_id = $1
-  AND wa.dnd5e_world_id = $2
-`
-
-type Dnd5eWorldFindAssignmentParams struct {
-	UserID       int64 `db:"user_id"`
-	Dnd5eWorldID int64 `db:"dnd5e_world_id"`
-}
-
-func (q *Queries) Dnd5eWorldFindAssignment(ctx context.Context, arg Dnd5eWorldFindAssignmentParams) ([]Dnd5eWorldAssignment, error) {
-	rows, err := q.query(ctx, q.dnd5eWorldFindAssignmentStmt, dnd5eWorldFindAssignment, arg.UserID, arg.Dnd5eWorldID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Dnd5eWorldAssignment{}
-	for rows.Next() {
-		var i Dnd5eWorldAssignment
-		if err := rows.Scan(
-			&i.CreatedBy,
-			&i.CreatedAt,
-			&i.Version,
-			&i.UserID,
-			&i.Dnd5eWorldID,
-			&i.RoleAction,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const dnd5eWorldFindByAssignment = `-- name: Dnd5eWorldFindByAssignment :many
-SELECT DISTINCT w.dnd5e_world_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.name, w.module, w.description, w.external_source_id, w.external_source_key
-FROM "dnd5e_world" w
-         INNER JOIN "dnd5e_world_assignment" wa ON
-    w.dnd5e_world_id = wa.dnd5e_world_id
-WHERE wa.user_id = $1
-ORDER BY w.dnd5e_world_id desc
-`
-
-func (q *Queries) Dnd5eWorldFindByAssignment(ctx context.Context, userID int64) ([]Dnd5eWorld, error) {
-	rows, err := q.query(ctx, q.dnd5eWorldFindByAssignmentStmt, dnd5eWorldFindByAssignment, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Dnd5eWorld{}
-	for rows.Next() {
-		var i Dnd5eWorld
-		if err := rows.Scan(
-			&i.Dnd5eWorldID,
-			&i.CreatedBy,
-			&i.CreatedAt,
-			&i.Version,
-			&i.IsActive,
-			&i.CommonAccess,
-			pq.Array(&i.UserTags),
-			pq.Array(&i.SystemTags),
-			&i.Name,
-			&i.Module,
-			&i.Description,
-			&i.ExternalSourceID,
-			&i.ExternalSourceKey,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const dnd5eWorldFindById = `-- name: Dnd5eWorldFindById :many
-SELECT dnd5e_world_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, name, module, description, external_source_id, external_source_key
-FROM "dnd5e_world" w
-WHERE w.dnd5e_world_id = $1
-`
-
-func (q *Queries) Dnd5eWorldFindById(ctx context.Context, dnd5eWorldID int64) ([]Dnd5eWorld, error) {
-	rows, err := q.query(ctx, q.dnd5eWorldFindByIdStmt, dnd5eWorldFindById, dnd5eWorldID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Dnd5eWorld{}
-	for rows.Next() {
-		var i Dnd5eWorld
-		if err := rows.Scan(
-			&i.Dnd5eWorldID,
-			&i.CreatedBy,
-			&i.CreatedAt,
-			&i.Version,
-			&i.IsActive,
-			&i.CommonAccess,
-			pq.Array(&i.UserTags),
-			pq.Array(&i.SystemTags),
-			&i.Name,
-			&i.Module,
-			&i.Description,
-			&i.ExternalSourceID,
-			&i.ExternalSourceKey,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const dnd5eWorldInsert = `-- name: Dnd5eWorldInsert :execrows
-insert into "dnd5e_world" (dnd5e_world_id, common_access, created_by, is_active, system_tags,
-                           user_tags, "name", module, description)
-VALUES ($1, $2, $3, $4,
-        $5, $6, $7, $8, $9)
-`
-
-type Dnd5eWorldInsertParams struct {
-	Dnd5eWorldID int64          `db:"dnd5e_world_id"`
-	CommonAccess string         `db:"common_access"`
-	CreatedBy    sql.NullInt64  `db:"created_by"`
-	IsActive     bool           `db:"is_active"`
-	SystemTags   []string       `db:"system_tags"`
-	UserTags     []string       `db:"user_tags"`
-	Name         string         `db:"name"`
-	Module       sql.NullString `db:"module"`
-	Description  string         `db:"description"`
-}
-
-func (q *Queries) Dnd5eWorldInsert(ctx context.Context, arg Dnd5eWorldInsertParams) (int64, error) {
-	result, err := q.exec(ctx, q.dnd5eWorldInsertStmt, dnd5eWorldInsert,
-		arg.Dnd5eWorldID,
-		arg.CommonAccess,
-		arg.CreatedBy,
-		arg.IsActive,
-		pq.Array(arg.SystemTags),
-		pq.Array(arg.UserTags),
-		arg.Name,
-		arg.Module,
-		arg.Description,
-	)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected()
-}
-
-const dnd5eWorldUpsertAssignment = `-- name: Dnd5eWorldUpsertAssignment :execrows
-insert into "dnd5e_world_assignment" (created_by, user_id, dnd5e_world_id, role_action)
-SELECT $1,
-       $2,
-       $3,
-       $4 WHERE NOT EXISTS (
-    SELECT 1 FROM dnd5e_world_assignment
-    WHERE user_id = $2 AND dnd5e_world_id = $3 AND role_action = $4
-)
-`
-
-type Dnd5eWorldUpsertAssignmentParams struct {
-	CreatedBy    sql.NullInt64 `db:"created_by"`
-	UserID       int64         `db:"user_id"`
-	Dnd5eWorldID int64         `db:"dnd5e_world_id"`
-	RoleAction   string        `db:"role_action"`
-}
-
-func (q *Queries) Dnd5eWorldUpsertAssignment(ctx context.Context, arg Dnd5eWorldUpsertAssignmentParams) (int64, error) {
-	result, err := q.exec(ctx, q.dnd5eWorldUpsertAssignmentStmt, dnd5eWorldUpsertAssignment,
-		arg.CreatedBy,
-		arg.UserID,
-		arg.Dnd5eWorldID,
-		arg.RoleAction,
-	)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected()
 }
 
 const userFindByEmail = `-- name: UserFindByEmail :many

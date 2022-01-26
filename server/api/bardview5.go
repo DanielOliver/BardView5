@@ -21,8 +21,8 @@ const (
 // The created time of this record
 type Created string
 
-// Dnd5eWorld defines model for Dnd5eWorld.
-type Dnd5eWorld struct {
+// Dnd5eSetting defines model for Dnd5eSetting.
+type Dnd5eSetting struct {
 	Active       bool       `json:"active"`
 	CommonAccess string     `binding:"required,oneof=private anyuser public" json:"commonAccess"`
 	Description  string     `binding:"required,min=1,max=1024" json:"description"`
@@ -32,21 +32,21 @@ type Dnd5eWorld struct {
 	UserTags     UserTags   `binding:"required,max=64,dive,max=256" json:"userTags"`
 }
 
-// Dnd5eWorldGet defines model for Dnd5eWorldGet.
-type Dnd5eWorldGet struct {
-	// Embedded struct due to allOf(#/components/schemas/Dnd5eWorld)
-	Dnd5eWorld `yaml:",inline"`
+// Dnd5eSettingGet defines model for Dnd5eSettingGet.
+type Dnd5eSettingGet struct {
+	// Embedded struct due to allOf(#/components/schemas/Dnd5eSetting)
+	Dnd5eSetting `yaml:",inline"`
 	// Embedded fields due to inline allOf schema
 	// The created time of this record
-	Created      Created `json:"created"`
-	Dnd5eWorldId string  `json:"dnd5eWorldId"`
-	Version      int64   `json:"version"`
+	Created        Created `json:"created"`
+	Dnd5eSettingId string  `json:"dnd5eSettingId"`
+	Version        int64   `json:"version"`
 }
 
-// Dnd5eWorldPostOk defines model for Dnd5eWorldPostOk.
-type Dnd5eWorldPostOk struct {
-	Dnd5eWorldId string `json:"dnd5eWorldId"`
-	Version      int64  `json:"version"`
+// Dnd5eSettingPostOk defines model for Dnd5eSettingPostOk.
+type Dnd5eSettingPostOk struct {
+	Dnd5eSettingId string `json:"dnd5eSettingId"`
+	Version        int64  `json:"version"`
 }
 
 // Email defines model for Email.
@@ -104,8 +104,8 @@ type UserGet struct {
 // UserTags defines model for UserTags.
 type UserTags []string
 
-// Dnd5eWorldId defines model for Dnd5eWorldId.
-type Dnd5eWorldId int64
+// Dnd5eSettingId defines model for Dnd5eSettingId.
+type Dnd5eSettingId int64
 
 // UserId defines model for UserId.
 type UserId string
@@ -113,11 +113,11 @@ type UserId string
 // UserUUID defines model for UserUUID.
 type UserUUID string
 
-// Dnd5eWorldArrayGetOk defines model for Dnd5eWorldArrayGetOk.
-type Dnd5eWorldArrayGetOk []Dnd5eWorldGet
+// Dnd5eSettingArrayGetOk defines model for Dnd5eSettingArrayGetOk.
+type Dnd5eSettingArrayGetOk []Dnd5eSettingGet
 
-// Dnd5eWorldGetOk defines model for Dnd5eWorldGetOk.
-type Dnd5eWorldGetOk Dnd5eWorldGet
+// Dnd5eSettingGetOk defines model for Dnd5eSettingGetOk.
+type Dnd5eSettingGetOk Dnd5eSettingGet
 
 // UserGetOk defines model for UserGetOk.
 type UserGetOk UserGet
@@ -131,20 +131,20 @@ type UserPostOk struct {
 // A JSONPatch document as defined by RFC 6902
 type Patch PatchDocument
 
-// PostApiV1Dnd5eWorldsJSONBody defines parameters for PostApiV1Dnd5eWorlds.
-type PostApiV1Dnd5eWorldsJSONBody Dnd5eWorld
+// PostApiV1Dnd5eSettingsJSONBody defines parameters for PostApiV1Dnd5eSettings.
+type PostApiV1Dnd5eSettingsJSONBody Dnd5eSetting
 
-// PostApiV1Dnd5eWorldsDnd5eWorldIdJSONBody defines parameters for PostApiV1Dnd5eWorldsDnd5eWorldId.
-type PostApiV1Dnd5eWorldsDnd5eWorldIdJSONBody Dnd5eWorld
+// PostApiV1Dnd5eSettingsDnd5eSettingIdJSONBody defines parameters for PostApiV1Dnd5eSettingsDnd5eSettingId.
+type PostApiV1Dnd5eSettingsDnd5eSettingIdJSONBody Dnd5eSetting
 
 // PostApiV1UsersJSONBody defines parameters for PostApiV1Users.
 type PostApiV1UsersJSONBody User
 
-// PostApiV1Dnd5eWorldsJSONRequestBody defines body for PostApiV1Dnd5eWorlds for application/json ContentType.
-type PostApiV1Dnd5eWorldsJSONRequestBody PostApiV1Dnd5eWorldsJSONBody
+// PostApiV1Dnd5eSettingsJSONRequestBody defines body for PostApiV1Dnd5eSettings for application/json ContentType.
+type PostApiV1Dnd5eSettingsJSONRequestBody PostApiV1Dnd5eSettingsJSONBody
 
-// PostApiV1Dnd5eWorldsDnd5eWorldIdJSONRequestBody defines body for PostApiV1Dnd5eWorldsDnd5eWorldId for application/json ContentType.
-type PostApiV1Dnd5eWorldsDnd5eWorldIdJSONRequestBody PostApiV1Dnd5eWorldsDnd5eWorldIdJSONBody
+// PostApiV1Dnd5eSettingsDnd5eSettingIdJSONRequestBody defines body for PostApiV1Dnd5eSettingsDnd5eSettingId for application/json ContentType.
+type PostApiV1Dnd5eSettingsDnd5eSettingIdJSONRequestBody PostApiV1Dnd5eSettingsDnd5eSettingIdJSONBody
 
 // PostApiV1UsersJSONRequestBody defines body for PostApiV1Users for application/json ContentType.
 type PostApiV1UsersJSONRequestBody PostApiV1UsersJSONBody

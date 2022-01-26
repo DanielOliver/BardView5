@@ -56,7 +56,7 @@ CREATE TABLE public.dnd5e_monster (
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     version bigint DEFAULT 0 NOT NULL,
-    dnd5e_world_id bigint,
+    dnd5e_setting_id bigint,
     name text NOT NULL,
     user_tags text[] NOT NULL,
     system_tags text[] NOT NULL,
@@ -86,26 +86,11 @@ CREATE TABLE public.dnd5e_monster_type (
 ALTER TABLE public.dnd5e_monster_type OWNER TO postgres;
 
 --
--- Name: dnd5e_size_category; Type: TABLE; Schema: public; Owner: postgres
+-- Name: dnd5e_setting; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.dnd5e_size_category (
-    created_by bigint,
-    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    version bigint DEFAULT 0 NOT NULL,
-    name text NOT NULL,
-    space text NOT NULL
-);
-
-
-ALTER TABLE public.dnd5e_size_category OWNER TO postgres;
-
---
--- Name: dnd5e_world; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.dnd5e_world (
-    dnd5e_world_id bigint NOT NULL,
+CREATE TABLE public.dnd5e_setting (
+    dnd5e_setting_id bigint NOT NULL,
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     version bigint DEFAULT 0 NOT NULL,
@@ -121,23 +106,38 @@ CREATE TABLE public.dnd5e_world (
 );
 
 
-ALTER TABLE public.dnd5e_world OWNER TO postgres;
+ALTER TABLE public.dnd5e_setting OWNER TO postgres;
 
 --
--- Name: dnd5e_world_assignment; Type: TABLE; Schema: public; Owner: postgres
+-- Name: dnd5e_setting_assignment; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.dnd5e_world_assignment (
+CREATE TABLE public.dnd5e_setting_assignment (
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     version bigint DEFAULT 0 NOT NULL,
     user_id bigint NOT NULL,
-    dnd5e_world_id bigint NOT NULL,
+    dnd5e_setting_id bigint NOT NULL,
     role_action text NOT NULL
 );
 
 
-ALTER TABLE public.dnd5e_world_assignment OWNER TO postgres;
+ALTER TABLE public.dnd5e_setting_assignment OWNER TO postgres;
+
+--
+-- Name: dnd5e_size_category; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.dnd5e_size_category (
+    created_by bigint,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    version bigint DEFAULT 0 NOT NULL,
+    name text NOT NULL,
+    space text NOT NULL
+);
+
+
+ALTER TABLE public.dnd5e_size_category OWNER TO postgres;
 
 --
 -- Name: external_source; Type: TABLE; Schema: public; Owner: postgres
@@ -251,27 +251,27 @@ ALTER TABLE ONLY public.dnd5e_monster_type
 
 
 --
+-- Name: dnd5e_setting_assignment dnd5e_setting_assignment_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_setting_assignment
+    ADD CONSTRAINT dnd5e_setting_assignment_pk PRIMARY KEY (user_id, dnd5e_setting_id);
+
+
+--
+-- Name: dnd5e_setting dnd5e_setting_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_setting
+    ADD CONSTRAINT dnd5e_setting_pk PRIMARY KEY (dnd5e_setting_id);
+
+
+--
 -- Name: dnd5e_size_category dnd5e_size_category_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.dnd5e_size_category
     ADD CONSTRAINT dnd5e_size_category_pk PRIMARY KEY (name);
-
-
---
--- Name: dnd5e_world_assignment dnd5e_world_assignment_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_world_assignment
-    ADD CONSTRAINT dnd5e_world_assignment_pk PRIMARY KEY (user_id, dnd5e_world_id);
-
-
---
--- Name: dnd5e_world dnd5e_world_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_world
-    ADD CONSTRAINT dnd5e_world_pk PRIMARY KEY (dnd5e_world_id);
 
 
 --
@@ -315,17 +315,17 @@ ALTER TABLE ONLY public."user"
 
 
 --
--- Name: dnd5e_monster_world; Type: INDEX; Schema: public; Owner: postgres
+-- Name: dnd5e_monster_setting; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX dnd5e_monster_world ON public.dnd5e_monster USING btree (dnd5e_world_id, dnd5e_monster_id);
+CREATE INDEX dnd5e_monster_setting ON public.dnd5e_monster USING btree (dnd5e_setting_id, dnd5e_monster_id);
 
 
 --
--- Name: dnd5e_monster_world_name; Type: INDEX; Schema: public; Owner: postgres
+-- Name: dnd5e_monster_setting_name; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX dnd5e_monster_world_name ON public.dnd5e_monster USING btree (dnd5e_world_id, name) INCLUDE (dnd5e_monster_id);
+CREATE INDEX dnd5e_monster_setting_name ON public.dnd5e_monster USING btree (dnd5e_setting_id, name) INCLUDE (dnd5e_monster_id);
 
 
 --
@@ -367,6 +367,14 @@ ALTER TABLE ONLY public.dnd5e_monster
 
 
 --
+-- Name: dnd5e_monster fk_dnd5e_monster_setting; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_monster
+    ADD CONSTRAINT fk_dnd5e_monster_setting FOREIGN KEY (dnd5e_setting_id) REFERENCES public.dnd5e_setting(dnd5e_setting_id);
+
+
+--
 -- Name: dnd5e_monster fk_dnd5e_monster_type; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -383,11 +391,51 @@ ALTER TABLE ONLY public.dnd5e_monster_type
 
 
 --
--- Name: dnd5e_monster fk_dnd5e_monster_world; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dnd5e_setting_assignment fk_dnd5e_setting_assignment_role_action; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.dnd5e_monster
-    ADD CONSTRAINT fk_dnd5e_monster_world FOREIGN KEY (dnd5e_world_id) REFERENCES public.dnd5e_world(dnd5e_world_id);
+ALTER TABLE ONLY public.dnd5e_setting_assignment
+    ADD CONSTRAINT fk_dnd5e_setting_assignment_role_action FOREIGN KEY (role_action) REFERENCES public.role_action(name);
+
+
+--
+-- Name: dnd5e_setting_assignment fk_dnd5e_setting_assignment_setting; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_setting_assignment
+    ADD CONSTRAINT fk_dnd5e_setting_assignment_setting FOREIGN KEY (dnd5e_setting_id) REFERENCES public.dnd5e_setting(dnd5e_setting_id);
+
+
+--
+-- Name: dnd5e_setting_assignment fk_dnd5e_setting_assignment_user; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_setting_assignment
+    ADD CONSTRAINT fk_dnd5e_setting_assignment_user FOREIGN KEY (user_id) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: dnd5e_setting fk_dnd5e_setting_commonaccess; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_setting
+    ADD CONSTRAINT fk_dnd5e_setting_commonaccess FOREIGN KEY (common_access) REFERENCES public.common_access(name);
+
+
+--
+-- Name: dnd5e_setting fk_dnd5e_setting_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_setting
+    ADD CONSTRAINT fk_dnd5e_setting_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: dnd5e_setting fk_dnd5e_setting_derived_from_external_source; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dnd5e_setting
+    ADD CONSTRAINT fk_dnd5e_setting_derived_from_external_source FOREIGN KEY (external_source_id) REFERENCES public.external_source(external_source_id);
 
 
 --
@@ -396,54 +444,6 @@ ALTER TABLE ONLY public.dnd5e_monster
 
 ALTER TABLE ONLY public.dnd5e_size_category
     ADD CONSTRAINT fk_dnd5e_size_category_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
-
-
---
--- Name: dnd5e_world_assignment fk_dnd5e_world_assignment_role_action; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_world_assignment
-    ADD CONSTRAINT fk_dnd5e_world_assignment_role_action FOREIGN KEY (role_action) REFERENCES public.role_action(name);
-
-
---
--- Name: dnd5e_world_assignment fk_dnd5e_world_assignment_user; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_world_assignment
-    ADD CONSTRAINT fk_dnd5e_world_assignment_user FOREIGN KEY (user_id) REFERENCES public."user"(user_id);
-
-
---
--- Name: dnd5e_world_assignment fk_dnd5e_world_assignment_world; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_world_assignment
-    ADD CONSTRAINT fk_dnd5e_world_assignment_world FOREIGN KEY (dnd5e_world_id) REFERENCES public.dnd5e_world(dnd5e_world_id);
-
-
---
--- Name: dnd5e_world fk_dnd5e_world_commonaccess; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_world
-    ADD CONSTRAINT fk_dnd5e_world_commonaccess FOREIGN KEY (common_access) REFERENCES public.common_access(name);
-
-
---
--- Name: dnd5e_world fk_dnd5e_world_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_world
-    ADD CONSTRAINT fk_dnd5e_world_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
-
-
---
--- Name: dnd5e_world fk_dnd5e_world_derived_from_external_source; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_world
-    ADD CONSTRAINT fk_dnd5e_world_derived_from_external_source FOREIGN KEY (external_source_id) REFERENCES public.external_source(external_source_id);
 
 
 --

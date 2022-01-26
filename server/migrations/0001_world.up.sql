@@ -1,7 +1,7 @@
-create table "dnd5e_world"
+create table "dnd5e_setting"
 (
-    dnd5e_world_id      bigint
-        constraint dnd5e_world_pk
+    dnd5e_setting_id      bigint
+        constraint dnd5e_setting_pk
             primary key,
     created_by          bigint  null,
     created_at          timestamp without time zone default (now() at time zone 'utc') not null,
@@ -16,38 +16,38 @@ create table "dnd5e_world"
     external_source_id  bigint  null,
     external_source_key text    null,
 
-    CONSTRAINT fk_dnd5e_world_createdby
+    CONSTRAINT fk_dnd5e_setting_createdby
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id),
-    CONSTRAINT fk_dnd5e_world_commonaccess
+    CONSTRAINT fk_dnd5e_setting_commonaccess
         FOREIGN KEY (common_access)
             REFERENCES common_access (name),
 
-    CONSTRAINT fk_dnd5e_world_derived_from_external_source
+    CONSTRAINT fk_dnd5e_setting_derived_from_external_source
         FOREIGN KEY (external_source_id)
             REFERENCES "external_source" (external_source_id)
 
 );
 
-create table "dnd5e_world_assignment"
+create table "dnd5e_setting_assignment"
 (
     created_by     bigint null,
     created_at     timestamp without time zone default (now() at time zone 'utc') not null,
     version        bigint not null             default (0),
     user_id        bigint not null,
-    dnd5e_world_id bigint not null,
+    dnd5e_setting_id bigint not null,
     role_action    text   not null,
 
-    CONSTRAINT dnd5e_world_assignment_pk
-        PRIMARY KEY (user_id, dnd5e_world_id),
+    CONSTRAINT dnd5e_setting_assignment_pk
+        PRIMARY KEY (user_id, dnd5e_setting_id),
 
-    CONSTRAINT fk_dnd5e_world_assignment_user
+    CONSTRAINT fk_dnd5e_setting_assignment_user
         FOREIGN KEY (user_id)
             REFERENCES "user" (user_id),
-    CONSTRAINT fk_dnd5e_world_assignment_world
-        FOREIGN KEY (dnd5e_world_id)
-            REFERENCES "dnd5e_world" (dnd5e_world_id),
-    CONSTRAINT fk_dnd5e_world_assignment_role_action
+    CONSTRAINT fk_dnd5e_setting_assignment_setting
+        FOREIGN KEY (dnd5e_setting_id)
+            REFERENCES "dnd5e_setting" (dnd5e_setting_id),
+    CONSTRAINT fk_dnd5e_setting_assignment_role_action
         FOREIGN KEY (role_action)
             REFERENCES "role_action" (name)
 );
@@ -91,7 +91,7 @@ create table "dnd5e_monster"
     created_by             bigint null,
     created_at             timestamp without time zone default (now() at time zone 'utc') not null,
     version                bigint not null             default (0),
-    dnd5e_world_id         bigint null,
+    dnd5e_setting_id         bigint null,
     name                   text   not null,
     user_tags              text[] not null,
     system_tags            text[] not null,
@@ -106,9 +106,9 @@ create table "dnd5e_monster"
     CONSTRAINT fk_dnd5e_monster_createdby
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id),
-    CONSTRAINT fk_dnd5e_monster_world
-        FOREIGN KEY (dnd5e_world_id)
-            REFERENCES "dnd5e_world" (dnd5e_world_id),
+    CONSTRAINT fk_dnd5e_monster_setting
+        FOREIGN KEY (dnd5e_setting_id)
+            REFERENCES "dnd5e_setting" (dnd5e_setting_id),
     CONSTRAINT fk_dnd5e_monster_dnd5e_size_category
         FOREIGN KEY (size_category)
             REFERENCES "dnd5e_size_category" (name),
@@ -117,9 +117,9 @@ create table "dnd5e_monster"
             REFERENCES "dnd5e_monster_type" (name)
 );
 
-create index dnd5e_monster_world on dnd5e_monster (dnd5e_world_id, dnd5e_monster_id);
+create index dnd5e_monster_setting on dnd5e_monster (dnd5e_setting_id, dnd5e_monster_id);
 
-create index dnd5e_monster_world_name on dnd5e_monster (dnd5e_world_id, name) include (dnd5e_monster_id);
+create index dnd5e_monster_setting_name on dnd5e_monster (dnd5e_setting_id, name) include (dnd5e_monster_id);
 
 create table "dnd5e_language"
 (

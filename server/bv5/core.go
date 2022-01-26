@@ -17,8 +17,8 @@ import (
 )
 
 type Generators struct {
-	userNode       *snowflake.Node
-	dnd5eWorldNode *snowflake.Node
+	userNode         *snowflake.Node
+	dnd5eSettingNode *snowflake.Node
 }
 
 type BardView5Configuration struct {
@@ -59,7 +59,7 @@ func ConfigNewBardView5(config *BardView5InitConfig) (bv5 *BardView5, err error)
 	metricsPg := db.NewDbMetrics(pgConnection, "bardview5")
 
 	userNode, _ := snowflake.NewNode(0)
-	dnd5eWorldNode, _ := snowflake.NewNode(0)
+	dnd5eSettingNode, _ := snowflake.NewNode(0)
 
 	sessionIdCache, _ := bigcache.NewBigCache(bigcache.DefaultConfig(1 * time.Minute))
 
@@ -67,8 +67,8 @@ func ConfigNewBardView5(config *BardView5InitConfig) (bv5 *BardView5, err error)
 		db:      pgConnection,
 		querier: db.New(metricsPg),
 		generators: &Generators{
-			userNode:       userNode,
-			dnd5eWorldNode: dnd5eWorldNode,
+			userNode:         userNode,
+			dnd5eSettingNode: dnd5eSettingNode,
 		},
 		dbMetrics: metricsPg,
 		Conf: &BardView5Configuration{
@@ -141,6 +141,6 @@ func (b *BardView5Http) GenUser() *snowflake.Node {
 	return b.BardView5.generators.userNode
 }
 
-func (b *BardView5Http) GenDnd5eWorld() *snowflake.Node {
-	return b.BardView5.generators.dnd5eWorldNode
+func (b *BardView5Http) GenDnd5eSetting() *snowflake.Node {
+	return b.BardView5.generators.dnd5eSettingNode
 }

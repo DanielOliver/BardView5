@@ -21,9 +21,9 @@ components:
       schema:
         type: string
         format: uuid
-    Dnd5eWorldId:
+    Dnd5eSettingId:
       in: path
-      name: dnd5eWorldId
+      name: dnd5eSettingId
       schema:
         type: integer
         format: int64
@@ -67,26 +67,26 @@ components:
           schema:
             type: string
           description: Known Location
-    Dnd5eWorldGetOk:
-      description: Dnd5eWorldGet
+    Dnd5eSettingGetOk:
+      description: Dnd5eSettingGet
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Dnd5eWorldGet'
-    Dnd5eWorldArrayGetOk:
-      description: Dnd5eWorldGet
+            $ref: '#/components/schemas/Dnd5eSettingGet'
+    Dnd5eSettingArrayGetOk:
+      description: Dnd5eSettingGet
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Dnd5eWorldGet'
-    Dnd5eWorldPostOk:
-      description: Dnd5eWorldPost
+              $ref: '#/components/schemas/Dnd5eSettingGet'
+    Dnd5eSettingPostOk:
+      description: Dnd5eSettingPost
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Dnd5eWorldPostOk'
+            $ref: '#/components/schemas/Dnd5eSettingPostOk'
       headers:
         ETag:
           schema:
@@ -170,7 +170,7 @@ components:
         type: string
         maxLength: 256
         example: LookingForPlayers
-    Dnd5eWorld:
+    Dnd5eSetting:
       type: object
       properties:
         name:
@@ -182,7 +182,7 @@ components:
             binding: "required,min=1,max=512"
         description:
           type: string
-          example: A whole new world!
+          example: A whole new setting!
           maxLength: 1024
           minLength: 1
           x-oapi-codegen-extra-tags:
@@ -215,12 +215,12 @@ components:
         - description
         - commonAccess
         - active
-    Dnd5eWorldGet:
+    Dnd5eSettingGet:
       allOf:
-        - $ref: '#/components/schemas/Dnd5eWorld'
+        - $ref: '#/components/schemas/Dnd5eSetting'
         - type: object
           properties:
-            dnd5eWorldId:
+            dnd5eSettingId:
               type: string
               example: 123
             created:
@@ -229,20 +229,20 @@ components:
               type: integer
               format: int64
           required:
-            - dnd5eWorldId
+            - dnd5eSettingId
             - created
             - version
-    Dnd5eWorldPostOk:
+    Dnd5eSettingPostOk:
       type: object
       properties:
-        dnd5eWorldId:
+        dnd5eSettingId:
           type: string
           example: 123
         version:
           type: integer
           format: int64
       required:
-        - dnd5eWorldId
+        - dnd5eSettingId
         - version
     User:
       type: object
@@ -301,53 +301,53 @@ components:
             - version
             - uuid
 paths:
-  /api/v1/dnd5e/worlds/assigned:
+  /api/v1/dnd5e/settings/assigned:
     get:
-      summary: Returns all Dnd5e Worlds that I have explicit access to.
+      summary: Returns all Dnd5e Settings that I have explicit access to.
       tags:
-        - Dnd5eWorld
+        - Dnd5eSetting
       responses:
         '200':
-          $ref: '#/components/responses/Dnd5eWorldArrayGetOk'
-  /api/v1/dnd5e/worlds/{dnd5eWorldId}:
+          $ref: '#/components/responses/Dnd5eSettingArrayGetOk'
+  /api/v1/dnd5e/settings/{dnd5eSettingId}:
     get:
-      summary: Returns Dnd5e World
+      summary: Returns Dnd5e Setting
       tags:
-        - Dnd5eWorld
+        - Dnd5eSetting
       parameters:
-        - $ref: '#/components/parameters/Dnd5eWorldId'
+        - $ref: '#/components/parameters/Dnd5eSettingId'
       responses:
         '200':
-          $ref: '#/components/responses/Dnd5eWorldGetOk'
+          $ref: '#/components/responses/Dnd5eSettingGetOk'
     post:
-      summary: Updates dnd5e world.
+      summary: Updates dnd5e setting.
       tags:
-        - Dnd5eWorld
+        - Dnd5eSetting
       parameters:
-        - $ref: '#/components/parameters/Dnd5eWorldId'
+        - $ref: '#/components/parameters/Dnd5eSettingId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Dnd5eWorld'
+              $ref: '#/components/schemas/Dnd5eSetting'
       responses:
         '201':
-          $ref: '#/components/responses/Dnd5eWorldPostOk'
-  /api/v1/dnd5e/worlds:
+          $ref: '#/components/responses/Dnd5eSettingPostOk'
+  /api/v1/dnd5e/settings:
     post:
-      summary: Creates a new dnd5e world.
+      summary: Creates a new dnd5e setting.
       tags:
-        - Dnd5eWorld
+        - Dnd5eSetting
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Dnd5eWorld'
+              $ref: '#/components/schemas/Dnd5eSetting'
       responses:
         '201':
-          $ref: '#/components/responses/Dnd5eWorldPostOk'
+          $ref: '#/components/responses/Dnd5eSettingPostOk'
   /api/v1/users/me:
     get:
       summary: Returns current user

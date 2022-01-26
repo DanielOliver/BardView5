@@ -27,7 +27,7 @@ type Dnd5eMonster struct {
 	CreatedBy            sql.NullInt64 `db:"created_by"`
 	CreatedAt            time.Time     `db:"created_at"`
 	Version              int64         `db:"version"`
-	Dnd5eWorldID         sql.NullInt64 `db:"dnd5e_world_id"`
+	Dnd5eSettingID       sql.NullInt64 `db:"dnd5e_setting_id"`
 	Name                 string        `db:"name"`
 	UserTags             []string      `db:"user_tags"`
 	SystemTags           []string      `db:"system_tags"`
@@ -46,16 +46,8 @@ type Dnd5eMonsterType struct {
 	Name      string        `db:"name"`
 }
 
-type Dnd5eSizeCategory struct {
-	CreatedBy sql.NullInt64 `db:"created_by"`
-	CreatedAt time.Time     `db:"created_at"`
-	Version   int64         `db:"version"`
-	Name      string        `db:"name"`
-	Space     string        `db:"space"`
-}
-
-type Dnd5eWorld struct {
-	Dnd5eWorldID      int64          `db:"dnd5e_world_id"`
+type Dnd5eSetting struct {
+	Dnd5eSettingID    int64          `db:"dnd5e_setting_id"`
 	CreatedBy         sql.NullInt64  `db:"created_by"`
 	CreatedAt         time.Time      `db:"created_at"`
 	Version           int64          `db:"version"`
@@ -70,13 +62,21 @@ type Dnd5eWorld struct {
 	ExternalSourceKey sql.NullString `db:"external_source_key"`
 }
 
-type Dnd5eWorldAssignment struct {
-	CreatedBy    sql.NullInt64 `db:"created_by"`
-	CreatedAt    time.Time     `db:"created_at"`
-	Version      int64         `db:"version"`
-	UserID       int64         `db:"user_id"`
-	Dnd5eWorldID int64         `db:"dnd5e_world_id"`
-	RoleAction   string        `db:"role_action"`
+type Dnd5eSettingAssignment struct {
+	CreatedBy      sql.NullInt64 `db:"created_by"`
+	CreatedAt      time.Time     `db:"created_at"`
+	Version        int64         `db:"version"`
+	UserID         int64         `db:"user_id"`
+	Dnd5eSettingID int64         `db:"dnd5e_setting_id"`
+	RoleAction     string        `db:"role_action"`
+}
+
+type Dnd5eSizeCategory struct {
+	CreatedBy sql.NullInt64 `db:"created_by"`
+	CreatedAt time.Time     `db:"created_at"`
+	Version   int64         `db:"version"`
+	Name      string        `db:"name"`
+	Space     string        `db:"space"`
 }
 
 type ExternalSource struct {

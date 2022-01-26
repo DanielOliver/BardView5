@@ -5,7 +5,7 @@
 import type { SystemTags } from './SystemTags';
 import type { UserTags } from './UserTags';
 
-export type Dnd5eWorld = {
+export type Dnd5eSetting = {
     name: string;
     description: string;
     module?: string;

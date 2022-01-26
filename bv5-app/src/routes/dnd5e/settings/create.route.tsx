@@ -4,14 +4,14 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useMutation } from 'react-query'
-import { bv5V1CreateDnd5eWorld } from '../../../services/bardview5'
-import { Dnd5eWorldPostOk } from '../../../bv5-server'
+import { bv5V1CreateDnd5eSetting } from '../../../services/bardview5'
+import { Dnd5eSettingPostOk } from '../../../bv5-server'
 import { useNavigate } from 'react-router-dom'
 
 const CommonAccessValues = ['private', 'anyuser', 'public'] as const
 const CommonAccessText = ['Private', 'Any User', 'Public'] as const
 
-const WorldCreateSchema = z.object({
+const SettingCreateSchema = z.object({
   name: z.string().min(1).max(512),
   description: z.string().min(1).max(1024),
   module: z.string().optional(),
@@ -21,18 +21,18 @@ const WorldCreateSchema = z.object({
   active: z.boolean().default(true)
 })
 
-type WorldCreate = z.infer<typeof WorldCreateSchema>
+type SettingCreate = z.infer<typeof SettingCreateSchema>
 
-function Dnd5eWorldCreate () {
-  const mutation = useMutation<Dnd5eWorldPostOk, unknown, WorldCreate>(async (world: WorldCreate) => {
-    const { data } = await bv5V1CreateDnd5eWorld({
-      name: world.name,
-      description: world.description,
-      module: world.module,
-      userTags: world.userTags,
-      systemTags: world.systemTags,
-      commonAccess: world.commonAccess,
-      active: world.active
+export function Dnd5eSettingCreate () {
+  const mutation = useMutation<Dnd5eSettingPostOk, unknown, SettingCreate>(async (setting: SettingCreate) => {
+    const { data } = await bv5V1CreateDnd5eSetting({
+      name: setting.name,
+      description: setting.description,
+      module: setting.module,
+      userTags: setting.userTags,
+      systemTags: setting.systemTags,
+      commonAccess: setting.commonAccess,
+      active: setting.active
     })
     return data
   })
@@ -43,19 +43,19 @@ function Dnd5eWorldCreate () {
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm<WorldCreate>({
-    resolver: zodResolver(WorldCreateSchema)
+  } = useForm<SettingCreate>({
+    resolver: zodResolver(SettingCreateSchema)
   })
 
   useEffect(() => {
-    if (mutation.isSuccess && mutation.data?.dnd5eWorldId !== undefined) {
-      navigate(`/dnd5e/worlds/${mutation.data.dnd5eWorldId}`)
+    if (mutation.isSuccess && mutation.data?.dnd5eSettingId !== undefined) {
+      navigate(`/dnd5e/settings/${mutation.data.dnd5eSettingId}`)
     }
   }, [mutation])
 
   return <Container fluid="lg">
     <Row>
-      <h1>D&D 5e World: Create</h1>
+      <h1>D&D 5e Setting: Create</h1>
     </Row>
     <Form onSubmit={handleSubmit((d) => mutation.mutate(d))}>
 
@@ -131,4 +131,6 @@ function Dnd5eWorldCreate () {
   </Container>
 }
 
-export default Dnd5eWorldCreate
+export default {
+  Dnd5eSettingCreate
+}

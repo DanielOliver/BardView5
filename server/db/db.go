@@ -28,26 +28,26 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.dnd5eMonsterFindByIdStmt, err = db.PrepareContext(ctx, dnd5eMonsterFindById); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eMonsterFindById: %w", err)
 	}
-	if q.dnd5eMonstersFindByWorldStmt, err = db.PrepareContext(ctx, dnd5eMonstersFindByWorld); err != nil {
-		return nil, fmt.Errorf("error preparing query Dnd5eMonstersFindByWorld: %w", err)
+	if q.dnd5eMonstersFindBySettingStmt, err = db.PrepareContext(ctx, dnd5eMonstersFindBySetting); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eMonstersFindBySetting: %w", err)
+	}
+	if q.dnd5eSettingFindAssignmentStmt, err = db.PrepareContext(ctx, dnd5eSettingFindAssignment); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eSettingFindAssignment: %w", err)
+	}
+	if q.dnd5eSettingFindByAssignmentStmt, err = db.PrepareContext(ctx, dnd5eSettingFindByAssignment); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eSettingFindByAssignment: %w", err)
+	}
+	if q.dnd5eSettingFindByIdStmt, err = db.PrepareContext(ctx, dnd5eSettingFindById); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eSettingFindById: %w", err)
+	}
+	if q.dnd5eSettingInsertStmt, err = db.PrepareContext(ctx, dnd5eSettingInsert); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eSettingInsert: %w", err)
+	}
+	if q.dnd5eSettingUpsertAssignmentStmt, err = db.PrepareContext(ctx, dnd5eSettingUpsertAssignment); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eSettingUpsertAssignment: %w", err)
 	}
 	if q.dnd5eSizeCategoryFindAllStmt, err = db.PrepareContext(ctx, dnd5eSizeCategoryFindAll); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eSizeCategoryFindAll: %w", err)
-	}
-	if q.dnd5eWorldFindAssignmentStmt, err = db.PrepareContext(ctx, dnd5eWorldFindAssignment); err != nil {
-		return nil, fmt.Errorf("error preparing query Dnd5eWorldFindAssignment: %w", err)
-	}
-	if q.dnd5eWorldFindByAssignmentStmt, err = db.PrepareContext(ctx, dnd5eWorldFindByAssignment); err != nil {
-		return nil, fmt.Errorf("error preparing query Dnd5eWorldFindByAssignment: %w", err)
-	}
-	if q.dnd5eWorldFindByIdStmt, err = db.PrepareContext(ctx, dnd5eWorldFindById); err != nil {
-		return nil, fmt.Errorf("error preparing query Dnd5eWorldFindById: %w", err)
-	}
-	if q.dnd5eWorldInsertStmt, err = db.PrepareContext(ctx, dnd5eWorldInsert); err != nil {
-		return nil, fmt.Errorf("error preparing query Dnd5eWorldInsert: %w", err)
-	}
-	if q.dnd5eWorldUpsertAssignmentStmt, err = db.PrepareContext(ctx, dnd5eWorldUpsertAssignment); err != nil {
-		return nil, fmt.Errorf("error preparing query Dnd5eWorldUpsertAssignment: %w", err)
 	}
 	if q.userFindByEmailStmt, err = db.PrepareContext(ctx, userFindByEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query UserFindByEmail: %w", err)
@@ -79,39 +79,39 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing dnd5eMonsterFindByIdStmt: %w", cerr)
 		}
 	}
-	if q.dnd5eMonstersFindByWorldStmt != nil {
-		if cerr := q.dnd5eMonstersFindByWorldStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing dnd5eMonstersFindByWorldStmt: %w", cerr)
+	if q.dnd5eMonstersFindBySettingStmt != nil {
+		if cerr := q.dnd5eMonstersFindBySettingStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eMonstersFindBySettingStmt: %w", cerr)
+		}
+	}
+	if q.dnd5eSettingFindAssignmentStmt != nil {
+		if cerr := q.dnd5eSettingFindAssignmentStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eSettingFindAssignmentStmt: %w", cerr)
+		}
+	}
+	if q.dnd5eSettingFindByAssignmentStmt != nil {
+		if cerr := q.dnd5eSettingFindByAssignmentStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eSettingFindByAssignmentStmt: %w", cerr)
+		}
+	}
+	if q.dnd5eSettingFindByIdStmt != nil {
+		if cerr := q.dnd5eSettingFindByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eSettingFindByIdStmt: %w", cerr)
+		}
+	}
+	if q.dnd5eSettingInsertStmt != nil {
+		if cerr := q.dnd5eSettingInsertStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eSettingInsertStmt: %w", cerr)
+		}
+	}
+	if q.dnd5eSettingUpsertAssignmentStmt != nil {
+		if cerr := q.dnd5eSettingUpsertAssignmentStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eSettingUpsertAssignmentStmt: %w", cerr)
 		}
 	}
 	if q.dnd5eSizeCategoryFindAllStmt != nil {
 		if cerr := q.dnd5eSizeCategoryFindAllStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing dnd5eSizeCategoryFindAllStmt: %w", cerr)
-		}
-	}
-	if q.dnd5eWorldFindAssignmentStmt != nil {
-		if cerr := q.dnd5eWorldFindAssignmentStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing dnd5eWorldFindAssignmentStmt: %w", cerr)
-		}
-	}
-	if q.dnd5eWorldFindByAssignmentStmt != nil {
-		if cerr := q.dnd5eWorldFindByAssignmentStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing dnd5eWorldFindByAssignmentStmt: %w", cerr)
-		}
-	}
-	if q.dnd5eWorldFindByIdStmt != nil {
-		if cerr := q.dnd5eWorldFindByIdStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing dnd5eWorldFindByIdStmt: %w", cerr)
-		}
-	}
-	if q.dnd5eWorldInsertStmt != nil {
-		if cerr := q.dnd5eWorldInsertStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing dnd5eWorldInsertStmt: %w", cerr)
-		}
-	}
-	if q.dnd5eWorldUpsertAssignmentStmt != nil {
-		if cerr := q.dnd5eWorldUpsertAssignmentStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing dnd5eWorldUpsertAssignmentStmt: %w", cerr)
 		}
 	}
 	if q.userFindByEmailStmt != nil {
@@ -176,41 +176,41 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                             DBTX
-	tx                             *sql.Tx
-	dnd5eLanguageFindAllStmt       *sql.Stmt
-	dnd5eMonsterFindByIdStmt       *sql.Stmt
-	dnd5eMonstersFindByWorldStmt   *sql.Stmt
-	dnd5eSizeCategoryFindAllStmt   *sql.Stmt
-	dnd5eWorldFindAssignmentStmt   *sql.Stmt
-	dnd5eWorldFindByAssignmentStmt *sql.Stmt
-	dnd5eWorldFindByIdStmt         *sql.Stmt
-	dnd5eWorldInsertStmt           *sql.Stmt
-	dnd5eWorldUpsertAssignmentStmt *sql.Stmt
-	userFindByEmailStmt            *sql.Stmt
-	userFindByIdStmt               *sql.Stmt
-	userFindByUuidStmt             *sql.Stmt
-	userInsertStmt                 *sql.Stmt
-	userUpdateStmt                 *sql.Stmt
+	db                               DBTX
+	tx                               *sql.Tx
+	dnd5eLanguageFindAllStmt         *sql.Stmt
+	dnd5eMonsterFindByIdStmt         *sql.Stmt
+	dnd5eMonstersFindBySettingStmt   *sql.Stmt
+	dnd5eSettingFindAssignmentStmt   *sql.Stmt
+	dnd5eSettingFindByAssignmentStmt *sql.Stmt
+	dnd5eSettingFindByIdStmt         *sql.Stmt
+	dnd5eSettingInsertStmt           *sql.Stmt
+	dnd5eSettingUpsertAssignmentStmt *sql.Stmt
+	dnd5eSizeCategoryFindAllStmt     *sql.Stmt
+	userFindByEmailStmt              *sql.Stmt
+	userFindByIdStmt                 *sql.Stmt
+	userFindByUuidStmt               *sql.Stmt
+	userInsertStmt                   *sql.Stmt
+	userUpdateStmt                   *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                             tx,
-		tx:                             tx,
-		dnd5eLanguageFindAllStmt:       q.dnd5eLanguageFindAllStmt,
-		dnd5eMonsterFindByIdStmt:       q.dnd5eMonsterFindByIdStmt,
-		dnd5eMonstersFindByWorldStmt:   q.dnd5eMonstersFindByWorldStmt,
-		dnd5eSizeCategoryFindAllStmt:   q.dnd5eSizeCategoryFindAllStmt,
-		dnd5eWorldFindAssignmentStmt:   q.dnd5eWorldFindAssignmentStmt,
-		dnd5eWorldFindByAssignmentStmt: q.dnd5eWorldFindByAssignmentStmt,
-		dnd5eWorldFindByIdStmt:         q.dnd5eWorldFindByIdStmt,
-		dnd5eWorldInsertStmt:           q.dnd5eWorldInsertStmt,
-		dnd5eWorldUpsertAssignmentStmt: q.dnd5eWorldUpsertAssignmentStmt,
-		userFindByEmailStmt:            q.userFindByEmailStmt,
-		userFindByIdStmt:               q.userFindByIdStmt,
-		userFindByUuidStmt:             q.userFindByUuidStmt,
-		userInsertStmt:                 q.userInsertStmt,
-		userUpdateStmt:                 q.userUpdateStmt,
+		db:                               tx,
+		tx:                               tx,
+		dnd5eLanguageFindAllStmt:         q.dnd5eLanguageFindAllStmt,
+		dnd5eMonsterFindByIdStmt:         q.dnd5eMonsterFindByIdStmt,
+		dnd5eMonstersFindBySettingStmt:   q.dnd5eMonstersFindBySettingStmt,
+		dnd5eSettingFindAssignmentStmt:   q.dnd5eSettingFindAssignmentStmt,
+		dnd5eSettingFindByAssignmentStmt: q.dnd5eSettingFindByAssignmentStmt,
+		dnd5eSettingFindByIdStmt:         q.dnd5eSettingFindByIdStmt,
+		dnd5eSettingInsertStmt:           q.dnd5eSettingInsertStmt,
+		dnd5eSettingUpsertAssignmentStmt: q.dnd5eSettingUpsertAssignmentStmt,
+		dnd5eSizeCategoryFindAllStmt:     q.dnd5eSizeCategoryFindAllStmt,
+		userFindByEmailStmt:              q.userFindByEmailStmt,
+		userFindByIdStmt:                 q.userFindByIdStmt,
+		userFindByUuidStmt:               q.userFindByUuidStmt,
+		userInsertStmt:                   q.userInsertStmt,
+		userUpdateStmt:                   q.userUpdateStmt,
 	}
 }

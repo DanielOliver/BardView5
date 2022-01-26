@@ -3,10 +3,10 @@
 /* eslint-disable */
 
 import type { Created } from './Created';
-import type { Dnd5eWorld } from './Dnd5eWorld';
+import type { Dnd5eSetting } from './Dnd5eSetting';
 
-export type Dnd5eWorldGet = (Dnd5eWorld & {
-dnd5eWorldId: string;
+export type Dnd5eSettingGet = (Dnd5eSetting & {
+dnd5eSettingId: string;
 created: Created;
 version: number;
 });

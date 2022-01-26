@@ -29,51 +29,51 @@ SET name          = @name
 WHERE u.user_id = @user_id
   AND u.version = @version RETURNING *;
 
--- name: Dnd5eWorldInsert :execrows
-insert into "dnd5e_world" (dnd5e_world_id, common_access, created_by, is_active, system_tags,
+-- name: Dnd5eSettingInsert :execrows
+insert into "dnd5e_setting" (dnd5e_setting_id, common_access, created_by, is_active, system_tags,
                            user_tags, "name", module, description)
-VALUES (@dnd5e_world_id, @common_access, @created_by, @is_active,
+VALUES (@dnd5e_setting_id, @common_access, @created_by, @is_active,
         @system_tags, @user_tags, @name, @module, @description);
 
--- name: Dnd5eWorldFindById :many
+-- name: Dnd5eSettingFindById :many
 SELECT *
-FROM "dnd5e_world" w
-WHERE w.dnd5e_world_id = @dnd5e_world_id;
+FROM "dnd5e_setting" w
+WHERE w.dnd5e_setting_id = @dnd5e_setting_id;
 
--- name: Dnd5eWorldUpsertAssignment :execrows
-insert into "dnd5e_world_assignment" (created_by, user_id, dnd5e_world_id, role_action)
+-- name: Dnd5eSettingUpsertAssignment :execrows
+insert into "dnd5e_setting_assignment" (created_by, user_id, dnd5e_setting_id, role_action)
 SELECT @created_by,
        @user_id,
-       @dnd5e_world_id,
+       @dnd5e_setting_id,
        @role_action WHERE NOT EXISTS (
-    SELECT 1 FROM dnd5e_world_assignment
-    WHERE user_id = @user_id AND dnd5e_world_id = @dnd5e_world_id AND role_action = @role_action
+    SELECT 1 FROM dnd5e_setting_assignment
+    WHERE user_id = @user_id AND dnd5e_setting_id = @dnd5e_setting_id AND role_action = @role_action
 );
 
--- name: Dnd5eWorldFindByAssignment :many
+-- name: Dnd5eSettingFindByAssignment :many
 SELECT DISTINCT w.*
-FROM "dnd5e_world" w
-         INNER JOIN "dnd5e_world_assignment" wa ON
-    w.dnd5e_world_id = wa.dnd5e_world_id
+FROM "dnd5e_setting" w
+         INNER JOIN "dnd5e_setting_assignment" wa ON
+    w.dnd5e_setting_id = wa.dnd5e_setting_id
 WHERE wa.user_id = @user_id
-ORDER BY w.dnd5e_world_id desc;
+ORDER BY w.dnd5e_setting_id desc;
 
--- name: Dnd5eWorldFindAssignment :many
+-- name: Dnd5eSettingFindAssignment :many
 SELECT wa.*
-FROM "dnd5e_world_assignment" wa
+FROM "dnd5e_setting_assignment" wa
 WHERE wa.user_id = @user_id
-  AND wa.dnd5e_world_id = @dnd5e_world_id;
+  AND wa.dnd5e_setting_id = @dnd5e_setting_id;
 
 -- name: Dnd5eMonsterFindById :many
 SELECT *
 FROM "dnd5e_monster" m
 WHERE m.dnd5e_monster_id = @dnd5e_monster_id;
 
--- name: Dnd5eMonstersFindByWorld :many
+-- name: Dnd5eMonstersFindBySetting :many
 SELECT *
 FROM "dnd5e_monster" m
-WHERE m.dnd5e_world_id = @dnd5e_world_id
-ORDER BY m.dnd5e_world_id, m.dnd5e_monster_id
+WHERE m.dnd5e_setting_id = @dnd5e_setting_id
+ORDER BY m.dnd5e_setting_id, m.dnd5e_monster_id
 OFFSET @row_offset LIMIT @row_limit;
 
 -- name: Dnd5eSizeCategoryFindAll :many
