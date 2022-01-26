@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Button, Col, Container, Form, Row, Spinner } from 'react-bootstrap'
+import { Button, Col, Container, Form, Row, Spinner, Tab, Tabs } from 'react-bootstrap'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -7,6 +7,8 @@ import { useMutation } from 'react-query'
 import { bv5V1CreateDnd5eSetting } from '../../../services/bardview5'
 import { Dnd5eSettingPostOk } from '../../../bv5-server'
 import { useNavigate } from 'react-router-dom'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 const CommonAccessValues = ['private', 'anyuser', 'public'] as const
 const CommonAccessText = ['Private', 'Any User', 'Public'] as const
@@ -42,6 +44,7 @@ export function Dnd5eSettingCreate () {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors }
   } = useForm<SettingCreate>({
     resolver: zodResolver(SettingCreateSchema)
@@ -53,9 +56,14 @@ export function Dnd5eSettingCreate () {
     }
   }, [mutation])
 
+  const watchDescription = watch('description')
+
   return <Container fluid="lg">
     <Row>
-      <h1>D&D 5e Setting: Create</h1>
+      <p><i>D&D 5e Setting</i></p>
+    </Row>
+    <Row>
+      <h1>Create</h1>
     </Row>
     <Form onSubmit={handleSubmit((d) => mutation.mutate(d))}>
 
@@ -66,17 +74,6 @@ export function Dnd5eSettingCreate () {
                         isInvalid={errors.name?.message !== undefined}/>
           <Form.Control.Feedback type="invalid">
             {errors.name?.message}
-          </Form.Control.Feedback>
-        </Form.Group>
-      </Row>
-
-      <Row>
-        <Form.Group as={Col} className="mb-3">
-          <Form.Label>Description</Form.Label>
-          <Form.Control as="textarea" required placeholder="Description" {...register('description')}
-                        isInvalid={errors.description?.message !== undefined}/>
-          <Form.Control.Feedback type="invalid">
-            {errors.description?.message}
           </Form.Control.Feedback>
         </Form.Group>
       </Row>
@@ -108,6 +105,28 @@ export function Dnd5eSettingCreate () {
       </Row>
 
       <Row>
+        <Form.Group as={Col} className="mb-3">
+          <Form.Label>Description</Form.Label>
+
+          <Tabs defaultActiveKey="edit">
+            <Tab eventKey="edit" title="Edit">
+              <Form.Control as="textarea" required placeholder="Description" {...register('description')}
+                            isInvalid={errors.description?.message !== undefined}/>
+            </Tab>
+            <Tab eventKey="preview" title="Preview">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {watchDescription}
+              </ReactMarkdown>
+              <hr/>
+            </Tab>
+          </Tabs>
+          <Form.Control.Feedback type="invalid">
+            {errors.description?.message}
+          </Form.Control.Feedback>
+        </Form.Group>
+      </Row>
+
+      <Row>
         <Col>
           <Button variant="primary" type="submit"
                   disabled={mutation.isLoading || mutation.isError || mutation.isSuccess}>
@@ -122,7 +141,7 @@ export function Dnd5eSettingCreate () {
                       />
                       Saving...
                     </>
-              : <>Submit</>
+              : <>Save</>
             }
           </Button>
         </Col>

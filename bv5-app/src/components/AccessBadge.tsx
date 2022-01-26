@@ -4,7 +4,7 @@ import { Badge } from 'react-bootstrap'
 export function AccessBadge ({
   accessType
 }: {
-  accessType: string
+  accessType: string | undefined
 }) {
   switch (accessType) {
     case 'private':
@@ -14,6 +14,6 @@ export function AccessBadge ({
     case 'public':
       return <Badge bg="info">Public</Badge>
     default:
-      return <></>
+      return <Badge bg="danger">Unknown</Badge>
   }
 }

@@ -15,7 +15,7 @@ A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool.
 ## Roadmap
 
 1. [X] Start with basic user management
-2. [ ] Become a compendium of worlds and monsters.
+2. [ ] Become a compendium of settings and monsters.
 3. [ ] Become a campaign/session/encounter tracker for the game master.
 4. [ ] Create a display window for tv so that DM can share information with players. 
 5. [ ] Explore player data management.
@@ -29,21 +29,23 @@ A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool.
     - [ ] Email verification
     - [ ] Password reset
 - D&D 5e
-    - World: A general setting to play in
+    - Setting: A general setting to play in
         - [X] Read
         - [X] Create
         - [ ] Update
         - [ ] Delete
         - [ ] Query
         - [ ] Assigning user permissions
+        - Notes
+            - Supports markdown in description
     - Monster: A single monster with statblocks and info
         - [ ] Read
         - [ ] Create
         - [ ] Update
         - [ ] Delete
         - [ ] Query
-        - [ ] Associating with worlds
-    - Data pack: An entire collection of worlds, monsters, and associated information. Meant to be imported or exported and shared.
+        - [ ] Associating with settings
+    - Data pack: An entire collection of settings, monsters, and associated information. Meant to be imported or exported and shared.
         - [ ] Export
         - [ ] Import
     - Player tv display:

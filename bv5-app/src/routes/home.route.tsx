@@ -23,11 +23,8 @@ function HomeRoute () {
           <ListGroup>
             {dnd5eSettings?.map((setting) => {
               const daysAgo = formatDistance(new Date(setting.created), new Date(), { addSuffix: true })
-              const shortDescription = setting.description.substring(0, 200) + (setting.description.length > 200 ? ' ...' : '')
-
               return (
                       <ListGroup.Item key={setting.dnd5eSettingId} as={Link} to={`/dnd5e/settings/${setting.dnd5eSettingId}`}>
-                        {/* <Link to={`/dnd5e/settings/${setting.dnd5eSettingId}`} > */}
                         <div className="d-flex justify-content-between flex-column flex-md-row">
                           <h5 className="mb-1">{setting.name}</h5>
                           <div className="mb-1 justify-content-between d-flex">
@@ -35,8 +32,6 @@ function HomeRoute () {
                             <AccessBadge accessType={setting.commonAccess}/>
                           </div>
                         </div>
-                        <p className="mb-1"><i>{shortDescription}</i></p>
-                        {/* </Link> */}
                       </ListGroup.Item>
               )
             })
