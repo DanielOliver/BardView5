@@ -26,7 +26,8 @@ func mapDnd5eSettingToJsonBody(dnd5eSetting *db.Dnd5eSetting) *api.Dnd5eSettingG
 		Version:        dnd5eSetting.Version,
 	}
 	if dnd5eSetting.Module.Valid {
-		ret.Dnd5eSetting.Module = &dnd5eSetting.Module.String
+		module := dnd5eSetting.Module.String
+		ret.Dnd5eSetting.Module = &module
 	}
 	return ret
 }
