@@ -29,10 +29,10 @@ export function Layout () {
   })
 
   return <Navbar bg="light" expand="md">
-    <Container fluid="lg">
+    <Container fluid>
       <Navbar.Brand><Link style={{ textDecoration: 'none' }} className="link-primary" to="/">BardView5</Link></Navbar.Brand>
-      <Navbar.Toggle aria-controls="basic-navbar-nav"/>
-      <Navbar.Collapse id="basic-navbar-nav">
+       <Navbar.Toggle aria-controls="basic-navbar-nav"/>
+       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="me-auto">
         </Nav>
 
@@ -52,7 +52,7 @@ export function Layout () {
                 </Nav>
             )
         }
-      </Navbar.Collapse>
+       </Navbar.Collapse>
     </Container>
   </Navbar>
 }

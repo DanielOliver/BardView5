@@ -9,6 +9,7 @@ import LayoutWrapper from './components/LayoutWrapper'
 import ProtectedRoute from './components/ProtectedRoute'
 import { Dnd5eSettingView } from './routes/dnd5e/settings/view.route'
 import { Dnd5eSettingCreate } from './routes/dnd5e/settings/create.route'
+import { Dnd5eSettingList } from './routes/dnd5e/settings/list.route'
 
 function App () {
   const [state, dispatch] = React.useReducer(AuthReducer, AuthInitialState)
@@ -51,6 +52,8 @@ function App () {
                   <Route path="/login" element={<LayoutWrapper><LoginRoute/></LayoutWrapper>}/>
                   <Route path="/" element={<ProtectedRoute isAuthenticated={state.isAuthenticated}/>}>
                     <Route path="/" element={<LayoutWrapper><HomeRoute/> </LayoutWrapper>}/>
+                    <Route path="/dnd5e/settings/"
+                           element={<LayoutWrapper><Dnd5eSettingList/></LayoutWrapper>}/>
                     <Route path="/dnd5e/settings/create"
                            element={<LayoutWrapper><Dnd5eSettingCreate/></LayoutWrapper>}/>
                   </Route>
