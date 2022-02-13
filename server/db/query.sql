@@ -35,6 +35,17 @@ insert into "dnd5e_setting" (dnd5e_setting_id, common_access, created_by, is_act
 VALUES (@dnd5e_setting_id, @common_access, @created_by, @is_active,
         @system_tags, @user_tags, @name, @module, @description);
 
+-- name: Dnd5eSettingUpdate :execrows
+Update "dnd5e_setting" as s
+SET common_access = @common_access
+  ,is_active = @is_active
+  ,system_tags = @system_tags
+  ,user_tags = @user_tags
+  ,"name" = @name
+  ,module = @module
+  ,description = @description
+WHERE s.dnd5e_setting_id = @dnd5e_setting_id;
+
 -- name: Dnd5eSettingFindById :many
 SELECT *
 FROM "dnd5e_setting" w
@@ -56,6 +67,18 @@ FROM "dnd5e_setting" w
          INNER JOIN "dnd5e_setting_assignment" wa ON
     w.dnd5e_setting_id = wa.dnd5e_setting_id
 WHERE wa.user_id = @user_id
+ORDER BY w.dnd5e_setting_id desc;
+
+-- name: Dnd5eSettingFindByParams :many
+SELECT DISTINCT w.*
+FROM "dnd5e_setting" w
+         LEFT OUTER JOIN "dnd5e_setting_assignment" wa ON
+        w.dnd5e_setting_id = wa.dnd5e_setting_id
+    AND wa.user_id = @user_id
+WHERE (wa.user_id IS NOT NULL
+    OR w.common_access IN ('anyuser', 'public')
+  )
+    AND w.name LIKE @name
 ORDER BY w.dnd5e_setting_id desc;
 
 -- name: Dnd5eSettingFindAssignment :many

@@ -13,19 +13,13 @@ create table "dnd5e_setting"
     name                text    not null,
     module              text    null,
     description         text    not null,
-    external_source_id  bigint  null,
-    external_source_key text    null,
 
     CONSTRAINT fk_dnd5e_setting_createdby
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id),
     CONSTRAINT fk_dnd5e_setting_commonaccess
         FOREIGN KEY (common_access)
-            REFERENCES common_access (name),
-
-    CONSTRAINT fk_dnd5e_setting_derived_from_external_source
-        FOREIGN KEY (external_source_id)
-            REFERENCES "external_source" (external_source_id)
+            REFERENCES common_access (name)
 
 );
 

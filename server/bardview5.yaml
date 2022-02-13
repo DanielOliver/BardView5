@@ -27,6 +27,16 @@ components:
       schema:
         type: integer
         format: int64
+    Dnd5eSettingName:
+      in: query
+      name: name
+      description: The beginning of the name
+      schema:
+        type: string
+        example: Forgiven Songs
+        maxLength: 512
+        x-oapi-codegen-extra-tags:
+          binding: "max=512"
   requestBodies:
     Patch:
       description: JsonPatch
@@ -335,6 +345,15 @@ paths:
         '201':
           $ref: '#/components/responses/Dnd5eSettingPostOk'
   /api/v1/dnd5e/settings:
+    get:
+      summary: Returns all Dnd5e Settings that I have access to.
+      tags:
+        - Dnd5eSetting
+      parameters:
+        - $ref: '#/components/parameters/Dnd5eSettingName'
+      responses:
+        '200':
+          $ref: '#/components/responses/Dnd5eSettingArrayGetOk'
     post:
       summary: Creates a new dnd5e setting.
       tags:

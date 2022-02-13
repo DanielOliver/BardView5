@@ -1,19 +1,23 @@
 import React, { useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useMutation, useQuery } from 'react-query'
+import { Dnd5eSettingGet, Dnd5eSettingPostOk } from '../../../bv5-server'
+import { bv5V1EditDnd5eSetting, bv5V1GetDnd5eSetting } from '../../../services/bardview5'
+import { AxiosResponse } from 'axios'
 import { Button, Col, Container, Form, Row, Spinner, Tab, Tabs } from 'react-bootstrap'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { useMutation } from 'react-query'
-import { bv5V1CreateDnd5eSetting } from '../../../services/bardview5'
-import { Dnd5eSettingPostOk } from '../../../bv5-server'
-import { useNavigate } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Dnd5eSettingCreateSchema, Dnd5eSettingCreateType } from './common'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { CommonAccessText, CommonAccessValues } from '../common'
 
-export function Dnd5eSettingCreate () {
+const Dnd5eSettingForm: React.FC<{ dnd5eSettingId: string, data: Dnd5eSettingGet }> = ({
+  dnd5eSettingId,
+  data
+}) => {
   const mutation = useMutation<Dnd5eSettingPostOk, unknown, Dnd5eSettingCreateType>(async (setting) => {
-    const { data } = await bv5V1CreateDnd5eSetting({
+    const { data } = await bv5V1EditDnd5eSetting(dnd5eSettingId, {
       name: setting.name,
       description: setting.description,
       module: setting.module,
@@ -33,12 +37,22 @@ export function Dnd5eSettingCreate () {
     watch,
     formState: { errors }
   } = useForm<Dnd5eSettingCreateType>({
-    resolver: zodResolver(Dnd5eSettingCreateSchema)
+    resolver: zodResolver(Dnd5eSettingCreateSchema),
+    defaultValues: {
+      active: data.active,
+      description: data.description,
+      module: data.module,
+      userTags: data.userTags,
+      systemTags: data.systemTags,
+      // @ts-ignore
+      commonAccess: data.commonAccess,
+      name: data.name
+    }
   })
 
   useEffect(() => {
     if (mutation.isSuccess && mutation.data?.dnd5eSettingId !== undefined) {
-      navigate(`/dnd5e/settings/${mutation.data.dnd5eSettingId}`)
+      navigate(`/dnd5e/settings/${dnd5eSettingId}`)
     }
   }, [mutation])
 
@@ -49,7 +63,7 @@ export function Dnd5eSettingCreate () {
       <p><i>D&D 5e Setting</i></p>
     </Row>
     <Row>
-      <h1>Create</h1>
+      <h1>Edit</h1>
     </Row>
     <Form onSubmit={handleSubmit((d) => mutation.mutate(d))}>
 
@@ -136,6 +150,40 @@ export function Dnd5eSettingCreate () {
   </Container>
 }
 
-export default {
-  Dnd5eSettingCreate
+const Dnd5eSettingEdit = () => {
+  const params = useParams()
+  const dnd5eSettingId: string = params.dnd5eSettingId ?? '0'
+  const {
+    data,
+    error,
+    isLoading
+  } = useQuery<Dnd5eSettingGet, AxiosResponse>(`dnd5e-setting-${dnd5eSettingId}`, async () => {
+    const { data } = await bv5V1GetDnd5eSetting(dnd5eSettingId)
+    return data
+  }, {
+    retry: false
+  })
+
+  if (error) {
+    return <Container fluid="lg">
+      <p>Did not find setting {dnd5eSettingId}</p>
+      <pre>
+        {JSON.stringify(error, null, 2)}
+      </pre>
+    </Container>
+  }
+
+  if (isLoading || data === undefined) {
+    return <Container fluid="lg">
+      <Spinner animation="border" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </Spinner>
+    </Container>
+  }
+
+  return <Dnd5eSettingForm dnd5eSettingId={dnd5eSettingId} data={data}/>
+}
+
+export {
+  Dnd5eSettingEdit
 }

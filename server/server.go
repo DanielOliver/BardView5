@@ -18,7 +18,7 @@ func registerRoutes(router *gin.Engine, b *bv5.BardView5) {
 	{
 		grpUsers := grpV1.Group("/users")
 		{
-			grpUsers.GET("/me", b.WrapRequest(bv5.GetUserThatIsMe))
+			grpUsers.GET("/me", b.RequireValidSession, b.WrapRequest(bv5.GetUserThatIsMe))
 			grpUsers.GET("/:userId", b.WrapRequest(bv5.GetUsersById))
 			grpUsers.POST("", b.RequireValidSession, b.PostUsersCreate)
 			grpUsers.PATCH("/:userId", b.RequireValidSession, b.PatchUserById)
@@ -29,6 +29,8 @@ func registerRoutes(router *gin.Engine, b *bv5.BardView5) {
 			{
 				grpDnd5eSettings.GET("/assigned", b.RequireValidSession, b.WrapRequest(bv5.GetMyDnd5eSettings))
 				grpDnd5eSettings.GET("/:dnd5eSettingId", b.WrapRequest(bv5.GetDnd5eSettingById))
+				grpDnd5eSettings.POST("/:dnd5eSettingId", b.WrapRequest(bv5.PostDnd5eSettingsEdit))
+				grpDnd5eSettings.GET("", b.RequireValidSession, b.WrapRequest(bv5.GetDnd5eSettings))
 				grpDnd5eSettings.POST("", b.RequireValidSession, b.WrapRequest(bv5.PostDnd5eSettingsCreate))
 			}
 		}

@@ -17,9 +17,14 @@ async function bv5V1CreateDnd5eSetting (setting: Dnd5eSetting): Promise<AxiosRes
   return await axios.post<Dnd5eSettingPostOk>('/api/v1/dnd5e/settings/', setting)
 }
 
+async function bv5V1EditDnd5eSetting (dnd5eSettingId: string, setting: Dnd5eSetting): Promise<AxiosResponse<Dnd5eSettingPostOk>> {
+  return await axios.post<Dnd5eSettingPostOk>(`/api/v1/dnd5e/settings/${dnd5eSettingId}`, setting)
+}
+
 export {
   bv5V1GetMe,
   bv5V1GetDnd5eSettingsMine,
   bv5V1GetDnd5eSetting,
-  bv5V1CreateDnd5eSetting
+  bv5V1CreateDnd5eSetting,
+  bv5V1EditDnd5eSetting
 }

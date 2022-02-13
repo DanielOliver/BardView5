@@ -10,6 +10,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 import { Dnd5eSettingView } from './routes/dnd5e/settings/view.route'
 import { Dnd5eSettingCreate } from './routes/dnd5e/settings/create.route'
 import { Dnd5eSettingList } from './routes/dnd5e/settings/list.route'
+import LayoutSidebar from './components/LayoutSidebar'
+import { Dnd5eSettingEdit } from './routes/dnd5e/settings/edit.route'
 
 function App () {
   const [state, dispatch] = React.useReducer(AuthReducer, AuthInitialState)
@@ -51,19 +53,26 @@ function App () {
                   <Route path="/register" element={<LayoutWrapper><RegisterRoute/></LayoutWrapper>}/>
                   <Route path="/login" element={<LayoutWrapper><LoginRoute/></LayoutWrapper>}/>
                   <Route path="/" element={<ProtectedRoute isAuthenticated={state.isAuthenticated}/>}>
-                    <Route path="/" element={<LayoutWrapper><HomeRoute/> </LayoutWrapper>}/>
+                    <Route path="/" element={<LayoutSidebar><HomeRoute/></LayoutSidebar>}/>
                     <Route path="/dnd5e/settings/"
-                           element={<LayoutWrapper><Dnd5eSettingList/></LayoutWrapper>}/>
+                           element={<LayoutSidebar><Dnd5eSettingList/></LayoutSidebar>}/>
                     <Route path="/dnd5e/settings/create"
-                           element={<LayoutWrapper><Dnd5eSettingCreate/></LayoutWrapper>}/>
+                           element={<LayoutSidebar><Dnd5eSettingCreate/></LayoutSidebar>}/>
+                    <Route path="/dnd5e/settings/:dnd5eSettingId/edit"
+                           element={<LayoutWrapper
+                                   isAuthenticated={state.isAuthenticated}><Dnd5eSettingEdit/></LayoutWrapper>}/>
                   </Route>
                   <Route path="/dnd5e/settings/:dnd5eSettingId"
-                         element={<LayoutWrapper><Dnd5eSettingView/></LayoutWrapper>}/>
+                         element={<LayoutWrapper
+                                 isAuthenticated={state.isAuthenticated}>
+                           <Dnd5eSettingView
+                                   isAuthenticated={state.isAuthenticated}/>
+                         </LayoutWrapper>}/>
                   <Route path="/*" element={<h1>Unknown</h1>}/>
-              </Routes>
-            </BrowserRouter>
-          </div>
-</AuthContext.Provider>
+                </Routes>
+              </BrowserRouter>
+            </div>
+          </AuthContext.Provider>
   )
 }
 

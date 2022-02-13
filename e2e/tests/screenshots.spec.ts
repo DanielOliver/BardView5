@@ -16,7 +16,7 @@ test('landing page to register', async ({ page }) => {
   const idSelector = await page.waitForSelector('text=ID');
   await idSelector.isVisible();
   await page.screenshot({ path: 'screenshots/unauth_login.png' });
-  
+
   await page.locator('text=Register').click();
   await page.waitForLoadState();
   const usernameSelector = await page.waitForSelector('text=Username');
@@ -37,14 +37,15 @@ test('landing page to register', async ({ page }) => {
   await usernameField.click();
   await usernameField.type(userId);
   await page.locator('.btn-primary').click();
-   
+
   await page.waitForLoadState();
-  const worldSelector = await page.waitForSelector('text=Worlds');
-  await worldSelector.isVisible();
+  const settingSelector = await page.waitForSelector('text=Settings');
+  await settingSelector.isVisible();
 
   const layoutSelector = await page.waitForSelector(`text=${userId}`);
   await layoutSelector.isVisible();
 
   await page.screenshot({ path: 'screenshots/registered.png' });
+
 });
 

@@ -107,6 +107,9 @@ type UserTags []string
 // Dnd5eSettingId defines model for Dnd5eSettingId.
 type Dnd5eSettingId int64
 
+// Dnd5eSettingName defines model for Dnd5eSettingName.
+type Dnd5eSettingName string
+
 // UserId defines model for UserId.
 type UserId string
 
@@ -130,6 +133,12 @@ type UserPostOk struct {
 
 // A JSONPatch document as defined by RFC 6902
 type Patch PatchDocument
+
+// GetApiV1Dnd5eSettingsParams defines parameters for GetApiV1Dnd5eSettings.
+type GetApiV1Dnd5eSettingsParams struct {
+	// The beginning of the name
+	Name *Dnd5eSettingName `json:"name,omitempty"`
+}
 
 // PostApiV1Dnd5eSettingsJSONBody defines parameters for PostApiV1Dnd5eSettings.
 type PostApiV1Dnd5eSettingsJSONBody Dnd5eSetting

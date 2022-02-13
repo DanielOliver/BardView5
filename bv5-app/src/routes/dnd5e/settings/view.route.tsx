@@ -1,17 +1,18 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import { Dnd5eSettingGet } from '../../../bv5-server'
 import { bv5V1GetDnd5eSetting } from '../../../services/bardview5'
 import { AxiosResponse } from 'axios'
-import { Col, Container, Row, Spinner } from 'react-bootstrap'
+import { Button, Col, Container, Row, Spinner } from 'react-bootstrap'
 import ReactMarkdown from 'react-markdown'
 import { AccessBadge } from '../../../components/AccessBadge'
 import { formatDistance } from 'date-fns'
 import remarkGfm from 'remark-gfm'
 
-function Dnd5eSettingView () {
+const Dnd5eSettingView: React.FC<{isAuthenticated: boolean}> = ({ isAuthenticated = false }) => {
   const params = useParams()
+  const navigate = useNavigate()
   const dnd5eSettingId: string = params.dnd5eSettingId ?? '0'
   const {
     data,
@@ -58,6 +59,13 @@ function Dnd5eSettingView () {
       <Col md={true}>
         <AccessBadge accessType={data.commonAccess ?? ''}/>
       </Col>
+      {isAuthenticated &&
+              <Col md={true}>
+                <Button variant="primary" onClick={() => {
+                  navigate(`/dnd5e/settings/${dnd5eSettingId}/edit`)
+                }}>Edit</Button>
+              </Col>
+      }
     </Row>
     {data?.module &&
             <Row>

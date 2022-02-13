@@ -77,6 +77,36 @@ func GetMyDnd5eSettings(b *BardView5Http) {
 	b.Context.JSON(http.StatusOK, results)
 }
 
+func GetDnd5eSettings(b *BardView5Http) {
+	var params api.GetApiV1Dnd5eSettingsParams
+	if err := b.Context.ShouldBindUri(&params); err != nil {
+		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	dbParams := db.Dnd5eSettingFindByParamsParams{
+		UserID: b.Session.SessionId,
+		Name:   "%",
+	}
+	if params.Name != nil {
+		dbParams.Name = string(*params.Name) + "%"
+	}
+	dnd5eSettings, err := b.Querier().Dnd5eSettingFindByParams(b.Context, dbParams)
+
+	if err != nil {
+		b.Logger.Err(err).Int64("id", b.Session.SessionId).Msg("Failed to get dnd5esettings")
+		b.Context.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	results := make([]api.Dnd5eSettingGet, len(dnd5eSettings))
+	for i, setting := range dnd5eSettings {
+		results[i] = *mapDnd5eSettingToJsonBody(&setting)
+	}
+
+	b.Context.JSON(http.StatusOK, results)
+}
+
 func PostDnd5eSettingsCreate(b *BardView5Http) {
 	var body api.PostApiV1Dnd5eSettingsJSONBody
 	if err := b.Context.ShouldBindJSON(&body); err != nil {
@@ -94,6 +124,44 @@ func PostDnd5eSettingsCreate(b *BardView5Http) {
 	b.Context.Header("Location", fmt.Sprintf("/v1/dnd5e/setting/%d/", newDnd5eSettingId))
 	b.Context.JSON(http.StatusCreated, api.Dnd5eSettingPostOk{
 		Dnd5eSettingId: strconv.FormatInt(newDnd5eSettingId, 10),
+		Version:        0,
+	})
+}
+
+func PostDnd5eSettingsEdit(b *BardView5Http) {
+	var params GetDnd5eSettingByIdParams
+	if err := b.Context.ShouldBindUri(&params); err != nil {
+		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var body api.PostApiV1Dnd5eSettingsJSONBody
+	if err := b.Context.ShouldBindJSON(&body); err != nil {
+		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	dnd5eSetting, err := Dnd5eSettingById(b, params.Dnd5eSettingId)
+	if err != nil {
+		WriteErrorToContext(b, err)
+		return
+	}
+	err = Dnd5eSettingHasAccess(b, &dnd5eSetting)
+	if err != nil {
+		WriteErrorToContext(b, err)
+		return
+	}
+
+	err = Dnd5eSettingEdit(b, params.Dnd5eSettingId, &body)
+	if err != nil {
+		WriteErrorToContext(b, err)
+		return
+	}
+
+	b.Context.Header("ETag", "0")
+	b.Context.Header("Location", fmt.Sprintf("/v1/dnd5e/setting/%d/", params.Dnd5eSettingId))
+	b.Context.JSON(http.StatusOK, api.Dnd5eSettingPostOk{
+		Dnd5eSettingId: strconv.FormatInt(params.Dnd5eSettingId, 10),
 		Version:        0,
 	})
 }
@@ -173,4 +241,25 @@ func Dnd5eSettingCreate(b *BardView5Http, body *api.PostApiV1Dnd5eSettingsJSONBo
 	}
 
 	return newDnd5eSettingId, nil
+}
+
+func Dnd5eSettingEdit(b *BardView5Http, dnd5eSettingId int64, body *api.PostApiV1Dnd5eSettingsJSONBody) error {
+	changedRows, err := b.Querier().Dnd5eSettingUpdate(b.Context, db.Dnd5eSettingUpdateParams{
+		Dnd5eSettingID: dnd5eSettingId,
+		CommonAccess:   body.CommonAccess,
+		IsActive:       body.Active,
+		SystemTags:     body.SystemTags,
+		UserTags:       body.UserTags,
+		Name:           body.Name,
+		Module:         MaybeString(body.Module),
+		Description:    body.Description,
+	})
+	if err != nil {
+		b.Logger.Err(err).Msg(ObjDnd5eSetting)
+		return ErrFailedCreate(ObjDnd5eSetting, dnd5eSettingId, true)
+	}
+	if changedRows == 0 {
+		return ErrUnknownStatusCreate(ObjDnd5eSetting, dnd5eSettingId, true)
+	}
+	return nil
 }

@@ -40,8 +40,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.dnd5eSettingFindByIdStmt, err = db.PrepareContext(ctx, dnd5eSettingFindById); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eSettingFindById: %w", err)
 	}
+	if q.dnd5eSettingFindByParamsStmt, err = db.PrepareContext(ctx, dnd5eSettingFindByParams); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eSettingFindByParams: %w", err)
+	}
 	if q.dnd5eSettingInsertStmt, err = db.PrepareContext(ctx, dnd5eSettingInsert); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eSettingInsert: %w", err)
+	}
+	if q.dnd5eSettingUpdateStmt, err = db.PrepareContext(ctx, dnd5eSettingUpdate); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eSettingUpdate: %w", err)
 	}
 	if q.dnd5eSettingUpsertAssignmentStmt, err = db.PrepareContext(ctx, dnd5eSettingUpsertAssignment); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eSettingUpsertAssignment: %w", err)
@@ -99,9 +105,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing dnd5eSettingFindByIdStmt: %w", cerr)
 		}
 	}
+	if q.dnd5eSettingFindByParamsStmt != nil {
+		if cerr := q.dnd5eSettingFindByParamsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eSettingFindByParamsStmt: %w", cerr)
+		}
+	}
 	if q.dnd5eSettingInsertStmt != nil {
 		if cerr := q.dnd5eSettingInsertStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing dnd5eSettingInsertStmt: %w", cerr)
+		}
+	}
+	if q.dnd5eSettingUpdateStmt != nil {
+		if cerr := q.dnd5eSettingUpdateStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eSettingUpdateStmt: %w", cerr)
 		}
 	}
 	if q.dnd5eSettingUpsertAssignmentStmt != nil {
@@ -184,7 +200,9 @@ type Queries struct {
 	dnd5eSettingFindAssignmentStmt   *sql.Stmt
 	dnd5eSettingFindByAssignmentStmt *sql.Stmt
 	dnd5eSettingFindByIdStmt         *sql.Stmt
+	dnd5eSettingFindByParamsStmt     *sql.Stmt
 	dnd5eSettingInsertStmt           *sql.Stmt
+	dnd5eSettingUpdateStmt           *sql.Stmt
 	dnd5eSettingUpsertAssignmentStmt *sql.Stmt
 	dnd5eSizeCategoryFindAllStmt     *sql.Stmt
 	userFindByEmailStmt              *sql.Stmt
@@ -204,7 +222,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		dnd5eSettingFindAssignmentStmt:   q.dnd5eSettingFindAssignmentStmt,
 		dnd5eSettingFindByAssignmentStmt: q.dnd5eSettingFindByAssignmentStmt,
 		dnd5eSettingFindByIdStmt:         q.dnd5eSettingFindByIdStmt,
+		dnd5eSettingFindByParamsStmt:     q.dnd5eSettingFindByParamsStmt,
 		dnd5eSettingInsertStmt:           q.dnd5eSettingInsertStmt,
+		dnd5eSettingUpdateStmt:           q.dnd5eSettingUpdateStmt,
 		dnd5eSettingUpsertAssignmentStmt: q.dnd5eSettingUpsertAssignmentStmt,
 		dnd5eSizeCategoryFindAllStmt:     q.dnd5eSizeCategoryFindAllStmt,
 		userFindByEmailStmt:              q.userFindByEmailStmt,

@@ -272,6 +272,61 @@ func (q *Queries) Dnd5eSettingFindById(ctx context.Context, dnd5eSettingID int64
 	return items, nil
 }
 
+const dnd5eSettingFindByParams = `-- name: Dnd5eSettingFindByParams :many
+SELECT DISTINCT w.dnd5e_setting_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.name, w.module, w.description, w.external_source_id, w.external_source_key
+FROM "dnd5e_setting" w
+         LEFT OUTER JOIN "dnd5e_setting_assignment" wa ON
+        w.dnd5e_setting_id = wa.dnd5e_setting_id
+    AND wa.user_id = $1
+WHERE (wa.user_id IS NOT NULL
+    OR w.common_access IN ('anyuser', 'public')
+  )
+    AND w.name LIKE $2
+ORDER BY w.dnd5e_setting_id desc
+`
+
+type Dnd5eSettingFindByParamsParams struct {
+	UserID int64  `db:"user_id"`
+	Name   string `db:"name"`
+}
+
+func (q *Queries) Dnd5eSettingFindByParams(ctx context.Context, arg Dnd5eSettingFindByParamsParams) ([]Dnd5eSetting, error) {
+	rows, err := q.query(ctx, q.dnd5eSettingFindByParamsStmt, dnd5eSettingFindByParams, arg.UserID, arg.Name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Dnd5eSetting{}
+	for rows.Next() {
+		var i Dnd5eSetting
+		if err := rows.Scan(
+			&i.Dnd5eSettingID,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.Version,
+			&i.IsActive,
+			&i.CommonAccess,
+			pq.Array(&i.UserTags),
+			pq.Array(&i.SystemTags),
+			&i.Name,
+			&i.Module,
+			&i.Description,
+			&i.ExternalSourceID,
+			&i.ExternalSourceKey,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const dnd5eSettingInsert = `-- name: Dnd5eSettingInsert :execrows
 insert into "dnd5e_setting" (dnd5e_setting_id, common_access, created_by, is_active, system_tags,
                            user_tags, "name", module, description)
@@ -302,6 +357,46 @@ func (q *Queries) Dnd5eSettingInsert(ctx context.Context, arg Dnd5eSettingInsert
 		arg.Name,
 		arg.Module,
 		arg.Description,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const dnd5eSettingUpdate = `-- name: Dnd5eSettingUpdate :execrows
+Update "dnd5e_setting" as s
+SET common_access = $1
+  ,is_active = $2
+  ,system_tags = $3
+  ,user_tags = $4
+  ,"name" = $5
+  ,module = $6
+  ,description = $7
+WHERE s.dnd5e_setting_id = $8
+`
+
+type Dnd5eSettingUpdateParams struct {
+	CommonAccess   string         `db:"common_access"`
+	IsActive       bool           `db:"is_active"`
+	SystemTags     []string       `db:"system_tags"`
+	UserTags       []string       `db:"user_tags"`
+	Name           string         `db:"name"`
+	Module         sql.NullString `db:"module"`
+	Description    string         `db:"description"`
+	Dnd5eSettingID int64          `db:"dnd5e_setting_id"`
+}
+
+func (q *Queries) Dnd5eSettingUpdate(ctx context.Context, arg Dnd5eSettingUpdateParams) (int64, error) {
+	result, err := q.exec(ctx, q.dnd5eSettingUpdateStmt, dnd5eSettingUpdate,
+		arg.CommonAccess,
+		arg.IsActive,
+		pq.Array(arg.SystemTags),
+		pq.Array(arg.UserTags),
+		arg.Name,
+		arg.Module,
+		arg.Description,
+		arg.Dnd5eSettingID,
 	)
 	if err != nil {
 		return 0, err

@@ -66,22 +66,3 @@ INSERT INTO common_access (name)
 VALUES ('private'),
        ('anyuser'),
        ('public');
-
-create table "external_source"
-(
-    external_source_id      bigint
-        constraint external_source_pk
-            primary key,
-    created_by              bigint null,
-    created_at              timestamp without time zone default (now() at time zone 'utc') not null,
-    version                 bigint not null             default (0),
-    external_source_key     text   not null,
-    external_source_version text   not null,
-    user_tags               text[] not null,
-    system_tags             text[] not null,
-    name                    text   not null,
-
-    CONSTRAINT fk_external_source_createdby
-        FOREIGN KEY (created_by)
-            REFERENCES "user" (user_id)
-);
