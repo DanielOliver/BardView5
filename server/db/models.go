@@ -23,20 +23,25 @@ type Dnd5eLanguage struct {
 }
 
 type Dnd5eMonster struct {
-	Dnd5eMonsterID       int64         `db:"dnd5e_monster_id"`
-	CreatedBy            sql.NullInt64 `db:"created_by"`
-	CreatedAt            time.Time     `db:"created_at"`
-	Version              int64         `db:"version"`
-	Dnd5eSettingID       sql.NullInt64 `db:"dnd5e_setting_id"`
-	Name                 string        `db:"name"`
-	UserTags             []string      `db:"user_tags"`
-	SystemTags           []string      `db:"system_tags"`
-	MonsterType          string        `db:"monster_type"`
-	Alignment            string        `db:"alignment"`
-	SizeCategory         string        `db:"size_category"`
-	MilliChallengeRating int64         `db:"milli_challenge_rating"`
-	Languages            []string      `db:"languages"`
-	Description          string        `db:"description"`
+	Dnd5eMonsterID       int64          `db:"dnd5e_monster_id"`
+	CreatedBy            sql.NullInt64  `db:"created_by"`
+	CreatedAt            time.Time      `db:"created_at"`
+	Version              int64          `db:"version"`
+	Dnd5eSettingID       int64          `db:"dnd5e_setting_id"`
+	Name                 string         `db:"name"`
+	Sources              []string       `db:"sources"`
+	UserTags             []string       `db:"user_tags"`
+	Languages            []string       `db:"languages"`
+	Environments         []string       `db:"environments"`
+	IsLegendary          bool           `db:"is_legendary"`
+	IsUnique             bool           `db:"is_unique"`
+	MonsterType          sql.NullString `db:"monster_type"`
+	Alignment            sql.NullString `db:"alignment"`
+	SizeCategory         sql.NullString `db:"size_category"`
+	MilliChallengeRating sql.NullInt64  `db:"milli_challenge_rating"`
+	ArmorClass           sql.NullInt32  `db:"armor_class"`
+	HitPoints            sql.NullInt32  `db:"hit_points"`
+	Description          sql.NullString `db:"description"`
 }
 
 type Dnd5eMonsterType struct {

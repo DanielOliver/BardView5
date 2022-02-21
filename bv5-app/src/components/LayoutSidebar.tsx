@@ -14,6 +14,13 @@ const Menu = ({ onNav }: {
         <li><NavLink to="/dnd5e/settings/create" onClick={onNav}>Create</NavLink></li>
       </ul>
     </li>
+    <li>
+      D&D 5e Monsters
+      <ul className="list-unstyled ms-3">
+        <li>Search</li>
+        <li>Create</li>
+      </ul>
+    </li>
   </ul>
 }
 const LayoutSidebar: React.FC<{ title?: string }> = ({ title, children }) => {

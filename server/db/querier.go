@@ -11,6 +11,7 @@ import (
 type Querier interface {
 	Dnd5eLanguageFindAll(ctx context.Context) ([]Dnd5eLanguage, error)
 	Dnd5eMonsterFindById(ctx context.Context, dnd5eMonsterID int64) ([]Dnd5eMonster, error)
+	Dnd5eMonsterInsert(ctx context.Context, arg Dnd5eMonsterInsertParams) (int64, error)
 	Dnd5eMonstersFindBySetting(ctx context.Context, arg Dnd5eMonstersFindBySettingParams) ([]Dnd5eMonster, error)
 	Dnd5eSettingFindAssignment(ctx context.Context, arg Dnd5eSettingFindAssignmentParams) ([]Dnd5eSettingAssignment, error)
 	Dnd5eSettingFindByAssignment(ctx context.Context, userID int64) ([]Dnd5eSetting, error)

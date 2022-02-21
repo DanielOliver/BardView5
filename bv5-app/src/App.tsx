@@ -13,6 +13,7 @@ import { Dnd5eSettingList } from './routes/dnd5e/settings/list.route'
 import LayoutSidebar from './components/LayoutSidebar'
 import { Dnd5eSettingEdit } from './routes/dnd5e/settings/edit.route'
 import Profile from './routes/user/profile'
+import { Dnd5eMonsterList } from './routes/dnd5e/monsters/list.route'
 
 function App () {
   const [state, dispatch] = React.useReducer(AuthReducer, AuthInitialState)
@@ -64,6 +65,11 @@ function App () {
                            element={<LayoutWrapper title="Edit: Setting D&D 5e"
                                                    isAuthenticated={state.isAuthenticated}><Dnd5eSettingEdit/></LayoutWrapper>}/>
                   </Route>
+                  <Route path="/dnd5e/settings/:dnd5eSettingId/monsters"
+                         element={<LayoutWrapper title="Monsters D&D 5e"
+                                                 isAuthenticated={state.isAuthenticated}>
+                           <Dnd5eMonsterList/>
+                         </LayoutWrapper>}/>
                   <Route path="/dnd5e/settings/:dnd5eSettingId"
                          element={<LayoutWrapper title="Setting D&D 5e"
                                                  isAuthenticated={state.isAuthenticated}>

@@ -27,6 +27,12 @@ components:
       schema:
         type: integer
         format: int64
+    Dnd5eMonsterId:
+      in: path
+      name: dnd5eMonsterId
+      schema:
+        type: integer
+        format: int64
     Dnd5eSettingName:
       in: query
       name: name
@@ -174,15 +180,15 @@ components:
       description: A 27 character string representing an unique id
     Created:
       type: string
-      format: date-time
+      example: 1990-12-31T23:59:60Z
       readOnly: true
-      description: The created time of this record
+      description: The created time of this record. RFC3339
       title: Created
     LastModified:
       type: string
-      format: date-time
+      example: 1990-12-31T23:59:60Z
       readOnly: true
-      description: The last modified time of this record
+      description: The last modified time of this record. RFC3339
       title: LastModified
     Email:
       type: string
@@ -300,7 +306,6 @@ components:
           type: string
           example: Goblins are fierce and territorial!
           maxLength: 1024
-          minLength: 1
           x-oapi-codegen-extra-tags:
             binding: "max=1024"
         sizeCategory:
@@ -342,13 +347,15 @@ components:
           minLength: 1
           x-oapi-codegen-extra-tags:
             binding: "max=40"
-        challengeRating:
-          type: string
-          example: 4
-          maxLength: 40
-          minLength: 1
+        milliChallengeRating:
+          type: integer
+          format: int64
+          example: 4000
+          description: The challenge rating, in thousandths
+          minimum: 0
+          maximum: 30000
           x-oapi-codegen-extra-tags:
-            binding: "max=40"
+            binding: "max=30000"
         userTags:
           $ref: '#/components/schemas/UserTags'
         languages:
@@ -534,6 +541,31 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/Dnd5eSettingPostOk'
+  /api/v1/dnd5e/monsters:
+    post:
+      summary: Creates a new dnd5e monster.
+      tags:
+        - Dnd5eMonster
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dnd5eMonster'
+      responses:
+        '201':
+          $ref: '#/components/responses/Dnd5eMonsterPostOk'
+  /api/v1/dnd5e/monsters/{dnd5eMonsterId}:
+    get:
+      summary: Returns Dnd5e Monster
+      tags:
+        - Dnd5eMonster
+      parameters:
+        - $ref: '#/components/parameters/Dnd5eMonsterId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Dnd5eMonsterGetOk'
+
   /api/v1/users/me:
     get:
       summary: Returns current user

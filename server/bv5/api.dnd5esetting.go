@@ -7,6 +7,7 @@ import (
 	"server/api"
 	"server/db"
 	"strconv"
+	"time"
 )
 
 func mapDnd5eSettingToJsonBody(dnd5eSetting *db.Dnd5eSetting) *api.Dnd5eSettingGet {
@@ -20,7 +21,7 @@ func mapDnd5eSettingToJsonBody(dnd5eSetting *db.Dnd5eSetting) *api.Dnd5eSettingG
 			SystemTags:   dnd5eSetting.SystemTags,
 			UserTags:     dnd5eSetting.UserTags,
 		},
-		Created:        api.Created(dnd5eSetting.CreatedAt),
+		Created:        api.Created(dnd5eSetting.CreatedAt.Format(time.RFC3339)),
 		Dnd5eSettingId: strconv.FormatInt(dnd5eSetting.Dnd5eSettingID, 10),
 		Version:        dnd5eSetting.Version,
 	}
@@ -120,7 +121,7 @@ func PostDnd5eSettingsCreate(b *BardView5Http) {
 	}
 
 	b.Context.Header("ETag", "0")
-	b.Context.Header("Location", fmt.Sprintf("/v1/dnd5e/setting/%d/", newDnd5eSettingId))
+	b.Context.Header("Location", fmt.Sprintf("/v1/dnd5e/settings/%d/", newDnd5eSettingId))
 	b.Context.JSON(http.StatusCreated, api.Dnd5eSettingPostOk{
 		Dnd5eSettingId: strconv.FormatInt(newDnd5eSettingId, 10),
 		Version:        0,

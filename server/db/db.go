@@ -28,6 +28,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.dnd5eMonsterFindByIdStmt, err = db.PrepareContext(ctx, dnd5eMonsterFindById); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eMonsterFindById: %w", err)
 	}
+	if q.dnd5eMonsterInsertStmt, err = db.PrepareContext(ctx, dnd5eMonsterInsert); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eMonsterInsert: %w", err)
+	}
 	if q.dnd5eMonstersFindBySettingStmt, err = db.PrepareContext(ctx, dnd5eMonstersFindBySetting); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eMonstersFindBySetting: %w", err)
 	}
@@ -83,6 +86,11 @@ func (q *Queries) Close() error {
 	if q.dnd5eMonsterFindByIdStmt != nil {
 		if cerr := q.dnd5eMonsterFindByIdStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing dnd5eMonsterFindByIdStmt: %w", cerr)
+		}
+	}
+	if q.dnd5eMonsterInsertStmt != nil {
+		if cerr := q.dnd5eMonsterInsertStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eMonsterInsertStmt: %w", cerr)
 		}
 	}
 	if q.dnd5eMonstersFindBySettingStmt != nil {
@@ -196,6 +204,7 @@ type Queries struct {
 	tx                               *sql.Tx
 	dnd5eLanguageFindAllStmt         *sql.Stmt
 	dnd5eMonsterFindByIdStmt         *sql.Stmt
+	dnd5eMonsterInsertStmt           *sql.Stmt
 	dnd5eMonstersFindBySettingStmt   *sql.Stmt
 	dnd5eSettingFindAssignmentStmt   *sql.Stmt
 	dnd5eSettingFindByAssignmentStmt *sql.Stmt
@@ -218,6 +227,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		tx:                               tx,
 		dnd5eLanguageFindAllStmt:         q.dnd5eLanguageFindAllStmt,
 		dnd5eMonsterFindByIdStmt:         q.dnd5eMonsterFindByIdStmt,
+		dnd5eMonsterInsertStmt:           q.dnd5eMonsterInsertStmt,
 		dnd5eMonstersFindBySettingStmt:   q.dnd5eMonstersFindBySettingStmt,
 		dnd5eSettingFindAssignmentStmt:   q.dnd5eSettingFindAssignmentStmt,
 		dnd5eSettingFindByAssignmentStmt: q.dnd5eSettingFindByAssignmentStmt,

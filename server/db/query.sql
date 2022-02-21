@@ -99,6 +99,16 @@ WHERE m.dnd5e_setting_id = @dnd5e_setting_id
 ORDER BY m.dnd5e_setting_id, m.dnd5e_monster_id
 OFFSET @row_offset LIMIT @row_limit;
 
+-- name: Dnd5eMonsterInsert :execrows
+INSERT INTO dnd5e_monster (dnd5e_monster_id, created_by, dnd5e_setting_id, name, sources,
+                           user_tags, languages, environments, is_legendary, is_unique, monster_type, alignment,
+                           size_category, milli_challenge_rating, armor_class, hit_points, description)
+VALUES (
+           @dnd5e_monster_id, @created_by, @dnd5e_setting_id, @name, @sources,
+           @user_tags, @languages, @environments, @is_legendary, @is_unique, @monster_type, @alignment,
+           @size_category, @milli_challenge_rating, @armor_class, @hit_points, @description
+       );
+
 -- name: Dnd5eSizeCategoryFindAll :many
 SELECT *
 FROM "dnd5e_size_category" s;

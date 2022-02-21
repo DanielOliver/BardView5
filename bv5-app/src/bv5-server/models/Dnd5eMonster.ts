@@ -15,7 +15,10 @@ export type Dnd5eMonster = {
     unique?: boolean;
     monsterType?: string;
     alignment?: string;
-    challengeRating?: string;
+    /**
+     * The challenge rating, in thousandths
+     */
+    milliChallengeRating?: number;
     userTags: UserTags;
     languages?: Array<string>;
     environments?: Array<string>;

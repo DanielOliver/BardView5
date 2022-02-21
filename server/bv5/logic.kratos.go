@@ -11,6 +11,7 @@ import (
 	"server/bardlog"
 	"server/db"
 	"strconv"
+	"time"
 )
 
 func mapUserToJsonBody(user *db.User) *api.UserGet {
@@ -23,7 +24,7 @@ func mapUserToJsonBody(user *db.User) *api.UserGet {
 			UserTags:     user.UserTags,
 			Active:       user.IsActive,
 		},
-		Created: api.Created(user.CreatedAt),
+		Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
 		UserId:  strconv.FormatInt(user.UserID, 10),
 		Uuid:    user.Uuid.String(),
 		Version: user.Version,

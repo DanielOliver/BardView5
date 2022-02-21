@@ -97,8 +97,8 @@ create table "dnd5e_monster"
     alignment              text    null,
     size_category          text    null,
     milli_challenge_rating bigint  null,
-    armor_class            bigint  null,
-    hit_points             bigint  null,
+    armor_class            int     null,
+    hit_points             int     null,
     description            text    null,
 
 

@@ -56,16 +56,21 @@ CREATE TABLE public.dnd5e_monster (
     created_by bigint,
     created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     version bigint DEFAULT 0 NOT NULL,
-    dnd5e_setting_id bigint,
+    dnd5e_setting_id bigint NOT NULL,
     name text NOT NULL,
+    sources text[] NOT NULL,
     user_tags text[] NOT NULL,
-    system_tags text[] NOT NULL,
-    monster_type text NOT NULL,
-    alignment text NOT NULL,
-    size_category text NOT NULL,
-    milli_challenge_rating bigint NOT NULL,
     languages text[] NOT NULL,
-    description text NOT NULL
+    environments text[] NOT NULL,
+    is_legendary boolean DEFAULT false NOT NULL,
+    is_unique boolean DEFAULT false NOT NULL,
+    monster_type text,
+    alignment text,
+    size_category text,
+    milli_challenge_rating bigint,
+    armor_class integer,
+    hit_points integer,
+    description text
 );
 
 

@@ -2,46 +2,12 @@
 import React from 'react'
 import { useQuery } from 'react-query'
 import { Dnd5eSettingGet } from '../../../bv5-server'
-import { bv5V1GetDnd5eSettingsMine } from '../../../services/bardview5'
+import { bv5V1GetDnd5eSettings } from '../../../services/bardview5'
 import { AxiosResponse } from 'axios'
 import { Container, Row, Spinner, Table } from 'react-bootstrap'
-import { CellProps, Column, useAsyncDebounce, useGlobalFilter, useSortBy, useTable } from 'react-table'
+import { CellProps, Column, useGlobalFilter, useSortBy, useTable } from 'react-table'
 import { Link } from 'react-router-dom'
-
-// Define a default UI for filtering
-function GlobalFilter ({
-  preGlobalFilteredRows,
-  globalFilter,
-  setGlobalFilter
-}: {
-  preGlobalFilteredRows: any[],
-  globalFilter: any,
-  setGlobalFilter: any
-}) {
-  const count = preGlobalFilteredRows.length
-  const [value, setValue] = React.useState(globalFilter)
-  const onChange = useAsyncDebounce(value => {
-    setGlobalFilter(value || undefined)
-  }, 200)
-
-  return (
-          <span>
-      Search:{' '}
-            <input
-                    value={value || ''}
-                    onChange={e => {
-                      setValue(e.target.value)
-                      onChange(e.target.value)
-                    }}
-                    placeholder={`${count} records...`}
-                    style={{
-                      fontSize: '1.1rem',
-                      border: '0'
-                    }}
-            />
-    </span>
-  )
-}
+import { GlobalFilter } from '../../../components/Table'
 
 function SettingTable ({
   data
@@ -84,7 +50,6 @@ function SettingTable ({
   },
   useGlobalFilter,
   useSortBy)
-  // const daysAgo = formatDistance(new Date(data.created), new Date(), { addSuffix: true })
 
   return <Container fluid="lg">
     <Row>
@@ -153,8 +118,8 @@ function Dnd5eSettingList () {
     data,
     error,
     isLoading
-  } = useQuery<Dnd5eSettingGet[], AxiosResponse>('dnd5e-setting-mine', async () => {
-    const { data } = await bv5V1GetDnd5eSettingsMine()
+  } = useQuery<Dnd5eSettingGet[], AxiosResponse>('dnd5e-settings', async () => {
+    const { data } = await bv5V1GetDnd5eSettings()
     return data
   }, {
     retry: false

@@ -19,6 +19,7 @@ import (
 type Generators struct {
 	userNode         *snowflake.Node
 	dnd5eSettingNode *snowflake.Node
+	dnd5eMonsterNode *snowflake.Node
 }
 
 type BardView5Configuration struct {
@@ -60,6 +61,7 @@ func ConfigNewBardView5(config *BardView5InitConfig) (bv5 *BardView5, err error)
 
 	userNode, _ := snowflake.NewNode(0)
 	dnd5eSettingNode, _ := snowflake.NewNode(0)
+	dnd5eMonsterNode, _ := snowflake.NewNode(0)
 
 	sessionIdCache, _ := bigcache.NewBigCache(bigcache.DefaultConfig(1 * time.Minute))
 
@@ -69,6 +71,7 @@ func ConfigNewBardView5(config *BardView5InitConfig) (bv5 *BardView5, err error)
 		generators: &Generators{
 			userNode:         userNode,
 			dnd5eSettingNode: dnd5eSettingNode,
+			dnd5eMonsterNode: dnd5eMonsterNode,
 		},
 		dbMetrics: metricsPg,
 		Conf: &BardView5Configuration{
@@ -143,4 +146,7 @@ func (b *BardView5Http) GenUser() *snowflake.Node {
 
 func (b *BardView5Http) GenDnd5eSetting() *snowflake.Node {
 	return b.BardView5.generators.dnd5eSettingNode
+}
+func (b *BardView5Http) GenDnd5eMonster() *snowflake.Node {
+	return b.BardView5.generators.dnd5eMonsterNode
 }

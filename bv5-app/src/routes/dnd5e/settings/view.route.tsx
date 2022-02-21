@@ -51,6 +51,11 @@ const Dnd5eSettingView: React.FC<{isAuthenticated: boolean}> = ({ isAuthenticate
 
     <Row>
       <Col md={true}>
+        <Button variant="secondary" onClick={() => {
+          navigate(`/dnd5e/settings/${dnd5eSettingId}/monsters`)
+        }}>Monsters</Button>
+      </Col>
+      <Col md={true}>
         <small><i>Created {daysAgo}</i></small>
       </Col>
       <Col md={true}>

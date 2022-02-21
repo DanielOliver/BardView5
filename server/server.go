@@ -28,10 +28,15 @@ func registerRoutes(router *gin.Engine, b *bv5.BardView5) {
 			grpDnd5eSettings := grpDnd5e.Group("/settings")
 			{
 				grpDnd5eSettings.GET("/assigned", b.RequireValidSession, b.WrapRequest(bv5.GetMyDnd5eSettings))
+				grpDnd5eSettings.GET("/:dnd5eSettingId/monsters", b.WrapRequest(bv5.GetDnd5eMonstersBySettingId))
 				grpDnd5eSettings.GET("/:dnd5eSettingId", b.WrapRequest(bv5.GetDnd5eSettingById))
 				grpDnd5eSettings.POST("/:dnd5eSettingId", b.WrapRequest(bv5.PostDnd5eSettingsEdit))
 				grpDnd5eSettings.GET("", b.RequireValidSession, b.WrapRequest(bv5.GetDnd5eSettings))
 				grpDnd5eSettings.POST("", b.RequireValidSession, b.WrapRequest(bv5.PostDnd5eSettingsCreate))
+			}
+			grpDnd5eMonsters := grpDnd5e.Group("/monsters")
+			{
+				grpDnd5eMonsters.POST("", b.RequireValidSession, b.WrapRequest(bv5.PostDnd5eMonstersCreate))
 			}
 		}
 		grpV1.GET("/session", b.GetWhoAmI)
