@@ -106,6 +106,35 @@ components:
           schema:
             type: string
           description: Known Location
+    Dnd5eMonsterGetOk:
+      description: Dnd5eMonsterGet
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Dnd5eMonsterGet'
+    Dnd5eMonsterArrayGetOk:
+      description: Dnd5eSettingGet
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Dnd5eMonsterGet'
+    Dnd5eMonsterPostOk:
+      description: Dnd5eMonsterPost
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Dnd5eMonsterPostOk'
+      headers:
+        ETag:
+          schema:
+            type: string
+          description: Current version
+        Location:
+          schema:
+            type: string
+          description: Known Location
   schemas:
     PatchDocument:
       description: A JSONPatch document as defined by RFC 6902
@@ -145,13 +174,13 @@ components:
       description: A 27 character string representing an unique id
     Created:
       type: string
-      format: datetime
+      format: date-time
       readOnly: true
       description: The created time of this record
       title: Created
     LastModified:
       type: string
-      format: datetime
+      format: date-time
       readOnly: true
       description: The last modified time of this record
       title: LastModified
@@ -254,6 +283,134 @@ components:
       required:
         - dnd5eSettingId
         - version
+    Dnd5eMonster:
+      type: object
+      properties:
+        dnd5eSettingId:
+          type: string
+          example: 123
+        name:
+          type: string
+          example: Goblin
+          maxLength: 512
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            binding: "required,min=1,max=512"
+        description:
+          type: string
+          example: Goblins are fierce and territorial!
+          maxLength: 1024
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            binding: "max=1024"
+        sizeCategory:
+          type: string
+          example: Small
+          maxLength: 40
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            binding: "max=80"
+        armorClass:
+          type: integer
+          example: 13
+          minimum: 0
+          maximum: 40
+        hitPoints:
+          type: integer
+          example: 10
+          minimum: 1
+          maximum: 2000
+        legendary:
+          type: boolean
+          example: false
+          default: false
+        unique:
+          type: boolean
+          example: false
+          default: false
+        monsterType:
+          type: string
+          example: Goblin
+          maxLength: 80
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            binding: "max=80"
+        alignment:
+          type: string
+          example: Chaotic Evil
+          maxLength: 40
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            binding: "max=40"
+        challengeRating:
+          type: string
+          example: 4
+          maxLength: 40
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            binding: "max=40"
+        userTags:
+          $ref: '#/components/schemas/UserTags'
+        languages:
+          type: array
+          maxItems: 16
+          x-oapi-codegen-extra-tags:
+            binding: "max=16,dive,max=256"
+          items:
+            type: string
+            maxLength: 256
+            example: Goblin
+        environments:
+          type: array
+          maxItems: 16
+          x-oapi-codegen-extra-tags:
+            binding: "max=16,dive,max=256"
+          items:
+            type: string
+            maxLength: 256
+            example: forest
+        sources:
+          type: array
+          maxItems: 16
+          x-oapi-codegen-extra-tags:
+            binding: "max=16,dive,max=256"
+          items:
+            type: string
+            maxLength: 256
+            example: "Fifth Edition Foes: 20"
+      required:
+        - userTags
+        - name
+        - dnd5eSettingId
+    Dnd5eMonsterGet:
+      allOf:
+        - $ref: '#/components/schemas/Dnd5eMonster'
+        - type: object
+          properties:
+            dnd5eMonsterId:
+              type: string
+              example: 123
+            created:
+              $ref: '#/components/schemas/Created'
+            version:
+              type: integer
+              format: int64
+          required:
+            - dnd5eMonsterId
+            - created
+            - version
+    Dnd5eMonsterPostOk:
+      type: object
+      properties:
+        dnd5eMonsterId:
+          type: string
+          example: 123
+        version:
+          type: integer
+          format: int64
+      required:
+        - dnd5eMonsterId
+        - version
     User:
       type: object
       properties:
@@ -319,6 +476,16 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Dnd5eSettingArrayGetOk'
+  /api/v1/dnd5e/settings/{dnd5eSettingId}/monsters:
+    get:
+      summary: Returns Dnd5e Setting's Monsters
+      tags:
+        - Dnd5eSetting
+      parameters:
+        - $ref: '#/components/parameters/Dnd5eSettingId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Dnd5eMonsterArrayGetOk'
   /api/v1/dnd5e/settings/{dnd5eSettingId}:
     get:
       summary: Returns Dnd5e Setting

@@ -1,18 +1,18 @@
 create table "dnd5e_setting"
 (
-    dnd5e_setting_id      bigint
+    dnd5e_setting_id bigint
         constraint dnd5e_setting_pk
             primary key,
-    created_by          bigint  null,
-    created_at          timestamp without time zone default (now() at time zone 'utc') not null,
-    version             bigint  not null            default (0),
-    is_active           boolean not null            default (true),
-    common_access       text    not null,
-    user_tags           text[]  not null,
-    system_tags         text[]  not null,
-    name                text    not null,
-    module              text    null,
-    description         text    not null,
+    created_by       bigint  null,
+    created_at       timestamp without time zone default (now() at time zone 'utc') not null,
+    version          bigint  not null            default (0),
+    is_active        boolean not null            default (true),
+    common_access    text    not null,
+    user_tags        text[]  not null,
+    system_tags      text[]  not null,
+    name             text    not null,
+    module           text    null,
+    description      text    not null,
 
     CONSTRAINT fk_dnd5e_setting_createdby
         FOREIGN KEY (created_by)
@@ -25,12 +25,12 @@ create table "dnd5e_setting"
 
 create table "dnd5e_setting_assignment"
 (
-    created_by     bigint null,
-    created_at     timestamp without time zone default (now() at time zone 'utc') not null,
-    version        bigint not null             default (0),
-    user_id        bigint not null,
+    created_by       bigint null,
+    created_at       timestamp without time zone default (now() at time zone 'utc') not null,
+    version          bigint not null             default (0),
+    user_id          bigint not null,
     dnd5e_setting_id bigint not null,
-    role_action    text   not null,
+    role_action      text   not null,
 
     CONSTRAINT dnd5e_setting_assignment_pk
         PRIMARY KEY (user_id, dnd5e_setting_id),
@@ -82,19 +82,24 @@ create table "dnd5e_monster"
     dnd5e_monster_id       bigint
         constraint dnd5e_monster_pk
             primary key,
-    created_by             bigint null,
+    created_by             bigint  null,
     created_at             timestamp without time zone default (now() at time zone 'utc') not null,
-    version                bigint not null             default (0),
-    dnd5e_setting_id         bigint null,
-    name                   text   not null,
-    user_tags              text[] not null,
-    system_tags            text[] not null,
-    monster_type           text   not null,
-    alignment              text   not null,
-    size_category          text   not null,
-    milli_challenge_rating bigint not null,
-    languages              text[] not null,
-    description            text   not null,
+    version                bigint  not null            default (0),
+    dnd5e_setting_id       bigint  not null,
+    name                   text    not null,
+    sources                text[]  not null,
+    user_tags              text[]  not null,
+    languages              text[]  not null,
+    environments           text[]  not null,
+    is_legendary           boolean not null            default (false),
+    is_unique              boolean not null            default (false),
+    monster_type           text    null,
+    alignment              text    null,
+    size_category          text    null,
+    milli_challenge_rating bigint  null,
+    armor_class            bigint  null,
+    hit_points             bigint  null,
+    description            text    null,
 
 
     CONSTRAINT fk_dnd5e_monster_createdby

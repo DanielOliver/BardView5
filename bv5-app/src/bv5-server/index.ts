@@ -2,6 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { Created } from './models/Created';
+export type { Dnd5eMonster } from './models/Dnd5eMonster';
+export type { Dnd5eMonsterGet } from './models/Dnd5eMonsterGet';
+export type { Dnd5eMonsterPostOk } from './models/Dnd5eMonsterPostOk';
 export type { Dnd5eSetting } from './models/Dnd5eSetting';
 export type { Dnd5eSettingGet } from './models/Dnd5eSettingGet';
 export type { Dnd5eSettingPostOk } from './models/Dnd5eSettingPostOk';

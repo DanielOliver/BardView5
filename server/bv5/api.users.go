@@ -13,7 +13,6 @@ import (
 	"server/bardlog"
 	"server/db"
 	"strconv"
-	"time"
 )
 
 func (b *BardView5) PostUsersCreate(c *gin.Context) {
@@ -195,7 +194,7 @@ func (b *BardView5) PatchUserById(c *gin.Context) {
 			UserTags:     user.UserTags,
 			Active:       user.IsActive,
 		},
-		Created: api.Created(user.CreatedAt.Format(time.RFC3339)),
+		Created: api.Created(user.CreatedAt),
 		UserId:  strconv.FormatInt(user.UserID, 10),
 		Version: user.Version,
 	})
@@ -260,7 +259,7 @@ func (b *BardView5) PatchUserById(c *gin.Context) {
 			UserTags:     updatedUser.UserTags,
 			Active:       updatedUser.IsActive,
 		},
-		Created: api.Created(updatedUser.CreatedAt.Format(time.RFC3339)),
+		Created: api.Created(updatedUser.CreatedAt),
 		UserId:  strconv.FormatInt(updatedUser.UserID, 10),
 		Version: updatedUser.Version,
 	})

@@ -7,7 +7,6 @@ import (
 	"server/api"
 	"server/db"
 	"strconv"
-	"time"
 )
 
 func mapDnd5eSettingToJsonBody(dnd5eSetting *db.Dnd5eSetting) *api.Dnd5eSettingGet {
@@ -21,7 +20,7 @@ func mapDnd5eSettingToJsonBody(dnd5eSetting *db.Dnd5eSetting) *api.Dnd5eSettingG
 			SystemTags:   dnd5eSetting.SystemTags,
 			UserTags:     dnd5eSetting.UserTags,
 		},
-		Created:        api.Created(dnd5eSetting.CreatedAt.Format(time.RFC3339)),
+		Created:        api.Created(dnd5eSetting.CreatedAt),
 		Dnd5eSettingId: strconv.FormatInt(dnd5eSetting.Dnd5eSettingID, 10),
 		Version:        dnd5eSetting.Version,
 	}

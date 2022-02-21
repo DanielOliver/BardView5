@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type Dnd5eSettingPostOk = {
-    dnd5eSettingId: string;
+export type Dnd5eMonsterPostOk = {
+    dnd5eMonsterId: string;
     version: number;
 }
