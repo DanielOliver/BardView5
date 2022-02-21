@@ -60,9 +60,6 @@ const Dnd5eSettingForm: React.FC<{ dnd5eSettingId: string, data: Dnd5eSettingGet
 
   return <Container fluid="lg">
     <Row>
-      <p><i>D&D 5e Setting</i></p>
-    </Row>
-    <Row>
       <h1>Edit</h1>
     </Row>
     <Form onSubmit={handleSubmit((d) => mutation.mutate(d))}>

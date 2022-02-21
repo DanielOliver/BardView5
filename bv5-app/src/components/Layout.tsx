@@ -35,8 +35,12 @@ const Layout: React.FC<{ title?: string }> = ({
 
   return <Navbar bg="light" expand="md">
     <Container fluid>
-      <Navbar.Brand><Link style={{ textDecoration: 'none' }} className="link-primary"
-                          to="/">BardView5</Link></Navbar.Brand>
+
+      <Navbar.Brand>
+        <Link style={{ textDecoration: 'none' }} className="link-primary" to="/">
+          {state.isAuthenticated ? 'BV5' : 'BardView5'}
+        </Link>
+      </Navbar.Brand>
       {title && <Navbar.Text>{title}</Navbar.Text>}
       <Navbar.Toggle aria-controls="basic-navbar-nav"/>
       <Navbar.Collapse id="basic-navbar-nav">
@@ -46,7 +50,7 @@ const Layout: React.FC<{ title?: string }> = ({
           ? (
                         <Nav>
                           <NavDropdown title={data?.name ?? 'me'}>
-                            <NavDropdown.Item>Profile</NavDropdown.Item>
+                            <NavDropdown.Item><Link to="/profile">Profile</Link></NavDropdown.Item>
                             <NavDropdown.Divider/>
                             <NavDropdown.Item onClick={submitLogout}>Logout</NavDropdown.Item>
                           </NavDropdown>

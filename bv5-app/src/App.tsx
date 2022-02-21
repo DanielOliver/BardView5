@@ -12,6 +12,7 @@ import { Dnd5eSettingCreate } from './routes/dnd5e/settings/create.route'
 import { Dnd5eSettingList } from './routes/dnd5e/settings/list.route'
 import LayoutSidebar from './components/LayoutSidebar'
 import { Dnd5eSettingEdit } from './routes/dnd5e/settings/edit.route'
+import Profile from './routes/user/profile'
 
 function App () {
   const [state, dispatch] = React.useReducer(AuthReducer, AuthInitialState)
@@ -53,8 +54,9 @@ function App () {
                   <Route path="/register" element={<LayoutWrapper title="Register"><RegisterRoute/></LayoutWrapper>}/>
                   <Route path="/login" element={<LayoutWrapper title="Login"><LoginRoute/></LayoutWrapper>}/>
                   <Route path="/" element={<ProtectedRoute isAuthenticated={state.isAuthenticated}/>}>
-                    <Route path="/" element={<LayoutSidebar><HomeRoute/></LayoutSidebar>}/>
-                    <Route path="/dnd5e/settings/"
+                    <Route path="/" element={<LayoutSidebar title="Home"><HomeRoute/></LayoutSidebar>}/>
+                    <Route path="/profile" element={<LayoutSidebar title="Profile"><Profile/></LayoutSidebar>}/>
+                    <Route path="/dnd5e/settings"
                            element={<LayoutSidebar title="Settings D&D 5e"><Dnd5eSettingList/></LayoutSidebar>}/>
                     <Route path="/dnd5e/settings/create"
                            element={<LayoutSidebar title="New: Setting D&D 5e"><Dnd5eSettingCreate/></LayoutSidebar>}/>
