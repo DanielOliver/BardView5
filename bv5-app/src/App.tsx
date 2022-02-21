@@ -50,21 +50,21 @@ function App () {
             <div className="App">
               <BrowserRouter>
                 <Routes>
-                  <Route path="/register" element={<LayoutWrapper><RegisterRoute/></LayoutWrapper>}/>
-                  <Route path="/login" element={<LayoutWrapper><LoginRoute/></LayoutWrapper>}/>
+                  <Route path="/register" element={<LayoutWrapper title="Register"><RegisterRoute/></LayoutWrapper>}/>
+                  <Route path="/login" element={<LayoutWrapper title="Login"><LoginRoute/></LayoutWrapper>}/>
                   <Route path="/" element={<ProtectedRoute isAuthenticated={state.isAuthenticated}/>}>
                     <Route path="/" element={<LayoutSidebar><HomeRoute/></LayoutSidebar>}/>
                     <Route path="/dnd5e/settings/"
-                           element={<LayoutSidebar><Dnd5eSettingList/></LayoutSidebar>}/>
+                           element={<LayoutSidebar title="Settings D&D 5e"><Dnd5eSettingList/></LayoutSidebar>}/>
                     <Route path="/dnd5e/settings/create"
-                           element={<LayoutSidebar><Dnd5eSettingCreate/></LayoutSidebar>}/>
+                           element={<LayoutSidebar title="New: Setting D&D 5e"><Dnd5eSettingCreate/></LayoutSidebar>}/>
                     <Route path="/dnd5e/settings/:dnd5eSettingId/edit"
-                           element={<LayoutWrapper
-                                   isAuthenticated={state.isAuthenticated}><Dnd5eSettingEdit/></LayoutWrapper>}/>
+                           element={<LayoutWrapper title="Edit: Setting D&D 5e"
+                                                   isAuthenticated={state.isAuthenticated}><Dnd5eSettingEdit/></LayoutWrapper>}/>
                   </Route>
                   <Route path="/dnd5e/settings/:dnd5eSettingId"
-                         element={<LayoutWrapper
-                                 isAuthenticated={state.isAuthenticated}>
+                         element={<LayoutWrapper title="Setting D&D 5e"
+                                                 isAuthenticated={state.isAuthenticated}>
                            <Dnd5eSettingView
                                    isAuthenticated={state.isAuthenticated}/>
                          </LayoutWrapper>}/>

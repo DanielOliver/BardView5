@@ -3,18 +3,19 @@ import { Layout } from './Layout'
 import { Container, Row } from 'react-bootstrap'
 import LayoutSidebar from './LayoutSidebar'
 
-const LayoutWrapper: React.FC<{isAuthenticated?: boolean}> = ({
+const LayoutWrapper: React.FC<{isAuthenticated?: boolean, title?: string}> = ({
   children,
+  title,
   isAuthenticated = false
 }) => {
   if (isAuthenticated) {
-    return <LayoutSidebar>
+    return <LayoutSidebar title={title}>
       {children}
     </LayoutSidebar>
   }
 
   return <Container fluid>
-      <Row> <Layout/></Row>
+      <Row> <Layout title={title}/></Row>
       <Row>
         {children}
       </Row>

@@ -46,9 +46,6 @@ export function Dnd5eSettingCreate () {
 
   return <Container fluid="lg">
     <Row>
-      <p><i>D&D 5e Setting</i></p>
-    </Row>
-    <Row>
       <h1>Create</h1>
     </Row>
     <Form onSubmit={handleSubmit((d) => mutation.mutate(d))}>

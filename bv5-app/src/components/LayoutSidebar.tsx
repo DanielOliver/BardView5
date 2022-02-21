@@ -16,14 +16,14 @@ const Menu = ({ onNav }: {
     </li>
   </ul>
 }
-const LayoutSidebar: React.FC<{}> = ({ children }) => {
+const LayoutSidebar: React.FC<{ title?: string }> = ({ title, children }) => {
   const [show, setShow] = useState(false)
 
   const handleClose = () => setShow(false)
   const handleShow = () => setShow(true)
 
   return (<Container fluid>
-            <Row> <Layout/></Row>
+            <Row> <Layout title={title}/></Row>
             <Row>
               <Col lg={2} className="d-none d-lg-block">
                 <Menu onNav={() => {

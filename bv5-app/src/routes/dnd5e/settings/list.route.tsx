@@ -88,9 +88,6 @@ function SettingTable ({
 
   return <Container fluid="lg">
     <Row>
-      <p><i>D&D 5e Setting</i></p>
-    </Row>
-    <Row>
       <Table {...getTableProps()}>
         <thead>
         <tr>

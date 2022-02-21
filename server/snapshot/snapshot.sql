@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.4 (Debian 13.4-4.pgdg110+1)
--- Dumped by pg_dump version 13.4 (Debian 13.4-4.pgdg110+1)
+-- Dumped from database version 13.4 (Debian 13.4-1.pgdg100+1)
+-- Dumped by pg_dump version 13.4 (Debian 13.4-1.pgdg100+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -100,9 +100,7 @@ CREATE TABLE public.dnd5e_setting (
     system_tags text[] NOT NULL,
     name text NOT NULL,
     module text,
-    description text NOT NULL,
-    external_source_id bigint,
-    external_source_key text
+    description text NOT NULL
 );
 
 
@@ -138,25 +136,6 @@ CREATE TABLE public.dnd5e_size_category (
 
 
 ALTER TABLE public.dnd5e_size_category OWNER TO postgres;
-
---
--- Name: external_source; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.external_source (
-    external_source_id bigint NOT NULL,
-    created_by bigint,
-    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    version bigint DEFAULT 0 NOT NULL,
-    external_source_key text NOT NULL,
-    external_source_version text NOT NULL,
-    user_tags text[] NOT NULL,
-    system_tags text[] NOT NULL,
-    name text NOT NULL
-);
-
-
-ALTER TABLE public.external_source OWNER TO postgres;
 
 --
 -- Name: role_action; Type: TABLE; Schema: public; Owner: postgres
@@ -272,14 +251,6 @@ ALTER TABLE ONLY public.dnd5e_setting
 
 ALTER TABLE ONLY public.dnd5e_size_category
     ADD CONSTRAINT dnd5e_size_category_pk PRIMARY KEY (name);
-
-
---
--- Name: external_source external_source_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.external_source
-    ADD CONSTRAINT external_source_pk PRIMARY KEY (external_source_id);
 
 
 --
@@ -431,27 +402,11 @@ ALTER TABLE ONLY public.dnd5e_setting
 
 
 --
--- Name: dnd5e_setting fk_dnd5e_setting_derived_from_external_source; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_setting
-    ADD CONSTRAINT fk_dnd5e_setting_derived_from_external_source FOREIGN KEY (external_source_id) REFERENCES public.external_source(external_source_id);
-
-
---
 -- Name: dnd5e_size_category fk_dnd5e_size_category_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.dnd5e_size_category
     ADD CONSTRAINT fk_dnd5e_size_category_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
-
-
---
--- Name: external_source fk_external_source_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.external_source
-    ADD CONSTRAINT fk_external_source_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
 
 
 --

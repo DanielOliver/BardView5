@@ -184,7 +184,7 @@ func (q *Queries) Dnd5eSettingFindAssignment(ctx context.Context, arg Dnd5eSetti
 }
 
 const dnd5eSettingFindByAssignment = `-- name: Dnd5eSettingFindByAssignment :many
-SELECT DISTINCT w.dnd5e_setting_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.name, w.module, w.description, w.external_source_id, w.external_source_key
+SELECT DISTINCT w.dnd5e_setting_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.name, w.module, w.description
 FROM "dnd5e_setting" w
          INNER JOIN "dnd5e_setting_assignment" wa ON
     w.dnd5e_setting_id = wa.dnd5e_setting_id
@@ -213,8 +213,6 @@ func (q *Queries) Dnd5eSettingFindByAssignment(ctx context.Context, userID int64
 			&i.Name,
 			&i.Module,
 			&i.Description,
-			&i.ExternalSourceID,
-			&i.ExternalSourceKey,
 		); err != nil {
 			return nil, err
 		}
@@ -230,7 +228,7 @@ func (q *Queries) Dnd5eSettingFindByAssignment(ctx context.Context, userID int64
 }
 
 const dnd5eSettingFindById = `-- name: Dnd5eSettingFindById :many
-SELECT dnd5e_setting_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, name, module, description, external_source_id, external_source_key
+SELECT dnd5e_setting_id, created_by, created_at, version, is_active, common_access, user_tags, system_tags, name, module, description
 FROM "dnd5e_setting" w
 WHERE w.dnd5e_setting_id = $1
 `
@@ -256,8 +254,6 @@ func (q *Queries) Dnd5eSettingFindById(ctx context.Context, dnd5eSettingID int64
 			&i.Name,
 			&i.Module,
 			&i.Description,
-			&i.ExternalSourceID,
-			&i.ExternalSourceKey,
 		); err != nil {
 			return nil, err
 		}
@@ -273,7 +269,7 @@ func (q *Queries) Dnd5eSettingFindById(ctx context.Context, dnd5eSettingID int64
 }
 
 const dnd5eSettingFindByParams = `-- name: Dnd5eSettingFindByParams :many
-SELECT DISTINCT w.dnd5e_setting_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.name, w.module, w.description, w.external_source_id, w.external_source_key
+SELECT DISTINCT w.dnd5e_setting_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.name, w.module, w.description
 FROM "dnd5e_setting" w
          LEFT OUTER JOIN "dnd5e_setting_assignment" wa ON
         w.dnd5e_setting_id = wa.dnd5e_setting_id
@@ -311,8 +307,6 @@ func (q *Queries) Dnd5eSettingFindByParams(ctx context.Context, arg Dnd5eSetting
 			&i.Name,
 			&i.Module,
 			&i.Description,
-			&i.ExternalSourceID,
-			&i.ExternalSourceKey,
 		); err != nil {
 			return nil, err
 		}

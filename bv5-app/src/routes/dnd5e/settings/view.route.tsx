@@ -45,9 +45,6 @@ const Dnd5eSettingView: React.FC<{isAuthenticated: boolean}> = ({ isAuthenticate
   const daysAgo = formatDistance(new Date(data.created), new Date(), { addSuffix: true })
 
   return <Container fluid="lg">
-    <Row>
-      <p><i>D&D 5e Setting</i></p>
-    </Row>
     <Row className="m-1">
       <h1>{data.name}</h1>
     </Row>
