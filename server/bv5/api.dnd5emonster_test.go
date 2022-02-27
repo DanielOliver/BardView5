@@ -3,7 +3,6 @@ package bv5
 import (
 	"github.com/stretchr/testify/assert"
 	"server/api"
-	"strconv"
 	"testing"
 )
 
@@ -25,13 +24,12 @@ func TestDnd5eMonsterCreate(t *testing.T) {
 
 	var milliChallengeRating int64 = 4000
 
-	newDnd5eMonsterId, err := dnd5eMonsterCreate(bv5Http, &api.PostApiV1Dnd5eMonstersJSONBody{
-		Alignment:      nil,
-		ArmorClass:     nil,
-		Description:    nil,
-		Dnd5eSettingId: strconv.FormatInt(newDnd5eSettingId, 10),
-		Environments:   nil,
-		HitPoints:      nil,
+	newDnd5eMonsterId, err := dnd5eMonsterCreate(bv5Http, &api.PostApiV1Dnd5eSettingsDnd5eSettingIdMonstersJSONBody{
+		Alignment:    nil,
+		ArmorClass:   nil,
+		Description:  nil,
+		Environments: nil,
+		HitPoints:    nil,
 		Languages: &[]string{
 			"Goblin",
 			"Common",
