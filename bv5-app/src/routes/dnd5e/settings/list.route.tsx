@@ -8,6 +8,7 @@ import { Container, Row, Spinner, Table } from 'react-bootstrap'
 import { CellProps, Column, useGlobalFilter, useSortBy, useTable } from 'react-table'
 import { Link } from 'react-router-dom'
 import { GlobalFilter } from '../../../components/Table'
+import LayoutSidebar from '../../../components/LayoutSidebar'
 
 function SettingTable ({
   data
@@ -144,6 +145,10 @@ function Dnd5eSettingList () {
   return <SettingTable data={data}/>
 }
 
+function RouteDnd5eSettingList () {
+  return <LayoutSidebar title="Settings D&D 5e"><Dnd5eSettingList/></LayoutSidebar>
+}
+
 export {
-  Dnd5eSettingList
+  RouteDnd5eSettingList
 }

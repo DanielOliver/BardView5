@@ -10,8 +10,9 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Dnd5eSettingCreateSchema, Dnd5eSettingCreateType } from './common'
 import { CommonAccessText, CommonAccessValues } from '../common'
+import LayoutSidebar from '../../../components/LayoutSidebar'
 
-export function Dnd5eSettingCreate () {
+function Dnd5eSettingCreate () {
   const mutation = useMutation<Dnd5eSettingPostOk, unknown, Dnd5eSettingCreateType>(async (setting) => {
     const { data } = await bv5V1CreateDnd5eSetting({
       name: setting.name,
@@ -133,6 +134,10 @@ export function Dnd5eSettingCreate () {
   </Container>
 }
 
-export default {
-  Dnd5eSettingCreate
+function RouteDnd5eSettingCreate () {
+  return <LayoutSidebar title="New: Setting D&D 5e"><Dnd5eSettingCreate/></LayoutSidebar>
+}
+
+export {
+  RouteDnd5eSettingCreate
 }

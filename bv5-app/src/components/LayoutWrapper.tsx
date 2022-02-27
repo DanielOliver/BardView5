@@ -2,11 +2,12 @@ import React from 'react'
 import { Layout } from './Layout'
 import { Container, Row } from 'react-bootstrap'
 import LayoutSidebar from './LayoutSidebar'
+import { Bv5RouteProps } from './Common'
 
-const LayoutWrapper: React.FC<{isAuthenticated?: boolean, title?: string}> = ({
+const LayoutWrapper: React.FC<{ title?: string } & Bv5RouteProps> = ({
   children,
   title,
-  isAuthenticated = false
+  isAuthenticated
 }) => {
   if (isAuthenticated) {
     return <LayoutSidebar title={title}>
@@ -15,11 +16,11 @@ const LayoutWrapper: React.FC<{isAuthenticated?: boolean, title?: string}> = ({
   }
 
   return <Container fluid>
-      <Row> <Layout title={title}/></Row>
-      <Row>
-        {children}
-      </Row>
-    </Container>
+    <Row> <Layout title={title}/></Row>
+    <Row>
+      {children}
+    </Row>
+  </Container>
 }
 
 export default LayoutWrapper

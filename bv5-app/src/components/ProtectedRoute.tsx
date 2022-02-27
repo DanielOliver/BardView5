@@ -1,6 +1,6 @@
 import { Link, Outlet, RouteProps } from 'react-router-dom'
 import React from 'react'
-import LayoutWrapper from './LayoutWrapper'
+import { Layout } from './Layout'
 import { Container } from 'react-bootstrap'
 
 export type ProtectedRouteProps = {
@@ -9,7 +9,7 @@ export type ProtectedRouteProps = {
 } & RouteProps;
 
 // Originally https://stackoverflow.com/a/47754325
-export default function ProtectedRoute ({
+function ProtectedRoute ({
   isAuthenticated,
   title,
   ...routeProps
@@ -17,7 +17,7 @@ export default function ProtectedRoute ({
   if (isAuthenticated) {
     return <Outlet/>
   } else {
-    return <LayoutWrapper title={title}>
+    return <Layout title={title}>
       <Container fluid="lg">
         <p>A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool.</p>
         <br/>
@@ -26,6 +26,10 @@ export default function ProtectedRoute ({
         <p><Link to="/login"><i className="bi-box-arrow-in-right px-1"></i>Login</Link> or <Link to="/register"><i
                 className="bi-box-arrow-in-right px-1"></i>Register</Link></p>
       </Container>
-    </LayoutWrapper>
+    </Layout>
   }
 };
+
+export {
+  ProtectedRoute
+}
