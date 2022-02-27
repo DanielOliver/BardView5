@@ -8,6 +8,8 @@ import { Breadcrumb, Container, Row, Spinner, Table } from 'react-bootstrap'
 import { Column, useGlobalFilter, useSortBy, useTable } from 'react-table'
 import { GlobalFilter } from '../../../components/Table'
 import { Link, useParams } from 'react-router-dom'
+import { Bv5RouteProps } from '../../../components/Common'
+import LayoutWrapper from '../../../components/LayoutWrapper'
 
 function MonsterTable ({
   data
@@ -166,6 +168,15 @@ function Dnd5eMonsterList () {
   </div>
 }
 
+const RouteDnd5eMonsterList = ({
+  isAuthenticated
+}: Bv5RouteProps) => {
+  return <LayoutWrapper title="Monsters D&D 5e"
+                        isAuthenticated={isAuthenticated}>
+    <Dnd5eMonsterList/>
+  </LayoutWrapper>
+}
+
 export {
-  Dnd5eMonsterList
+  RouteDnd5eMonsterList
 }

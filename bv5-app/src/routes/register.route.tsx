@@ -13,8 +13,10 @@ import { AuthContext } from '../context/Auth.context'
 import { RegisterForm } from '../components/RegisterForm'
 import { useNavigate } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
+import { Bv5RouteProps } from '../components/Common'
+import LayoutWrapper from '../components/LayoutWrapper'
 
-function RegisterRoute () {
+function RegisterFormWrapper () {
   const navigate = useNavigate()
   const {
     dispatch,
@@ -99,4 +101,8 @@ function RegisterRoute () {
   }
 }
 
-export default RegisterRoute
+const RouteRegister = ({ isAuthenticated }: Bv5RouteProps) => {
+  return <LayoutWrapper isAuthenticated={isAuthenticated} title="Register"><RegisterFormWrapper/></LayoutWrapper>
+}
+
+export { RouteRegister }
