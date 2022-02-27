@@ -9,8 +9,10 @@ import ReactMarkdown from 'react-markdown'
 import { AccessBadge } from '../../../components/AccessBadge'
 import { formatDistance } from 'date-fns'
 import remarkGfm from 'remark-gfm'
+import { Bv5RouteProps } from '../../../components/Common'
+import LayoutWrapper from '../../../components/LayoutWrapper'
 
-const Dnd5eSettingView: React.FC<{isAuthenticated: boolean}> = ({ isAuthenticated = false }) => {
+function Dnd5eSettingView () {
   const params = useParams()
   const navigate = useNavigate()
   const dnd5eSettingId: string = params.dnd5eSettingId ?? '0'
@@ -61,13 +63,11 @@ const Dnd5eSettingView: React.FC<{isAuthenticated: boolean}> = ({ isAuthenticate
       <Col md={true}>
         <AccessBadge accessType={data.commonAccess ?? ''}/>
       </Col>
-      {isAuthenticated &&
-              <Col md={true}>
-                <Button variant="primary" onClick={() => {
-                  navigate(`/dnd5e/settings/${dnd5eSettingId}/edit`)
-                }}>Edit</Button>
-              </Col>
-      }
+      <Col md={true}>
+        <Button variant="primary" onClick={() => {
+          navigate(`/dnd5e/settings/${dnd5eSettingId}/edit`)
+        }}>Edit</Button>
+      </Col>
     </Row>
     {data?.module &&
             <Row>
@@ -84,6 +84,13 @@ const Dnd5eSettingView: React.FC<{isAuthenticated: boolean}> = ({ isAuthenticate
   </Container>
 }
 
+function RouteDnd5eSettingView (props: Bv5RouteProps) {
+  return <LayoutWrapper title="Setting D&D 5e"
+                 isAuthenticated={props.isAuthenticated}>
+    <Dnd5eSettingView/>
+  </LayoutWrapper>
+}
+
 export {
-  Dnd5eSettingView
+  RouteDnd5eSettingView
 }

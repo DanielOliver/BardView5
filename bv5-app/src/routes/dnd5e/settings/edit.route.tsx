@@ -11,6 +11,7 @@ import { Dnd5eSettingCreateSchema, Dnd5eSettingCreateType } from './common'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CommonAccessText, CommonAccessValues } from '../common'
+import LayoutSidebar from '../../../components/LayoutSidebar'
 
 const Dnd5eSettingForm: React.FC<{ dnd5eSettingId: string, data: Dnd5eSettingGet }> = ({
   dnd5eSettingId,
@@ -181,6 +182,10 @@ const Dnd5eSettingEdit = () => {
   return <Dnd5eSettingForm dnd5eSettingId={dnd5eSettingId} data={data}/>
 }
 
+function RouteDnd5eSettingEdit () {
+  return <LayoutSidebar title="Edit: Setting D&D 5e"><Dnd5eSettingEdit/></LayoutSidebar>
+}
+
 export {
-  Dnd5eSettingEdit
+  RouteDnd5eSettingEdit
 }

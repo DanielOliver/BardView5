@@ -6,6 +6,7 @@ import { Dnd5eSettingGet } from '../bv5-server'
 import { formatDistance } from 'date-fns'
 import { AccessBadge } from '../components/AccessBadge'
 import { Link } from 'react-router-dom'
+import LayoutSidebar from '../components/LayoutSidebar'
 
 const Dnd5eSettingList: React.FC<{ dnd5eSettings: Dnd5eSettingGet[] }> = ({ dnd5eSettings }) => {
   return <ListGroup>
@@ -28,7 +29,7 @@ const Dnd5eSettingList: React.FC<{ dnd5eSettings: Dnd5eSettingGet[] }> = ({ dnd5
   </ListGroup>
 }
 
-function HomeRoute () {
+function RouteHome () {
   const {
     data: dnd5eSettings
   } = useQuery<Dnd5eSettingGet[]>('dnd5e-setting-mine', async () => {
@@ -36,7 +37,8 @@ function HomeRoute () {
     return data
   })
 
-  return <Container fluid="lg">
+  return <LayoutSidebar title="Home">
+  <Container fluid="lg">
     <Row><Col><h1 className="m-1">D&D 5e</h1></Col></Row>
     <Row>
       <Col md={6}>
@@ -50,6 +52,9 @@ function HomeRoute () {
       </Col>
     </Row>
   </Container>
+  </LayoutSidebar>
 }
 
-export default HomeRoute
+export {
+  RouteHome
+}
