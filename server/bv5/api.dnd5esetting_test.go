@@ -10,7 +10,7 @@ func TestDnd5eSettingCreate(t *testing.T) {
 	bv5Http := CreateBv5Test(6)
 	CreateBv5TestSessionUser(bv5Http)
 
-	newDnd5eSettingId, err := Dnd5eSettingCreate(bv5Http, &api.PostApiV1Dnd5eSettingsJSONBody{
+	newDnd5eSettingId, err := dnd5eSettingCreate(bv5Http, &api.PostApiV1Dnd5eSettingsJSONBody{
 		Active:       true,
 		CommonAccess: CommonAccessPrivate,
 		Description:  "Describe",
@@ -22,15 +22,15 @@ func TestDnd5eSettingCreate(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotZero(t, newDnd5eSettingId)
 
-	_, err = Dnd5eSettingById(bv5Http, -100)
+	_, err = dnd5eSettingById(bv5Http, -100)
 	assert.Error(t, err)
 	assert.IsType(t, &CrudError{}, err)
 
-	getThatSetting, err := Dnd5eSettingById(bv5Http, newDnd5eSettingId)
+	getThatSetting, err := dnd5eSettingById(bv5Http, newDnd5eSettingId)
 	assert.NoError(t, err)
 	assert.Equal(t, "Named", getThatSetting.Name)
 	assert.Equal(t, "Describe", getThatSetting.Description)
 
-	err = Dnd5eSettingHasAccess(bv5Http, &getThatSetting)
+	err = dnd5eSettingHasAccess(bv5Http, &getThatSetting)
 	assert.NoError(t, err)
 }

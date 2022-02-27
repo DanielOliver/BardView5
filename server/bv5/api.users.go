@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-func (b *BardView5) PostUsersCreate(c *gin.Context) {
+func (b *BardView5) ApiPostUsersCreate(c *gin.Context) {
 	session := SessionCriteria(c)
 	logger := bardlog.GetLogger(c)
 
@@ -94,7 +94,7 @@ func (b *BardView5) PostUsersCreate(c *gin.Context) {
 	}
 }
 
-func GetUserThatIsMe(b *BardView5Http) {
+func ApiGetUserThatIsMe(b *BardView5Http) {
 	session, err := b.BardView5.DepKratos.GetKratosSession(b)
 	if err != nil {
 		WriteErrorToContext(b, err)
@@ -121,7 +121,7 @@ type GetUserByUuidParams struct {
 	UserID string `uri:"userId" binding:"required,uuid"`
 }
 
-func GetUsersById(b *BardView5Http) {
+func ApiGetUsersById(b *BardView5Http) {
 	var params GetUserByIdParams
 	if err := b.Context.ShouldBindUri(&params); err != nil {
 
@@ -161,13 +161,13 @@ func getUserById(b *BardView5Http, userId int64) (*api.UserGet, error) {
 		return nil, ErrNotFound(ObjUser, userId)
 	}
 	user := users[0]
-	if err = UserHasAccess(b, &user); err != nil {
+	if err = userHasAccess(b, &user); err != nil {
 		return nil, err
 	}
 	return mapUserToJsonBody(&user), nil
 }
 
-func (b *BardView5) PatchUserById(c *gin.Context) {
+func (b *BardView5) ApiPatchUserById(c *gin.Context) {
 	var params GetUserByIdParams
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -266,7 +266,7 @@ func (b *BardView5) PatchUserById(c *gin.Context) {
 	})
 }
 
-func UserHasAccess(b *BardView5Http, user *db.User) error {
+func userHasAccess(b *BardView5Http, user *db.User) error {
 	switch user.CommonAccess {
 	case CommonAccessPublic:
 		return nil

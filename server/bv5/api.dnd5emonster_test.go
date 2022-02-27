@@ -11,7 +11,7 @@ func TestDnd5eMonsterCreate(t *testing.T) {
 	bv5Http := CreateBv5Test(6)
 	CreateBv5TestSessionUser(bv5Http)
 
-	newDnd5eSettingId, err := Dnd5eSettingCreate(bv5Http, &api.PostApiV1Dnd5eSettingsJSONBody{
+	newDnd5eSettingId, err := dnd5eSettingCreate(bv5Http, &api.PostApiV1Dnd5eSettingsJSONBody{
 		Active:       true,
 		CommonAccess: CommonAccessPrivate,
 		Description:  "Describe",
@@ -25,7 +25,7 @@ func TestDnd5eMonsterCreate(t *testing.T) {
 
 	var milliChallengeRating int64 = 4000
 
-	newDnd5eMonsterId, err := Dnd5eMonsterCreate(bv5Http, &api.PostApiV1Dnd5eMonstersJSONBody{
+	newDnd5eMonsterId, err := dnd5eMonsterCreate(bv5Http, &api.PostApiV1Dnd5eMonstersJSONBody{
 		Alignment:      nil,
 		ArmorClass:     nil,
 		Description:    nil,

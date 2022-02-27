@@ -36,20 +36,20 @@ func mapDnd5eMonsterToJsonBody(m *db.Dnd5eMonster) *api.Dnd5eMonsterGet {
 	return ret
 }
 
-func GetDnd5eMonstersBySettingId(b *BardView5Http) {
+func ApiGetDnd5eMonstersBySettingId(b *BardView5Http) {
 	var params GetDnd5eSettingByIdParams
 	if err := b.Context.ShouldBindUri(&params); err != nil {
 		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	dnd5eSetting, err := Dnd5eSettingById(b, params.Dnd5eSettingId)
+	dnd5eSetting, err := dnd5eSettingById(b, params.Dnd5eSettingId)
 	if err != nil {
 		WriteErrorToContext(b, err)
 		return
 	}
 
-	err = Dnd5eSettingHasAccess(b, &dnd5eSetting)
+	err = dnd5eSettingHasAccess(b, &dnd5eSetting)
 	if err != nil {
 		WriteErrorToContext(b, err)
 		return
@@ -71,7 +71,7 @@ func GetDnd5eMonstersBySettingId(b *BardView5Http) {
 	b.Context.JSON(http.StatusOK, api.Dnd5eMonsterArrayGetOk(results))
 }
 
-func PostDnd5eMonstersCreate(b *BardView5Http) {
+func ApiPostDnd5eMonstersCreate(b *BardView5Http) {
 	var body api.PostApiV1Dnd5eMonstersJSONBody
 	if err := b.Context.ShouldBindJSON(&body); err != nil {
 		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -83,19 +83,19 @@ func PostDnd5eMonstersCreate(b *BardView5Http) {
 		b.Context.Status(http.StatusBadRequest)
 	}
 
-	dnd5eSetting, err := Dnd5eSettingById(b, dnd5eSettingId)
+	dnd5eSetting, err := dnd5eSettingById(b, dnd5eSettingId)
 	if err != nil {
 		WriteErrorToContext(b, err)
 		return
 	}
 
-	err = Dnd5eSettingHasAccess(b, &dnd5eSetting)
+	err = dnd5eSettingHasAccess(b, &dnd5eSetting)
 	if err != nil {
 		WriteErrorToContext(b, err)
 		return
 	}
 
-	newDnd5eSettingId, err := Dnd5eMonsterCreate(b, &body, dnd5eSettingId)
+	newDnd5eSettingId, err := dnd5eMonsterCreate(b, &body, dnd5eSettingId)
 	if err != nil {
 		WriteErrorToContext(b, err)
 		return
@@ -109,7 +109,7 @@ func PostDnd5eMonstersCreate(b *BardView5Http) {
 	})
 }
 
-func Dnd5eMonsterCreate(b *BardView5Http, body *api.PostApiV1Dnd5eMonstersJSONBody, dnd5eSettingId int64) (int64, error) {
+func dnd5eMonsterCreate(b *BardView5Http, body *api.PostApiV1Dnd5eMonstersJSONBody, dnd5eSettingId int64) (int64, error) {
 	newDnd5eMonsterId := b.GenDnd5eMonster().Generate().Int64()
 	changedRows, err := b.Querier().Dnd5eMonsterInsert(b.Context, db.Dnd5eMonsterInsertParams{
 		Dnd5eMonsterID:       newDnd5eMonsterId,

@@ -9,7 +9,7 @@ import (
 	"server/bardlog"
 )
 
-func (b *BardView5) GetWhoAmI(c *gin.Context) {
+func (b *BardView5) ApiGetWhoAmI(c *gin.Context) {
 	logger := bardlog.GetLogger(c)
 	req, err := http.NewRequest("GET", "http://proxy.local/sessions/whoami", nil)
 	if err != nil {

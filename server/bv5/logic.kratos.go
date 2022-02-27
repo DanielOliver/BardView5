@@ -91,7 +91,7 @@ func ensureKratosUserByUuid(b *BardView5Http, userUuid uuid.UUID) (*api.UserGet,
 	}
 
 	user := users[0]
-	if err = UserHasAccess(b, &user); err != nil {
+	if err = userHasAccess(b, &user); err != nil {
 		return mapUserToJsonBody(&user), err
 	}
 
@@ -144,7 +144,7 @@ func (b *BardView5) AddSessionToContext(c *gin.Context) {
 	c.Set(Session, MakeSession(userId))
 }
 
-func (b *BardView5) RequireValidSession(c *gin.Context) {
+func (b *BardView5) ApiRequireValidSession(c *gin.Context) {
 	s := SessionCriteria(c)
 	if s.Anonymous {
 		c.AbortWithStatus(http.StatusUnauthorized)

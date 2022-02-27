@@ -36,20 +36,20 @@ type GetDnd5eSettingByIdParams struct {
 	Dnd5eSettingId int64 `uri:"dnd5eSettingId" binding:"required"`
 }
 
-func GetDnd5eSettingById(b *BardView5Http) {
+func ApiGetDnd5eSettingById(b *BardView5Http) {
 	var params GetDnd5eSettingByIdParams
 	if err := b.Context.ShouldBindUri(&params); err != nil {
 		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	dnd5eSetting, err := Dnd5eSettingById(b, params.Dnd5eSettingId)
+	dnd5eSetting, err := dnd5eSettingById(b, params.Dnd5eSettingId)
 	if err != nil {
 		WriteErrorToContext(b, err)
 		return
 	}
 
-	err = Dnd5eSettingHasAccess(b, &dnd5eSetting)
+	err = dnd5eSettingHasAccess(b, &dnd5eSetting)
 	if err != nil {
 		WriteErrorToContext(b, err)
 		return
@@ -60,7 +60,7 @@ func GetDnd5eSettingById(b *BardView5Http) {
 	b.Context.JSON(http.StatusOK, mapDnd5eSettingToJsonBody(&dnd5eSetting))
 }
 
-func GetMyDnd5eSettings(b *BardView5Http) {
+func ApiGetMyDnd5eSettings(b *BardView5Http) {
 	dnd5eSettings, err := b.Querier().Dnd5eSettingFindByAssignment(b.Context, b.Session.SessionId)
 
 	if err != nil {
@@ -77,7 +77,7 @@ func GetMyDnd5eSettings(b *BardView5Http) {
 	b.Context.JSON(http.StatusOK, results)
 }
 
-func GetDnd5eSettings(b *BardView5Http) {
+func ApiGetDnd5eSettings(b *BardView5Http) {
 	var params api.GetApiV1Dnd5eSettingsParams
 	if err := b.Context.ShouldBindUri(&params); err != nil {
 		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -107,14 +107,14 @@ func GetDnd5eSettings(b *BardView5Http) {
 	b.Context.JSON(http.StatusOK, results)
 }
 
-func PostDnd5eSettingsCreate(b *BardView5Http) {
+func ApiPostDnd5eSettingsCreate(b *BardView5Http) {
 	var body api.PostApiV1Dnd5eSettingsJSONBody
 	if err := b.Context.ShouldBindJSON(&body); err != nil {
 		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	newDnd5eSettingId, err := Dnd5eSettingCreate(b, &body)
+	newDnd5eSettingId, err := dnd5eSettingCreate(b, &body)
 	if err != nil {
 		WriteErrorToContext(b, err)
 		return
@@ -128,7 +128,7 @@ func PostDnd5eSettingsCreate(b *BardView5Http) {
 	})
 }
 
-func PostDnd5eSettingsEdit(b *BardView5Http) {
+func ApiPostDnd5eSettingsEdit(b *BardView5Http) {
 	var params GetDnd5eSettingByIdParams
 	if err := b.Context.ShouldBindUri(&params); err != nil {
 		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -141,18 +141,18 @@ func PostDnd5eSettingsEdit(b *BardView5Http) {
 		return
 	}
 
-	dnd5eSetting, err := Dnd5eSettingById(b, params.Dnd5eSettingId)
+	dnd5eSetting, err := dnd5eSettingById(b, params.Dnd5eSettingId)
 	if err != nil {
 		WriteErrorToContext(b, err)
 		return
 	}
-	err = Dnd5eSettingHasAccess(b, &dnd5eSetting)
+	err = dnd5eSettingHasAccess(b, &dnd5eSetting)
 	if err != nil {
 		WriteErrorToContext(b, err)
 		return
 	}
 
-	err = Dnd5eSettingEdit(b, params.Dnd5eSettingId, &body)
+	err = dnd5eSettingEdit(b, params.Dnd5eSettingId, &body)
 	if err != nil {
 		WriteErrorToContext(b, err)
 		return
@@ -166,7 +166,7 @@ func PostDnd5eSettingsEdit(b *BardView5Http) {
 	})
 }
 
-func Dnd5eSettingById(b *BardView5Http, dnd5eSettingId int64) (db.Dnd5eSetting, error) {
+func dnd5eSettingById(b *BardView5Http, dnd5eSettingId int64) (db.Dnd5eSetting, error) {
 	dnd5eSettings, err := b.Querier().Dnd5eSettingFindById(b.Context, dnd5eSettingId)
 
 	empty := db.Dnd5eSetting{}
@@ -180,7 +180,7 @@ func Dnd5eSettingById(b *BardView5Http, dnd5eSettingId int64) (db.Dnd5eSetting, 
 	return dnd5eSettings[0], nil
 }
 
-func Dnd5eSettingHasAccess(b *BardView5Http, dnd5eSetting *db.Dnd5eSetting) error {
+func dnd5eSettingHasAccess(b *BardView5Http, dnd5eSetting *db.Dnd5eSetting) error {
 	switch dnd5eSetting.CommonAccess {
 	case CommonAccessPublic:
 		return nil
@@ -208,7 +208,7 @@ func Dnd5eSettingHasAccess(b *BardView5Http, dnd5eSetting *db.Dnd5eSetting) erro
 	}
 }
 
-func Dnd5eSettingCreate(b *BardView5Http, body *api.PostApiV1Dnd5eSettingsJSONBody) (int64, error) {
+func dnd5eSettingCreate(b *BardView5Http, body *api.PostApiV1Dnd5eSettingsJSONBody) (int64, error) {
 	newDnd5eSettingId := b.GenDnd5eSetting().Generate().Int64()
 	changedRows, err := b.Querier().Dnd5eSettingInsert(b.Context, db.Dnd5eSettingInsertParams{
 		Dnd5eSettingID: newDnd5eSettingId,
@@ -243,7 +243,7 @@ func Dnd5eSettingCreate(b *BardView5Http, body *api.PostApiV1Dnd5eSettingsJSONBo
 	return newDnd5eSettingId, nil
 }
 
-func Dnd5eSettingEdit(b *BardView5Http, dnd5eSettingId int64, body *api.PostApiV1Dnd5eSettingsJSONBody) error {
+func dnd5eSettingEdit(b *BardView5Http, dnd5eSettingId int64, body *api.PostApiV1Dnd5eSettingsJSONBody) error {
 	changedRows, err := b.Querier().Dnd5eSettingUpdate(b.Context, db.Dnd5eSettingUpdateParams{
 		Dnd5eSettingID: dnd5eSettingId,
 		CommonAccess:   body.CommonAccess,
