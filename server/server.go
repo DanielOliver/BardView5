@@ -27,17 +27,18 @@ func registerRoutes(router *gin.Engine, b *bv5.BardView5) {
 		{
 			grpDnd5eSettings := grpDnd5e.Group("/settings")
 			{
-				grpDnd5eSettings.GET("/assigned", b.ApiRequireValidSession, b.WrapRequest(bv5.ApiGetMyDnd5eSettings))
 				grpDnd5eSettings.GET("/:dnd5eSettingId/monsters", b.WrapRequest(bv5.ApiGetDnd5eMonstersBySettingId))
+				grpDnd5eSettings.POST("/:dnd5eSettingId/monsters", b.WrapRequest(bv5.ApiPostDnd5eMonstersCreate))
+				grpDnd5eSettings.GET("/assigned", b.ApiRequireValidSession, b.WrapRequest(bv5.ApiGetMyDnd5eSettings))
 				grpDnd5eSettings.GET("/:dnd5eSettingId", b.WrapRequest(bv5.ApiGetDnd5eSettingById))
 				grpDnd5eSettings.POST("/:dnd5eSettingId", b.WrapRequest(bv5.ApiPostDnd5eSettingsEdit))
 				grpDnd5eSettings.GET("", b.ApiRequireValidSession, b.WrapRequest(bv5.ApiGetDnd5eSettings))
 				grpDnd5eSettings.POST("", b.ApiRequireValidSession, b.WrapRequest(bv5.ApiPostDnd5eSettingsCreate))
 			}
-			grpDnd5eMonsters := grpDnd5e.Group("/monsters")
-			{
-				grpDnd5eMonsters.POST("", b.ApiRequireValidSession, b.WrapRequest(bv5.ApiPostDnd5eMonstersCreate))
-			}
+			//grpDnd5eMonsters := grpDnd5e.Group("/monsters")
+			//{
+			//	grpDnd5eMonsters.POST("", b.ApiRequireValidSession, b.WrapRequest(bv5.ApiPostDnd5eMonstersCreate))
+			//}
 		}
 		grpV1.GET("/session", b.ApiGetWhoAmI)
 	}

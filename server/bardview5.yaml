@@ -221,17 +221,17 @@ components:
         name:
           type: string
           example: Forgiven Songs
-          maxLength: 512
+          maxLength: 256
           minLength: 1
           x-oapi-codegen-extra-tags:
-            binding: "required,min=1,max=512"
+            binding: "required,min=1,max=256"
         description:
           type: string
           example: A whole new setting!
-          maxLength: 1024
+          maxLength: 4096
           minLength: 1
           x-oapi-codegen-extra-tags:
-            binding: "required,min=1,max=1024"
+            binding: "required,min=1,max=4096"
         module:
           type: string
           example: A Hidden Module
@@ -292,9 +292,6 @@ components:
     Dnd5eMonster:
       type: object
       properties:
-        dnd5eSettingId:
-          type: string
-          example: 123
         name:
           type: string
           example: Goblin
@@ -388,13 +385,15 @@ components:
       required:
         - userTags
         - name
-        - dnd5eSettingId
     Dnd5eMonsterGet:
       allOf:
         - $ref: '#/components/schemas/Dnd5eMonster'
         - type: object
           properties:
             dnd5eMonsterId:
+              type: string
+              example: 123
+            dnd5eSettingId:
               type: string
               example: 123
             created:
@@ -404,6 +403,7 @@ components:
               format: int64
           required:
             - dnd5eMonsterId
+            - dnd5eSettingId
             - created
             - version
     Dnd5eMonsterPostOk:
@@ -415,9 +415,28 @@ components:
         version:
           type: integer
           format: int64
+        dnd5eSettingId:
+          type: string
+          example: 123
       required:
         - dnd5eMonsterId
         - version
+        - dnd5eSettingId
+    Dnd5eSettingPackage:
+      type: object
+      properties:
+        setting:
+          $ref: "#/components/schemas/Dnd5eSetting"
+        monsters:
+          type: array
+          maxItems: 2048
+          x-oapi-codegen-extra-tags:
+            binding: "max=2048"
+          items:
+            $ref: "#/components/schemas/Dnd5eMonster"
+      required:
+        - monsters
+        - setting
     User:
       type: object
       properties:
@@ -475,6 +494,48 @@ components:
             - version
             - uuid
 paths:
+  /api/v1/dnd5e/packages:
+    post:
+      summary: Creates new dnd5e setting package. Good for import
+      tags:
+        - Dnd5eSettingPackage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dnd5eSettingPackage'
+      responses:
+        '201':
+          $ref: '#/components/responses/Dnd5eSettingPostOk'
+  /api/v1/dnd5e/packages/{dnd5eSettingId}:
+    get:
+      summary: Returns Dnd5e Setting packaged up into a nice bundle. Good for export
+      tags:
+        - Dnd5eSettingPackage
+      parameters:
+        - $ref: '#/components/parameters/Dnd5eSettingId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dnd5eSettingPackage'
+    post:
+      summary: Updates dnd5e setting package completely. Good for import
+      tags:
+        - Dnd5eSettingPackage
+      parameters:
+        - $ref: '#/components/parameters/Dnd5eSettingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dnd5eSettingPackage'
+      responses:
+        '200':
+          $ref: '#/components/responses/Dnd5eSettingPostOk'
   /api/v1/dnd5e/settings/assigned:
     get:
       summary: Returns all Dnd5e Settings that I have explicit access to.
@@ -488,11 +549,28 @@ paths:
       summary: Returns Dnd5e Setting's Monsters
       tags:
         - Dnd5eSetting
+        - Dnd5eMonster
       parameters:
         - $ref: '#/components/parameters/Dnd5eSettingId'
       responses:
         '200':
           $ref: '#/components/responses/Dnd5eMonsterArrayGetOk'
+    post:
+      summary: Creates a new dnd5e monster.
+      tags:
+        - Dnd5eMonster
+        - Dnd5eSetting
+      parameters:
+        - $ref: '#/components/parameters/Dnd5eSettingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dnd5eMonster'
+      responses:
+        '201':
+          $ref: '#/components/responses/Dnd5eMonsterPostOk'
   /api/v1/dnd5e/settings/{dnd5eSettingId}:
     get:
       summary: Returns Dnd5e Setting
@@ -541,20 +619,6 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/Dnd5eSettingPostOk'
-  /api/v1/dnd5e/monsters:
-    post:
-      summary: Creates a new dnd5e monster.
-      tags:
-        - Dnd5eMonster
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Dnd5eMonster'
-      responses:
-        '201':
-          $ref: '#/components/responses/Dnd5eMonsterPostOk'
   /api/v1/dnd5e/monsters/{dnd5eMonsterId}:
     get:
       summary: Returns Dnd5e Monster

@@ -23,14 +23,13 @@ type Created string
 
 // Dnd5eMonster defines model for Dnd5eMonster.
 type Dnd5eMonster struct {
-	Alignment      *string   `binding:"max=40" json:"alignment,omitempty"`
-	ArmorClass     *int      `json:"armorClass,omitempty"`
-	Description    *string   `binding:"max=1024" json:"description,omitempty"`
-	Dnd5eSettingId string    `json:"dnd5eSettingId"`
-	Environments   *[]string `binding:"max=16,dive,max=256" json:"environments,omitempty"`
-	HitPoints      *int      `json:"hitPoints,omitempty"`
-	Languages      *[]string `binding:"max=16,dive,max=256" json:"languages,omitempty"`
-	Legendary      *bool     `json:"legendary,omitempty"`
+	Alignment    *string   `binding:"max=40" json:"alignment,omitempty"`
+	ArmorClass   *int      `json:"armorClass,omitempty"`
+	Description  *string   `binding:"max=1024" json:"description,omitempty"`
+	Environments *[]string `binding:"max=16,dive,max=256" json:"environments,omitempty"`
+	HitPoints    *int      `json:"hitPoints,omitempty"`
+	Languages    *[]string `binding:"max=16,dive,max=256" json:"languages,omitempty"`
+	Legendary    *bool     `json:"legendary,omitempty"`
 
 	// The challenge rating, in thousandths
 	MilliChallengeRating *int64    `binding:"max=30000" json:"milliChallengeRating,omitempty"`
@@ -50,12 +49,14 @@ type Dnd5eMonsterGet struct {
 	// The created time of this record. RFC3339
 	Created        Created `json:"created"`
 	Dnd5eMonsterId string  `json:"dnd5eMonsterId"`
+	Dnd5eSettingId string  `json:"dnd5eSettingId"`
 	Version        int64   `json:"version"`
 }
 
 // Dnd5eMonsterPostOk defines model for Dnd5eMonsterPostOk.
 type Dnd5eMonsterPostOk struct {
 	Dnd5eMonsterId string `json:"dnd5eMonsterId"`
+	Dnd5eSettingId string `json:"dnd5eSettingId"`
 	Version        int64  `json:"version"`
 }
 
@@ -63,9 +64,9 @@ type Dnd5eMonsterPostOk struct {
 type Dnd5eSetting struct {
 	Active       bool       `json:"active"`
 	CommonAccess string     `binding:"required,oneof=private anyuser public" json:"commonAccess"`
-	Description  string     `binding:"required,min=1,max=1024" json:"description"`
+	Description  string     `binding:"required,min=1,max=4096" json:"description"`
 	Module       *string    `binding:"max=512" json:"module,omitempty"`
-	Name         string     `binding:"required,min=1,max=512" json:"name"`
+	Name         string     `binding:"required,min=1,max=256" json:"name"`
 	SystemTags   SystemTags `binding:"required,max=64,dive,max=256" json:"systemTags"`
 	UserTags     UserTags   `binding:"required,max=64,dive,max=256" json:"userTags"`
 }
@@ -79,6 +80,12 @@ type Dnd5eSettingGet struct {
 	Created        Created `json:"created"`
 	Dnd5eSettingId string  `json:"dnd5eSettingId"`
 	Version        int64   `json:"version"`
+}
+
+// Dnd5eSettingPackage defines model for Dnd5eSettingPackage.
+type Dnd5eSettingPackage struct {
+	Monsters []Dnd5eMonster `binding:"max=2048" json:"monsters"`
+	Setting  Dnd5eSetting   `json:"setting"`
 }
 
 // Dnd5eSettingPostOk defines model for Dnd5eSettingPostOk.
@@ -181,8 +188,11 @@ type UserPostOk struct {
 // A JSONPatch document as defined by RFC 6902
 type Patch PatchDocument
 
-// PostApiV1Dnd5eMonstersJSONBody defines parameters for PostApiV1Dnd5eMonsters.
-type PostApiV1Dnd5eMonstersJSONBody Dnd5eMonster
+// PostApiV1Dnd5ePackagesJSONBody defines parameters for PostApiV1Dnd5ePackages.
+type PostApiV1Dnd5ePackagesJSONBody Dnd5eSettingPackage
+
+// PostApiV1Dnd5ePackagesDnd5eSettingIdJSONBody defines parameters for PostApiV1Dnd5ePackagesDnd5eSettingId.
+type PostApiV1Dnd5ePackagesDnd5eSettingIdJSONBody Dnd5eSettingPackage
 
 // GetApiV1Dnd5eSettingsParams defines parameters for GetApiV1Dnd5eSettings.
 type GetApiV1Dnd5eSettingsParams struct {
@@ -196,17 +206,26 @@ type PostApiV1Dnd5eSettingsJSONBody Dnd5eSetting
 // PostApiV1Dnd5eSettingsDnd5eSettingIdJSONBody defines parameters for PostApiV1Dnd5eSettingsDnd5eSettingId.
 type PostApiV1Dnd5eSettingsDnd5eSettingIdJSONBody Dnd5eSetting
 
+// PostApiV1Dnd5eSettingsDnd5eSettingIdMonstersJSONBody defines parameters for PostApiV1Dnd5eSettingsDnd5eSettingIdMonsters.
+type PostApiV1Dnd5eSettingsDnd5eSettingIdMonstersJSONBody Dnd5eMonster
+
 // PostApiV1UsersJSONBody defines parameters for PostApiV1Users.
 type PostApiV1UsersJSONBody User
 
-// PostApiV1Dnd5eMonstersJSONRequestBody defines body for PostApiV1Dnd5eMonsters for application/json ContentType.
-type PostApiV1Dnd5eMonstersJSONRequestBody PostApiV1Dnd5eMonstersJSONBody
+// PostApiV1Dnd5ePackagesJSONRequestBody defines body for PostApiV1Dnd5ePackages for application/json ContentType.
+type PostApiV1Dnd5ePackagesJSONRequestBody PostApiV1Dnd5ePackagesJSONBody
+
+// PostApiV1Dnd5ePackagesDnd5eSettingIdJSONRequestBody defines body for PostApiV1Dnd5ePackagesDnd5eSettingId for application/json ContentType.
+type PostApiV1Dnd5ePackagesDnd5eSettingIdJSONRequestBody PostApiV1Dnd5ePackagesDnd5eSettingIdJSONBody
 
 // PostApiV1Dnd5eSettingsJSONRequestBody defines body for PostApiV1Dnd5eSettings for application/json ContentType.
 type PostApiV1Dnd5eSettingsJSONRequestBody PostApiV1Dnd5eSettingsJSONBody
 
 // PostApiV1Dnd5eSettingsDnd5eSettingIdJSONRequestBody defines body for PostApiV1Dnd5eSettingsDnd5eSettingId for application/json ContentType.
 type PostApiV1Dnd5eSettingsDnd5eSettingIdJSONRequestBody PostApiV1Dnd5eSettingsDnd5eSettingIdJSONBody
+
+// PostApiV1Dnd5eSettingsDnd5eSettingIdMonstersJSONRequestBody defines body for PostApiV1Dnd5eSettingsDnd5eSettingIdMonsters for application/json ContentType.
+type PostApiV1Dnd5eSettingsDnd5eSettingIdMonstersJSONRequestBody PostApiV1Dnd5eSettingsDnd5eSettingIdMonstersJSONBody
 
 // PostApiV1UsersJSONRequestBody defines body for PostApiV1Users for application/json ContentType.
 type PostApiV1UsersJSONRequestBody PostApiV1UsersJSONBody

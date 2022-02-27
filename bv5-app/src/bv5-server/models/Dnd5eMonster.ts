@@ -5,7 +5,6 @@
 import type { UserTags } from './UserTags';
 
 export type Dnd5eMonster = {
-    dnd5eSettingId: string;
     name: string;
     description?: string;
     sizeCategory?: string;

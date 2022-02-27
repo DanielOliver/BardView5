@@ -17,7 +17,6 @@ func mapDnd5eMonsterToJsonBody(m *db.Dnd5eMonster) *api.Dnd5eMonsterGet {
 			ArmorClass:           SMaybeInt32(m.ArmorClass),
 			MilliChallengeRating: SMaybeInt64(m.MilliChallengeRating),
 			Description:          SMaybeString(m.Description),
-			Dnd5eSettingId:       strconv.FormatInt(m.Dnd5eSettingID, 10),
 			Environments:         &m.Environments,
 			HitPoints:            SMaybeInt32(m.HitPoints),
 			Languages:            &m.Environments,
@@ -31,6 +30,7 @@ func mapDnd5eMonsterToJsonBody(m *db.Dnd5eMonster) *api.Dnd5eMonsterGet {
 		},
 		Created:        api.Created(m.CreatedAt.Format(time.RFC3339)),
 		Dnd5eMonsterId: strconv.FormatInt(m.Dnd5eMonsterID, 10),
+		Dnd5eSettingId: strconv.FormatInt(m.Dnd5eSettingID, 10),
 		Version:        m.Version,
 	}
 	return ret
@@ -72,17 +72,19 @@ func ApiGetDnd5eMonstersBySettingId(b *BardView5Http) {
 }
 
 func ApiPostDnd5eMonstersCreate(b *BardView5Http) {
-	var body api.PostApiV1Dnd5eMonstersJSONBody
+	var params GetDnd5eSettingByIdParams
+	if err := b.Context.ShouldBindUri(&params); err != nil {
+		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var body api.PostApiV1Dnd5eSettingsDnd5eSettingIdMonstersJSONBody
 	if err := b.Context.ShouldBindJSON(&body); err != nil {
 		b.Context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	dnd5eSettingId, err := strconv.ParseInt(body.Dnd5eSettingId, 10, 64)
-	if err != nil {
-		b.Context.Status(http.StatusBadRequest)
-	}
-
+	dnd5eSettingId := params.Dnd5eSettingId
 	dnd5eSetting, err := dnd5eSettingById(b, dnd5eSettingId)
 	if err != nil {
 		WriteErrorToContext(b, err)
@@ -109,7 +111,7 @@ func ApiPostDnd5eMonstersCreate(b *BardView5Http) {
 	})
 }
 
-func dnd5eMonsterCreate(b *BardView5Http, body *api.PostApiV1Dnd5eMonstersJSONBody, dnd5eSettingId int64) (int64, error) {
+func dnd5eMonsterCreate(b *BardView5Http, body *api.PostApiV1Dnd5eSettingsDnd5eSettingIdMonstersJSONBody, dnd5eSettingId int64) (int64, error) {
 	newDnd5eMonsterId := b.GenDnd5eMonster().Generate().Int64()
 	changedRows, err := b.Querier().Dnd5eMonsterInsert(b.Context, db.Dnd5eMonsterInsertParams{
 		Dnd5eMonsterID:       newDnd5eMonsterId,

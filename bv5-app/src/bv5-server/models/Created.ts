@@ -3,6 +3,6 @@
 /* eslint-disable */
 
 /**
- * The created time of this record
+ * The created time of this record. RFC3339
  */
 export type Created = string;
