@@ -2,6 +2,8 @@
 
 A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool.  
 
+**WARNING: No stable release candidate is available yet. Work-in-progress**
+
 ## Screenshots
 
 ### Landing Page
@@ -29,12 +31,12 @@ A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool.
     - [ ] Email verification
     - [ ] Password reset
 - D&D 5e
-    - Setting: A general setting to play in
+    - Setting: A general setting to play in. Almost equivalent to a "world"
         - [X] Read
         - [X] Create
-        - [ ] Update
+        - [X] Update
         - [ ] Delete
-        - [ ] Query
+        - [X] Query
         - [ ] Assigning user permissions
         - Notes
             - Supports markdown in description
@@ -43,7 +45,7 @@ A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool.
         - [ ] Create
         - [ ] Update
         - [ ] Delete
-        - [ ] Query
+        - [X] Query
         - [ ] Associating with settings
     - Data pack: An entire collection of settings, monsters, and associated information. Meant to be imported or exported and shared.
         - [ ] Export
@@ -176,9 +178,13 @@ Operating system: I alternate development on openSUSE Tumbleweed and Windows 10 
    mage -v InternalMigrate
    ```
 
+## Deployment
+
+**TODO: Not ready**
+
 ## Methodology and philosophy
 
-Development proceeds as I have time, usually a couple lines very late at night or very early in the morning. Neither am I optimizing for "web-scale" As such, the development habits here generally reflect my mood of what I want to explore at the time. Further, this isn't my job, so please don't judge me too harshly on what I write here and shortcuts taken since my free time is valuable.
+Development proceeds as I have time, usually a couple lines very late at night or very early in the morning. Neither am I optimizing for "web-scale" As such, the development habits here generally reflect my mood of what I want to explore at the time. Further, this isn't my job, so please don't judge me too harshly on what I write here and shortcuts taken since my free time is valuable. If you would, consider this an example microcosm of tradeoffs and compromise in order to make progress forward.
 
 The things I value here are:
 
@@ -188,3 +194,4 @@ The things I value here are:
 * Simple user flows and logical interactions.
 * Freedom of data. I don't want your data. Self-host for yourself and your friends and do whatever.
 * No data entry. I hate typing more than required. Accurate importing and exporting of data is important.
+* A very deliberate and thoughtful acceptance of any new capabilities with the goal of a successful long-term maintenance thereof.
