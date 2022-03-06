@@ -232,51 +232,6 @@ func (q *Queries) Dnd5eMonstersFindBySetting(ctx context.Context, arg Dnd5eMonst
 	return items, nil
 }
 
-const dnd5eSettingFindAssignment = `-- name: Dnd5eSettingFindAssignment :many
-SELECT wa.created_by, wa.created_at, wa.version, wa.user_id, wa.role_id, wa.scope_id
-FROM "role_assignment" wa
-         INNER JOIN "role" r ON
-    r.role_id = wa.role_id
-WHERE wa.user_id = $1
-  AND wa.scope_id = $2
-  AND r.role_subject = 'dnd5e_setting'
-`
-
-type Dnd5eSettingFindAssignmentParams struct {
-	UserID         int64 `db:"user_id"`
-	Dnd5eSettingID int64 `db:"dnd5e_setting_id"`
-}
-
-func (q *Queries) Dnd5eSettingFindAssignment(ctx context.Context, arg Dnd5eSettingFindAssignmentParams) ([]RoleAssignment, error) {
-	rows, err := q.query(ctx, q.dnd5eSettingFindAssignmentStmt, dnd5eSettingFindAssignment, arg.UserID, arg.Dnd5eSettingID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []RoleAssignment{}
-	for rows.Next() {
-		var i RoleAssignment
-		if err := rows.Scan(
-			&i.CreatedBy,
-			&i.CreatedAt,
-			&i.Version,
-			&i.UserID,
-			&i.RoleID,
-			&i.ScopeID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const dnd5eSettingFindByAssignment = `-- name: Dnd5eSettingFindByAssignment :many
 SELECT DISTINCT w.dnd5e_setting_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.name, w.module, w.description
 FROM "dnd5e_setting" w
@@ -284,7 +239,7 @@ FROM "dnd5e_setting" w
     w.dnd5e_setting_id = wa.scope_id
          INNER JOIN "role" r ON
             r.role_id = wa.role_id
-        AND r.role_subject = 'dnd5e_setting'
+        AND r.role_subject = 'dnd5esetting'
 WHERE wa.user_id = $1
 ORDER BY w.dnd5e_setting_id desc
 `
@@ -375,7 +330,7 @@ FROM "dnd5e_setting" w
                     SELECT 1
                     FROM "role" r
                     WHERE r.role_id = wa.role_id
-                      AND r.role_subject = 'dnd5e_setting')
+                      AND r.role_subject = 'dnd5esetting')
 WHERE (wa.user_id IS NOT NULL
     OR w.common_access IN ('anyuser', 'public')
     )
@@ -520,6 +475,66 @@ func (q *Queries) Dnd5eSizeCategoryFindAll(ctx context.Context) ([]Dnd5eSizeCate
 			&i.Version,
 			&i.Name,
 			&i.Space,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const roleAssignmentFindByScopeId = `-- name: RoleAssignmentFindByScopeId :many
+SELECT wa.scope_id
+    ,r.role_id
+    ,r.name
+    ,r.role_type
+    ,r.role_subject
+    ,r.capabilities
+FROM "role_assignment" wa
+         INNER JOIN "role" r ON
+        r.role_id = wa.role_id
+WHERE wa.user_id = $1
+  AND wa.scope_id = $2
+  AND r.role_subject = $3
+`
+
+type RoleAssignmentFindByScopeIdParams struct {
+	UserID      int64  `db:"user_id"`
+	ScopeID     int64  `db:"scope_id"`
+	RoleSubject string `db:"role_subject"`
+}
+
+type RoleAssignmentFindByScopeIdRow struct {
+	ScopeID      int64    `db:"scope_id"`
+	RoleID       int64    `db:"role_id"`
+	Name         string   `db:"name"`
+	RoleType     string   `db:"role_type"`
+	RoleSubject  string   `db:"role_subject"`
+	Capabilities []string `db:"capabilities"`
+}
+
+func (q *Queries) RoleAssignmentFindByScopeId(ctx context.Context, arg RoleAssignmentFindByScopeIdParams) ([]RoleAssignmentFindByScopeIdRow, error) {
+	rows, err := q.query(ctx, q.roleAssignmentFindByScopeIdStmt, roleAssignmentFindByScopeId, arg.UserID, arg.ScopeID, arg.RoleSubject)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []RoleAssignmentFindByScopeIdRow{}
+	for rows.Next() {
+		var i RoleAssignmentFindByScopeIdRow
+		if err := rows.Scan(
+			&i.ScopeID,
+			&i.RoleID,
+			&i.Name,
+			&i.RoleType,
+			&i.RoleSubject,
+			pq.Array(&i.Capabilities),
 		); err != nil {
 			return nil, err
 		}

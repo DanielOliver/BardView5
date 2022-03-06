@@ -89,6 +89,20 @@ SELECT @created_by,
   AND r.role_subject = @role_subject
     );
 
+-- name: RoleAssignmentFindByScopeId :many
+SELECT wa.scope_id
+    ,r.role_id
+    ,r.name
+    ,r.role_type
+    ,r.role_subject
+    ,r.capabilities
+FROM "role_assignment" wa
+         INNER JOIN "role" r ON
+        r.role_id = wa.role_id
+WHERE wa.user_id = @user_id
+  AND wa.scope_id = @scope_id
+  AND r.role_subject = @role_subject;
+
 -- name: Dnd5eSettingFindByAssignment :many
 SELECT DISTINCT w.*
 FROM "dnd5e_setting" w
@@ -116,15 +130,6 @@ WHERE (wa.user_id IS NOT NULL
     )
   AND w.name LIKE @name
 ORDER BY w.dnd5e_setting_id desc;
-
--- name: Dnd5eSettingFindAssignment :many
-SELECT wa.*
-FROM "role_assignment" wa
-         INNER JOIN "role" r ON
-    r.role_id = wa.role_id
-WHERE wa.user_id = @user_id
-  AND wa.scope_id = @dnd5e_setting_id
-  AND r.role_subject = 'dnd5esetting';
 
 -- name: Dnd5eMonsterFindById :many
 SELECT *

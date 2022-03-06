@@ -34,9 +34,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.dnd5eMonstersFindBySettingStmt, err = db.PrepareContext(ctx, dnd5eMonstersFindBySetting); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eMonstersFindBySetting: %w", err)
 	}
-	if q.dnd5eSettingFindAssignmentStmt, err = db.PrepareContext(ctx, dnd5eSettingFindAssignment); err != nil {
-		return nil, fmt.Errorf("error preparing query Dnd5eSettingFindAssignment: %w", err)
-	}
 	if q.dnd5eSettingFindByAssignmentStmt, err = db.PrepareContext(ctx, dnd5eSettingFindByAssignment); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eSettingFindByAssignment: %w", err)
 	}
@@ -54,6 +51,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.dnd5eSizeCategoryFindAllStmt, err = db.PrepareContext(ctx, dnd5eSizeCategoryFindAll); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eSizeCategoryFindAll: %w", err)
+	}
+	if q.roleAssignmentFindByScopeIdStmt, err = db.PrepareContext(ctx, roleAssignmentFindByScopeId); err != nil {
+		return nil, fmt.Errorf("error preparing query RoleAssignmentFindByScopeId: %w", err)
 	}
 	if q.roleAssignmentUpsertDefaultAddStmt, err = db.PrepareContext(ctx, roleAssignmentUpsertDefaultAdd); err != nil {
 		return nil, fmt.Errorf("error preparing query RoleAssignmentUpsertDefaultAdd: %w", err)
@@ -101,11 +101,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing dnd5eMonstersFindBySettingStmt: %w", cerr)
 		}
 	}
-	if q.dnd5eSettingFindAssignmentStmt != nil {
-		if cerr := q.dnd5eSettingFindAssignmentStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing dnd5eSettingFindAssignmentStmt: %w", cerr)
-		}
-	}
 	if q.dnd5eSettingFindByAssignmentStmt != nil {
 		if cerr := q.dnd5eSettingFindByAssignmentStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing dnd5eSettingFindByAssignmentStmt: %w", cerr)
@@ -134,6 +129,11 @@ func (q *Queries) Close() error {
 	if q.dnd5eSizeCategoryFindAllStmt != nil {
 		if cerr := q.dnd5eSizeCategoryFindAllStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing dnd5eSizeCategoryFindAllStmt: %w", cerr)
+		}
+	}
+	if q.roleAssignmentFindByScopeIdStmt != nil {
+		if cerr := q.roleAssignmentFindByScopeIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing roleAssignmentFindByScopeIdStmt: %w", cerr)
 		}
 	}
 	if q.roleAssignmentUpsertDefaultAddStmt != nil {
@@ -214,13 +214,13 @@ type Queries struct {
 	dnd5eMonsterFindByIdStmt           *sql.Stmt
 	dnd5eMonsterInsertStmt             *sql.Stmt
 	dnd5eMonstersFindBySettingStmt     *sql.Stmt
-	dnd5eSettingFindAssignmentStmt     *sql.Stmt
 	dnd5eSettingFindByAssignmentStmt   *sql.Stmt
 	dnd5eSettingFindByIdStmt           *sql.Stmt
 	dnd5eSettingFindByParamsStmt       *sql.Stmt
 	dnd5eSettingInsertStmt             *sql.Stmt
 	dnd5eSettingUpdateStmt             *sql.Stmt
 	dnd5eSizeCategoryFindAllStmt       *sql.Stmt
+	roleAssignmentFindByScopeIdStmt    *sql.Stmt
 	roleAssignmentUpsertDefaultAddStmt *sql.Stmt
 	roleAssignmentUpsertInitialStmt    *sql.Stmt
 	userFindByEmailStmt                *sql.Stmt
@@ -238,13 +238,13 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		dnd5eMonsterFindByIdStmt:           q.dnd5eMonsterFindByIdStmt,
 		dnd5eMonsterInsertStmt:             q.dnd5eMonsterInsertStmt,
 		dnd5eMonstersFindBySettingStmt:     q.dnd5eMonstersFindBySettingStmt,
-		dnd5eSettingFindAssignmentStmt:     q.dnd5eSettingFindAssignmentStmt,
 		dnd5eSettingFindByAssignmentStmt:   q.dnd5eSettingFindByAssignmentStmt,
 		dnd5eSettingFindByIdStmt:           q.dnd5eSettingFindByIdStmt,
 		dnd5eSettingFindByParamsStmt:       q.dnd5eSettingFindByParamsStmt,
 		dnd5eSettingInsertStmt:             q.dnd5eSettingInsertStmt,
 		dnd5eSettingUpdateStmt:             q.dnd5eSettingUpdateStmt,
 		dnd5eSizeCategoryFindAllStmt:       q.dnd5eSizeCategoryFindAllStmt,
+		roleAssignmentFindByScopeIdStmt:    q.roleAssignmentFindByScopeIdStmt,
 		roleAssignmentUpsertDefaultAddStmt: q.roleAssignmentUpsertDefaultAddStmt,
 		roleAssignmentUpsertInitialStmt:    q.roleAssignmentUpsertInitialStmt,
 		userFindByEmailStmt:                q.userFindByEmailStmt,

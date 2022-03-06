@@ -190,9 +190,10 @@ func dnd5eSettingHasAccess(b *BardView5Http, dnd5eSetting *db.Dnd5eSetting) erro
 		}
 		return nil
 	case CommonAccessPrivate:
-		settingAssignments, err := b.Querier().Dnd5eSettingFindAssignment(b.Context, db.Dnd5eSettingFindAssignmentParams{
-			UserID:         b.Session.SessionId,
-			Dnd5eSettingID: dnd5eSetting.Dnd5eSettingID,
+		settingAssignments, err := b.Querier().RoleAssignmentFindByScopeId(b.Context, db.RoleAssignmentFindByScopeIdParams{
+			UserID:      b.Session.SessionId,
+			ScopeID:     dnd5eSetting.Dnd5eSettingID,
+			RoleSubject: ObjDnd5eSetting,
 		})
 		if err != nil {
 			fmt.Println(err.Error())
