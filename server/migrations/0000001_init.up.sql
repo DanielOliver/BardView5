@@ -48,7 +48,7 @@ create table "role_subject"
 );
 
 INSERT INTO role_subject (name)
-VALUES ('dnd5e_setting');
+VALUES ('dnd5esetting');
 
 create table "role_type"
 (
@@ -75,9 +75,9 @@ create table "role_action"
 );
 
 INSERT INTO role_action (name, role_subject)
-VALUES ('manage', 'dnd5e_setting'),
-       ('owner', 'dnd5e_setting'),
-       ('view', 'dnd5e_setting');
+VALUES ('manage', 'dnd5esetting'),
+       ('owner', 'dnd5esetting'),
+       ('view', 'dnd5esetting');
 
 create table "role"
 (
@@ -108,9 +108,9 @@ create table "role"
 );
 
 INSERT INTO role (role_id, role_type, role_subject, scope_id, capabilities, name, assign_on_create, assign_on_add)
-VALUES (10, 'innate', 'dnd5e_setting', null, '{ "view", "manage", "owner" }', 'Owner', true, false),
-       (20, 'innate', 'dnd5e_setting', null, '{ "view", "manage", "owner" }', 'Admin', false, false),
-       (30, 'innate', 'dnd5e_setting', null, '{ "view" }', 'Viewer', false, true);
+VALUES (10, 'innate', 'dnd5esetting', null, '{ "view", "manage", "owner" }', 'Owner', true, false),
+       (20, 'innate', 'dnd5esetting', null, '{ "view", "manage", "owner" }', 'Admin', false, false),
+       (30, 'innate', 'dnd5esetting', null, '{ "view" }', 'Viewer', false, true);
 
 create table "role_assignment"
 (

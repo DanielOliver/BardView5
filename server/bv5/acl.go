@@ -16,8 +16,6 @@ const (
 	CommonAccessPublic  = "public"
 
 	RoleActionOwner = "owner"
-
-	RoleSubDnd5eSetting = "dnd5e_setting"
 )
 
 type SessionContext struct {

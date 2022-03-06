@@ -96,7 +96,7 @@ FROM "dnd5e_setting" w
     w.dnd5e_setting_id = wa.scope_id
          INNER JOIN "role" r ON
             r.role_id = wa.role_id
-        AND r.role_subject = 'dnd5e_setting'
+        AND r.role_subject = 'dnd5esetting'
 WHERE wa.user_id = @user_id
 ORDER BY w.dnd5e_setting_id desc;
 
@@ -110,7 +110,7 @@ FROM "dnd5e_setting" w
                     SELECT 1
                     FROM "role" r
                     WHERE r.role_id = wa.role_id
-                      AND r.role_subject = 'dnd5e_setting')
+                      AND r.role_subject = 'dnd5esetting')
 WHERE (wa.user_id IS NOT NULL
     OR w.common_access IN ('anyuser', 'public')
     )
@@ -124,7 +124,7 @@ FROM "role_assignment" wa
     r.role_id = wa.role_id
 WHERE wa.user_id = @user_id
   AND wa.scope_id = @dnd5e_setting_id
-  AND r.role_subject = 'dnd5e_setting';
+  AND r.role_subject = 'dnd5esetting';
 
 -- name: Dnd5eMonsterFindById :many
 SELECT *
