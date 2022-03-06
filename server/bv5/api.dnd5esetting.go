@@ -229,10 +229,11 @@ func dnd5eSettingCreate(b *BardView5Http, body *api.PostApiV1Dnd5eSettingsJSONBo
 		return 0, ErrUnknownStatusCreate(ObjDnd5eSetting, newDnd5eSettingId, true)
 	}
 
-	_, err = b.Querier().Dnd5eSettingInitialAssignment(b.Context, db.Dnd5eSettingInitialAssignmentParams{
-		CreatedBy:      MaybeInt64(&b.Session.SessionId),
-		UserID:         b.Session.SessionId,
-		Dnd5eSettingID: newDnd5eSettingId,
+	_, err = b.Querier().RoleAssignmentUpsertInitial(b.Context, db.RoleAssignmentUpsertInitialParams{
+		CreatedBy:   MaybeInt64(&b.Session.SessionId),
+		UserID:      b.Session.SessionId,
+		RoleSubject: RoleSubDnd5eSetting,
+		ScopeID:     newDnd5eSettingId,
 	})
 	if err != nil {
 		b.Logger.Err(err).Msg(ObjRoleAssignment)

@@ -423,41 +423,6 @@ func (q *Queries) Dnd5eSettingFindByParams(ctx context.Context, arg Dnd5eSetting
 	return items, nil
 }
 
-const dnd5eSettingInitialAssignment = `-- name: Dnd5eSettingInitialAssignment :execrows
-insert into "role_assignment" (created_by, user_id, role_id, scope_id)
-SELECT $1,
-       $2,
-       (SELECT MIN(role_id)
-        FROM "role" r
-        WHERE r.scope_id IS NULL
-          AND r.role_subject = 'dnd5e_setting'
-          AND r.assign_on_create = true),
-       $3
-WHERE NOT EXISTS (
-    SELECT 1 FROM role_assignment ra
-    INNER JOIN "role" r ON r.role_id = ra.role_id
-    WHERE ra.user_id = $2
-  AND ra.scope_id = $3
-  AND r.scope_id IS NULL
-  AND r.assign_on_create = true
-  AND r.role_subject = 'dnd5e_setting'
-    )
-`
-
-type Dnd5eSettingInitialAssignmentParams struct {
-	CreatedBy      sql.NullInt64 `db:"created_by"`
-	UserID         int64         `db:"user_id"`
-	Dnd5eSettingID int64         `db:"dnd5e_setting_id"`
-}
-
-func (q *Queries) Dnd5eSettingInitialAssignment(ctx context.Context, arg Dnd5eSettingInitialAssignmentParams) (int64, error) {
-	result, err := q.exec(ctx, q.dnd5eSettingInitialAssignmentStmt, dnd5eSettingInitialAssignment, arg.CreatedBy, arg.UserID, arg.Dnd5eSettingID)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected()
-}
-
 const dnd5eSettingInsert = `-- name: Dnd5eSettingInsert :execrows
 insert into "dnd5e_setting" (dnd5e_setting_id, common_access, created_by, is_active, system_tags,
                              user_tags, "name", module, description)
@@ -567,6 +532,86 @@ func (q *Queries) Dnd5eSizeCategoryFindAll(ctx context.Context) ([]Dnd5eSizeCate
 		return nil, err
 	}
 	return items, nil
+}
+
+const roleAssignmentUpsertDefaultAdd = `-- name: RoleAssignmentUpsertDefaultAdd :execrows
+insert into "role_assignment" (created_by, user_id, role_id, scope_id)
+SELECT $1,
+       $2,
+       (SELECT MIN(role_id)
+        FROM "role" r
+        WHERE r.scope_id IS NULL
+          AND r.role_subject = $3
+          AND r.assign_on_add = true),
+       $4 WHERE NOT EXISTS (
+    SELECT 1 FROM role_assignment ra
+    INNER JOIN "role" r ON r.role_id = ra.role_id
+    WHERE ra.user_id = $2
+  AND ra.scope_id = $4
+  AND r.scope_id IS NULL
+  AND r.assign_on_add = true
+  AND r.role_subject = $3
+    )
+`
+
+type RoleAssignmentUpsertDefaultAddParams struct {
+	CreatedBy   sql.NullInt64 `db:"created_by"`
+	UserID      int64         `db:"user_id"`
+	RoleSubject string        `db:"role_subject"`
+	ScopeID     int64         `db:"scope_id"`
+}
+
+func (q *Queries) RoleAssignmentUpsertDefaultAdd(ctx context.Context, arg RoleAssignmentUpsertDefaultAddParams) (int64, error) {
+	result, err := q.exec(ctx, q.roleAssignmentUpsertDefaultAddStmt, roleAssignmentUpsertDefaultAdd,
+		arg.CreatedBy,
+		arg.UserID,
+		arg.RoleSubject,
+		arg.ScopeID,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const roleAssignmentUpsertInitial = `-- name: RoleAssignmentUpsertInitial :execrows
+insert into "role_assignment" (created_by, user_id, role_id, scope_id)
+SELECT $1,
+       $2,
+       (SELECT MIN(role_id)
+        FROM "role" r
+        WHERE r.scope_id IS NULL
+          AND r.role_subject = $3
+          AND r.assign_on_create = true),
+       $4 WHERE NOT EXISTS (
+    SELECT 1 FROM role_assignment ra
+    INNER JOIN "role" r ON r.role_id = ra.role_id
+    WHERE ra.user_id = $2
+  AND ra.scope_id = $4
+  AND r.scope_id IS NULL
+  AND r.assign_on_create = true
+  AND r.role_subject = $3
+    )
+`
+
+type RoleAssignmentUpsertInitialParams struct {
+	CreatedBy   sql.NullInt64 `db:"created_by"`
+	UserID      int64         `db:"user_id"`
+	RoleSubject string        `db:"role_subject"`
+	ScopeID     int64         `db:"scope_id"`
+}
+
+func (q *Queries) RoleAssignmentUpsertInitial(ctx context.Context, arg RoleAssignmentUpsertInitialParams) (int64, error) {
+	result, err := q.exec(ctx, q.roleAssignmentUpsertInitialStmt, roleAssignmentUpsertInitial,
+		arg.CreatedBy,
+		arg.UserID,
+		arg.RoleSubject,
+		arg.ScopeID,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const userFindByEmail = `-- name: UserFindByEmail :many

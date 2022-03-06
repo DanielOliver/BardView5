@@ -51,24 +51,42 @@ SELECT *
 FROM "dnd5e_setting" w
 WHERE w.dnd5e_setting_id = @dnd5e_setting_id;
 
--- name: Dnd5eSettingInitialAssignment :execrows
+-- name: RoleAssignmentUpsertInitial :execrows
 insert into "role_assignment" (created_by, user_id, role_id, scope_id)
 SELECT @created_by,
        @user_id,
        (SELECT MIN(role_id)
         FROM "role" r
         WHERE r.scope_id IS NULL
-          AND r.role_subject = 'dnd5e_setting'
+          AND r.role_subject = @role_subject
           AND r.assign_on_create = true),
-       @dnd5e_setting_id
-WHERE NOT EXISTS (
+       @scope_id WHERE NOT EXISTS (
     SELECT 1 FROM role_assignment ra
     INNER JOIN "role" r ON r.role_id = ra.role_id
     WHERE ra.user_id = @user_id
-  AND ra.scope_id = @dnd5e_setting_id
+  AND ra.scope_id = @scope_id
   AND r.scope_id IS NULL
   AND r.assign_on_create = true
-  AND r.role_subject = 'dnd5e_setting'
+  AND r.role_subject = @role_subject
+    );
+
+-- name: RoleAssignmentUpsertDefaultAdd :execrows
+insert into "role_assignment" (created_by, user_id, role_id, scope_id)
+SELECT @created_by,
+       @user_id,
+       (SELECT MIN(role_id)
+        FROM "role" r
+        WHERE r.scope_id IS NULL
+          AND r.role_subject = @role_subject
+          AND r.assign_on_add = true),
+       @scope_id WHERE NOT EXISTS (
+    SELECT 1 FROM role_assignment ra
+    INNER JOIN "role" r ON r.role_id = ra.role_id
+    WHERE ra.user_id = @user_id
+  AND ra.scope_id = @scope_id
+  AND r.scope_id IS NULL
+  AND r.assign_on_add = true
+  AND r.role_subject = @role_subject
     );
 
 -- name: Dnd5eSettingFindByAssignment :many
