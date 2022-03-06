@@ -46,7 +46,7 @@ func (q *Queries) Dnd5eLanguageFindAll(ctx context.Context) ([]Dnd5eLanguage, er
 }
 
 const dnd5eMonsterFindById = `-- name: Dnd5eMonsterFindById :many
-SELECT dnd5e_monster_id, created_by, created_at, version, dnd5e_setting_id, name, sources, user_tags, languages, environments, is_legendary, is_unique, monster_type, alignment, size_category, milli_challenge_rating, armor_class, hit_points, description
+SELECT dnd5e_monster_id, created_by, created_at, version, dnd5e_setting_id, name, sources, user_tags, languages, environments, is_legendary, is_unique, monster_type, alignment, size_category, milli_challenge_rating, armor_class, hit_points, description, str_score, dex_score, int_score, wis_score, con_score, cha_score
 FROM "dnd5e_monster" m
 WHERE m.dnd5e_monster_id = $1
 `
@@ -80,6 +80,12 @@ func (q *Queries) Dnd5eMonsterFindById(ctx context.Context, dnd5eMonsterID int64
 			&i.ArmorClass,
 			&i.HitPoints,
 			&i.Description,
+			&i.StrScore,
+			&i.DexScore,
+			&i.IntScore,
+			&i.WisScore,
+			&i.ConScore,
+			&i.ChaScore,
 		); err != nil {
 			return nil, err
 		}
@@ -95,20 +101,21 @@ func (q *Queries) Dnd5eMonsterFindById(ctx context.Context, dnd5eMonsterID int64
 }
 
 const dnd5eMonsterInsert = `-- name: Dnd5eMonsterInsert :execrows
-INSERT INTO dnd5e_monster (dnd5e_monster_id, created_by, version, dnd5e_setting_id, name, sources,
+INSERT INTO dnd5e_monster (dnd5e_monster_id, created_by, dnd5e_setting_id, name, sources,
                            user_tags, languages, environments, is_legendary, is_unique, monster_type, alignment,
-                           size_category, milli_challenge_rating, armor_class, hit_points, description)
+                           size_category, milli_challenge_rating, armor_class, hit_points, description,
+                           str_score, int_score, wis_score, dex_score, con_score, cha_score)
 VALUES (
-           $1, $2, $3, $4, $5, $6,
-           $7, $8, $9, $10, $11, $12, $13,
-           $14, $15, $16, $17, $18
+           $1, $2, $3, $4, $5,
+           $6, $7, $8, $9, $10, $11, $12,
+           $13, $14, $15, $16, $17,
+           $18, $19, $20, $21, $22, $23
        )
 `
 
 type Dnd5eMonsterInsertParams struct {
 	Dnd5eMonsterID       int64          `db:"dnd5e_monster_id"`
 	CreatedBy            sql.NullInt64  `db:"created_by"`
-	Version              int64          `db:"version"`
 	Dnd5eSettingID       int64          `db:"dnd5e_setting_id"`
 	Name                 string         `db:"name"`
 	Sources              []string       `db:"sources"`
@@ -124,13 +131,18 @@ type Dnd5eMonsterInsertParams struct {
 	ArmorClass           sql.NullInt32  `db:"armor_class"`
 	HitPoints            sql.NullInt32  `db:"hit_points"`
 	Description          sql.NullString `db:"description"`
+	StrScore             sql.NullInt32  `db:"str_score"`
+	IntScore             sql.NullInt32  `db:"int_score"`
+	WisScore             sql.NullInt32  `db:"wis_score"`
+	DexScore             sql.NullInt32  `db:"dex_score"`
+	ConScore             sql.NullInt32  `db:"con_score"`
+	ChaScore             sql.NullInt32  `db:"cha_score"`
 }
 
 func (q *Queries) Dnd5eMonsterInsert(ctx context.Context, arg Dnd5eMonsterInsertParams) (int64, error) {
 	result, err := q.exec(ctx, q.dnd5eMonsterInsertStmt, dnd5eMonsterInsert,
 		arg.Dnd5eMonsterID,
 		arg.CreatedBy,
-		arg.Version,
 		arg.Dnd5eSettingID,
 		arg.Name,
 		pq.Array(arg.Sources),
@@ -146,6 +158,12 @@ func (q *Queries) Dnd5eMonsterInsert(ctx context.Context, arg Dnd5eMonsterInsert
 		arg.ArmorClass,
 		arg.HitPoints,
 		arg.Description,
+		arg.StrScore,
+		arg.IntScore,
+		arg.WisScore,
+		arg.DexScore,
+		arg.ConScore,
+		arg.ChaScore,
 	)
 	if err != nil {
 		return 0, err
@@ -154,7 +172,7 @@ func (q *Queries) Dnd5eMonsterInsert(ctx context.Context, arg Dnd5eMonsterInsert
 }
 
 const dnd5eMonstersFindBySetting = `-- name: Dnd5eMonstersFindBySetting :many
-SELECT dnd5e_monster_id, created_by, created_at, version, dnd5e_setting_id, name, sources, user_tags, languages, environments, is_legendary, is_unique, monster_type, alignment, size_category, milli_challenge_rating, armor_class, hit_points, description
+SELECT dnd5e_monster_id, created_by, created_at, version, dnd5e_setting_id, name, sources, user_tags, languages, environments, is_legendary, is_unique, monster_type, alignment, size_category, milli_challenge_rating, armor_class, hit_points, description, str_score, dex_score, int_score, wis_score, con_score, cha_score
 FROM "dnd5e_monster" m
 WHERE m.dnd5e_setting_id = $1
 ORDER BY m.dnd5e_setting_id, m.dnd5e_monster_id
@@ -196,6 +214,12 @@ func (q *Queries) Dnd5eMonstersFindBySetting(ctx context.Context, arg Dnd5eMonst
 			&i.ArmorClass,
 			&i.HitPoints,
 			&i.Description,
+			&i.StrScore,
+			&i.DexScore,
+			&i.IntScore,
+			&i.WisScore,
+			&i.ConScore,
+			&i.ChaScore,
 		); err != nil {
 			return nil, err
 		}

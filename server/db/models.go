@@ -42,6 +42,12 @@ type Dnd5eMonster struct {
 	ArmorClass           sql.NullInt32  `db:"armor_class"`
 	HitPoints            sql.NullInt32  `db:"hit_points"`
 	Description          sql.NullString `db:"description"`
+	StrScore             sql.NullInt32  `db:"str_score"`
+	DexScore             sql.NullInt32  `db:"dex_score"`
+	IntScore             sql.NullInt32  `db:"int_score"`
+	WisScore             sql.NullInt32  `db:"wis_score"`
+	ConScore             sql.NullInt32  `db:"con_score"`
+	ChaScore             sql.NullInt32  `db:"cha_score"`
 }
 
 type Dnd5eMonsterType struct {

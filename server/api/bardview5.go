@@ -23,13 +23,17 @@ type Created string
 
 // Dnd5eMonster defines model for Dnd5eMonster.
 type Dnd5eMonster struct {
-	Alignment    *string   `binding:"max=40" json:"alignment,omitempty"`
-	ArmorClass   *int      `json:"armorClass,omitempty"`
-	Description  *string   `binding:"max=1024" json:"description,omitempty"`
-	Environments *[]string `binding:"max=16,dive,max=256" json:"environments,omitempty"`
-	HitPoints    *int      `json:"hitPoints,omitempty"`
-	Languages    *[]string `binding:"max=16,dive,max=256" json:"languages,omitempty"`
-	Legendary    *bool     `json:"legendary,omitempty"`
+	Alignment         *string   `binding:"max=40" json:"alignment,omitempty"`
+	ArmorClass        *int      `binding:"max=50" json:"armorClass,omitempty"`
+	CharismaScore     *int      `binding:"max=30" json:"charismaScore,omitempty"`
+	ConstitutionScore *int      `binding:"max=30" json:"constitutionScore,omitempty"`
+	Description       *string   `binding:"max=1024" json:"description,omitempty"`
+	DexterityScore    *int      `binding:"max=30" json:"dexterityScore,omitempty"`
+	Environments      *[]string `binding:"max=16,dive,max=256" json:"environments,omitempty"`
+	HitPoints         *int      `binding:"max=2000" json:"hitPoints,omitempty"`
+	IntelligenceScore *int      `binding:"max=30" json:"intelligenceScore,omitempty"`
+	Languages         *[]string `binding:"max=16,dive,max=256" json:"languages,omitempty"`
+	Legendary         *bool     `json:"legendary,omitempty"`
 
 	// The challenge rating, in thousandths
 	MilliChallengeRating *int64    `binding:"max=30000" json:"milliChallengeRating,omitempty"`
@@ -37,8 +41,10 @@ type Dnd5eMonster struct {
 	Name                 string    `binding:"required,min=1,max=512" json:"name"`
 	SizeCategory         *string   `binding:"max=80" json:"sizeCategory,omitempty"`
 	Sources              *[]string `binding:"max=16,dive,max=256" json:"sources,omitempty"`
+	StrengthScore        *int      `binding:"max=30" json:"strengthScore,omitempty"`
 	Unique               *bool     `json:"unique,omitempty"`
 	UserTags             UserTags  `binding:"required,max=64,dive,max=256" json:"userTags"`
+	WisdomScore          *int      `binding:"max=30" json:"wisdomScore,omitempty"`
 }
 
 // Dnd5eMonsterGet defines model for Dnd5eMonsterGet.

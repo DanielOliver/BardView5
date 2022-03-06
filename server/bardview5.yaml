@@ -316,12 +316,58 @@ components:
           type: integer
           example: 13
           minimum: 0
-          maximum: 40
+          maximum: 50
+          x-oapi-codegen-extra-tags:
+            binding: "max=50"
+        strengthScore:
+          type: integer
+          example: 10
+          minimum: 0
+          maximum: 30
+          x-oapi-codegen-extra-tags:
+            binding: "max=30"
+        intelligenceScore:
+          type: integer
+          example: 10
+          minimum: 0
+          maximum: 30
+          x-oapi-codegen-extra-tags:
+            binding: "max=30"
+        wisdomScore:
+          type: integer
+          example: 10
+          minimum: 0
+          maximum: 30
+          x-oapi-codegen-extra-tags:
+            binding: "max=30"
+        dexterityScore:
+          type: integer
+          example: 10
+          minimum: 0
+          maximum: 30
+          x-oapi-codegen-extra-tags:
+            binding: "max=30"
+        constitutionScore:
+          type: integer
+          example: 10
+          minimum: 0
+          maximum: 30
+          x-oapi-codegen-extra-tags:
+            binding: "max=30"
+        charismaScore:
+          type: integer
+          example: 10
+          minimum: 0
+          maximum: 30
+          x-oapi-codegen-extra-tags:
+            binding: "max=30"
         hitPoints:
           type: integer
           example: 10
           minimum: 1
           maximum: 2000
+          x-oapi-codegen-extra-tags:
+            binding: "max=2000"
         legendary:
           type: boolean
           example: false

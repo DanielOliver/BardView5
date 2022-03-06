@@ -70,7 +70,13 @@ CREATE TABLE public.dnd5e_monster (
     milli_challenge_rating bigint,
     armor_class integer,
     hit_points integer,
-    description text
+    description text,
+    str_score integer,
+    dex_score integer,
+    int_score integer,
+    wis_score integer,
+    con_score integer,
+    cha_score integer
 );
 
 

@@ -100,7 +100,12 @@ create table "dnd5e_monster"
     armor_class            int     null,
     hit_points             int     null,
     description            text    null,
-
+    str_score              int     null,
+    dex_score              int     null,
+    int_score              int     null,
+    wis_score              int     null,
+    con_score              int     null,
+    cha_score              int     null,
 
     CONSTRAINT fk_dnd5e_monster_createdby
         FOREIGN KEY (created_by)

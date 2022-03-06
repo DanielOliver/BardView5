@@ -102,11 +102,13 @@ OFFSET @row_offset LIMIT @row_limit;
 -- name: Dnd5eMonsterInsert :execrows
 INSERT INTO dnd5e_monster (dnd5e_monster_id, created_by, dnd5e_setting_id, name, sources,
                            user_tags, languages, environments, is_legendary, is_unique, monster_type, alignment,
-                           size_category, milli_challenge_rating, armor_class, hit_points, description)
+                           size_category, milli_challenge_rating, armor_class, hit_points, description,
+                           str_score, int_score, wis_score, dex_score, con_score, cha_score)
 VALUES (
            @dnd5e_monster_id, @created_by, @dnd5e_setting_id, @name, @sources,
            @user_tags, @languages, @environments, @is_legendary, @is_unique, @monster_type, @alignment,
-           @size_category, @milli_challenge_rating, @armor_class, @hit_points, @description
+           @size_category, @milli_challenge_rating, @armor_class, @hit_points, @description,
+           @str_score, @int_score, @wis_score, @dex_score, @con_score, @cha_score
        );
 
 -- name: Dnd5eSizeCategoryFindAll :many
