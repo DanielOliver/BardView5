@@ -196,8 +196,8 @@ func dnd5eSettingHasAccess(b *BardView5Http, dnd5eSetting *db.Dnd5eSetting) erro
 		})
 		if err != nil {
 			fmt.Println(err.Error())
-			b.Logger.Err(err).Msg(ObjDnd5eSettingAssignment)
-			return ErrFailedRead(ObjDnd5eSettingAssignment, dnd5eSetting.Dnd5eSettingID, true)
+			b.Logger.Err(err).Msg(ObjRoleAssignment)
+			return ErrFailedRead(ObjRoleAssignment, dnd5eSetting.Dnd5eSettingID, true)
 		}
 		if len(settingAssignments) == 0 {
 			return ErrNotAuthorized(ObjDnd5eSetting, dnd5eSetting.Dnd5eSettingID)
@@ -229,15 +229,14 @@ func dnd5eSettingCreate(b *BardView5Http, body *api.PostApiV1Dnd5eSettingsJSONBo
 		return 0, ErrUnknownStatusCreate(ObjDnd5eSetting, newDnd5eSettingId, true)
 	}
 
-	_, err = b.Querier().Dnd5eSettingUpsertAssignment(b.Context, db.Dnd5eSettingUpsertAssignmentParams{
+	_, err = b.Querier().Dnd5eSettingInitialAssignment(b.Context, db.Dnd5eSettingInitialAssignmentParams{
 		CreatedBy:      MaybeInt64(&b.Session.SessionId),
 		UserID:         b.Session.SessionId,
 		Dnd5eSettingID: newDnd5eSettingId,
-		RoleAction:     RoleActionOwner,
 	})
 	if err != nil {
-		b.Logger.Err(err).Msg(ObjDnd5eSettingAssignment)
-		return 0, ErrFailedCreate(ObjDnd5eSettingAssignment, newDnd5eSettingId, true)
+		b.Logger.Err(err).Msg(ObjRoleAssignment)
+		return 0, ErrFailedCreate(ObjRoleAssignment, newDnd5eSettingId, true)
 	}
 
 	return newDnd5eSettingId, nil

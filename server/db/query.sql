@@ -31,19 +31,19 @@ WHERE u.user_id = @user_id
 
 -- name: Dnd5eSettingInsert :execrows
 insert into "dnd5e_setting" (dnd5e_setting_id, common_access, created_by, is_active, system_tags,
-                           user_tags, "name", module, description)
+                             user_tags, "name", module, description)
 VALUES (@dnd5e_setting_id, @common_access, @created_by, @is_active,
         @system_tags, @user_tags, @name, @module, @description);
 
 -- name: Dnd5eSettingUpdate :execrows
 Update "dnd5e_setting" as s
 SET common_access = @common_access
-  ,is_active = @is_active
-  ,system_tags = @system_tags
-  ,user_tags = @user_tags
-  ,"name" = @name
-  ,module = @module
-  ,description = @description
+  , is_active     = @is_active
+  , system_tags   = @system_tags
+  , user_tags     = @user_tags
+  , "name"        = @name
+  , module        = @module
+  , description   = @description
 WHERE s.dnd5e_setting_id = @dnd5e_setting_id;
 
 -- name: Dnd5eSettingFindById :many
@@ -51,41 +51,62 @@ SELECT *
 FROM "dnd5e_setting" w
 WHERE w.dnd5e_setting_id = @dnd5e_setting_id;
 
--- name: Dnd5eSettingUpsertAssignment :execrows
-insert into "dnd5e_setting_assignment" (created_by, user_id, dnd5e_setting_id, role_action)
+-- name: Dnd5eSettingInitialAssignment :execrows
+insert into "role_assignment" (created_by, user_id, role_id, scope_id)
 SELECT @created_by,
        @user_id,
-       @dnd5e_setting_id,
-       @role_action WHERE NOT EXISTS (
-    SELECT 1 FROM dnd5e_setting_assignment
-    WHERE user_id = @user_id AND dnd5e_setting_id = @dnd5e_setting_id AND role_action = @role_action
-);
+       (SELECT MIN(role_id)
+        FROM "role" r
+        WHERE r.scope_id IS NULL
+          AND r.role_subject = 'dnd5e_setting'
+          AND r.assign_on_create = true),
+       @dnd5e_setting_id
+WHERE NOT EXISTS (
+    SELECT 1 FROM role_assignment ra
+    INNER JOIN "role" r ON r.role_id = ra.role_id
+    WHERE ra.user_id = @user_id
+  AND ra.scope_id = @dnd5e_setting_id
+  AND r.scope_id IS NULL
+  AND r.assign_on_create = true
+  AND r.role_subject = 'dnd5e_setting'
+    );
 
 -- name: Dnd5eSettingFindByAssignment :many
 SELECT DISTINCT w.*
 FROM "dnd5e_setting" w
-         INNER JOIN "dnd5e_setting_assignment" wa ON
-    w.dnd5e_setting_id = wa.dnd5e_setting_id
+         INNER JOIN "role_assignment" wa ON
+    w.dnd5e_setting_id = wa.scope_id
+         INNER JOIN "role" r ON
+            r.role_id = wa.role_id
+        AND r.role_subject = 'dnd5e_setting'
 WHERE wa.user_id = @user_id
 ORDER BY w.dnd5e_setting_id desc;
 
 -- name: Dnd5eSettingFindByParams :many
 SELECT DISTINCT w.*
 FROM "dnd5e_setting" w
-         LEFT OUTER JOIN "dnd5e_setting_assignment" wa ON
-        w.dnd5e_setting_id = wa.dnd5e_setting_id
-    AND wa.user_id = @user_id
+         LEFT OUTER JOIN "role_assignment" wa ON
+            w.dnd5e_setting_id = wa.scope_id
+        AND wa.user_id = @user_id
+        AND EXISTS(
+                    SELECT 1
+                    FROM "role" r
+                    WHERE r.role_id = wa.role_id
+                      AND r.role_subject = 'dnd5e_setting')
 WHERE (wa.user_id IS NOT NULL
     OR w.common_access IN ('anyuser', 'public')
-  )
-    AND w.name LIKE @name
+    )
+  AND w.name LIKE @name
 ORDER BY w.dnd5e_setting_id desc;
 
 -- name: Dnd5eSettingFindAssignment :many
 SELECT wa.*
-FROM "dnd5e_setting_assignment" wa
+FROM "role_assignment" wa
+         INNER JOIN "role" r ON
+    r.role_id = wa.role_id
 WHERE wa.user_id = @user_id
-  AND wa.dnd5e_setting_id = @dnd5e_setting_id;
+  AND wa.scope_id = @dnd5e_setting_id
+  AND r.role_subject = 'dnd5e_setting';
 
 -- name: Dnd5eMonsterFindById :many
 SELECT *
@@ -104,12 +125,10 @@ INSERT INTO dnd5e_monster (dnd5e_monster_id, created_by, dnd5e_setting_id, name,
                            user_tags, languages, environments, is_legendary, is_unique, monster_type, alignment,
                            size_category, milli_challenge_rating, armor_class, hit_points, description,
                            str_score, int_score, wis_score, dex_score, con_score, cha_score)
-VALUES (
-           @dnd5e_monster_id, @created_by, @dnd5e_setting_id, @name, @sources,
-           @user_tags, @languages, @environments, @is_legendary, @is_unique, @monster_type, @alignment,
-           @size_category, @milli_challenge_rating, @armor_class, @hit_points, @description,
-           @str_score, @int_score, @wis_score, @dex_score, @con_score, @cha_score
-       );
+VALUES (@dnd5e_monster_id, @created_by, @dnd5e_setting_id, @name, @sources,
+        @user_tags, @languages, @environments, @is_legendary, @is_unique, @monster_type, @alignment,
+        @size_category, @milli_challenge_rating, @armor_class, @hit_points, @description,
+        @str_score, @int_score, @wis_score, @dex_score, @con_score, @cha_score);
 
 -- name: Dnd5eSizeCategoryFindAll :many
 SELECT *

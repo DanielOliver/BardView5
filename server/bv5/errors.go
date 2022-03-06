@@ -16,10 +16,10 @@ const (
 	ErrTFailedToRead
 	ErrTInit
 
-	ObjDnd5eSetting           = "dnd5esetting"
-	ObjDnd5eSettingAssignment = "dnd5esettingassignment"
-	ObjDnd5eMonster           = "dnd5emonster"
-	ObjUser                   = "user"
+	ObjDnd5eSetting   = "dnd5esetting"
+	ObjRoleAssignment = "roleassignment"
+	ObjDnd5eMonster   = "dnd5emonster"
+	ObjUser           = "user"
 
 	DepHttpKratos DepHttpType = "httpkratos"
 )

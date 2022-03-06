@@ -105,12 +105,10 @@ INSERT INTO dnd5e_monster (dnd5e_monster_id, created_by, dnd5e_setting_id, name,
                            user_tags, languages, environments, is_legendary, is_unique, monster_type, alignment,
                            size_category, milli_challenge_rating, armor_class, hit_points, description,
                            str_score, int_score, wis_score, dex_score, con_score, cha_score)
-VALUES (
-           $1, $2, $3, $4, $5,
-           $6, $7, $8, $9, $10, $11, $12,
-           $13, $14, $15, $16, $17,
-           $18, $19, $20, $21, $22, $23
-       )
+VALUES ($1, $2, $3, $4, $5,
+        $6, $7, $8, $9, $10, $11, $12,
+        $13, $14, $15, $16, $17,
+        $18, $19, $20, $21, $22, $23)
 `
 
 type Dnd5eMonsterInsertParams struct {
@@ -235,10 +233,13 @@ func (q *Queries) Dnd5eMonstersFindBySetting(ctx context.Context, arg Dnd5eMonst
 }
 
 const dnd5eSettingFindAssignment = `-- name: Dnd5eSettingFindAssignment :many
-SELECT wa.created_by, wa.created_at, wa.version, wa.user_id, wa.dnd5e_setting_id, wa.role_action
-FROM "dnd5e_setting_assignment" wa
+SELECT wa.created_by, wa.created_at, wa.version, wa.user_id, wa.role_id, wa.scope_id
+FROM "role_assignment" wa
+         INNER JOIN "role" r ON
+    r.role_id = wa.role_id
 WHERE wa.user_id = $1
-  AND wa.dnd5e_setting_id = $2
+  AND wa.scope_id = $2
+  AND r.role_subject = 'dnd5e_setting'
 `
 
 type Dnd5eSettingFindAssignmentParams struct {
@@ -246,22 +247,22 @@ type Dnd5eSettingFindAssignmentParams struct {
 	Dnd5eSettingID int64 `db:"dnd5e_setting_id"`
 }
 
-func (q *Queries) Dnd5eSettingFindAssignment(ctx context.Context, arg Dnd5eSettingFindAssignmentParams) ([]Dnd5eSettingAssignment, error) {
+func (q *Queries) Dnd5eSettingFindAssignment(ctx context.Context, arg Dnd5eSettingFindAssignmentParams) ([]RoleAssignment, error) {
 	rows, err := q.query(ctx, q.dnd5eSettingFindAssignmentStmt, dnd5eSettingFindAssignment, arg.UserID, arg.Dnd5eSettingID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Dnd5eSettingAssignment{}
+	items := []RoleAssignment{}
 	for rows.Next() {
-		var i Dnd5eSettingAssignment
+		var i RoleAssignment
 		if err := rows.Scan(
 			&i.CreatedBy,
 			&i.CreatedAt,
 			&i.Version,
 			&i.UserID,
-			&i.Dnd5eSettingID,
-			&i.RoleAction,
+			&i.RoleID,
+			&i.ScopeID,
 		); err != nil {
 			return nil, err
 		}
@@ -279,8 +280,11 @@ func (q *Queries) Dnd5eSettingFindAssignment(ctx context.Context, arg Dnd5eSetti
 const dnd5eSettingFindByAssignment = `-- name: Dnd5eSettingFindByAssignment :many
 SELECT DISTINCT w.dnd5e_setting_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.name, w.module, w.description
 FROM "dnd5e_setting" w
-         INNER JOIN "dnd5e_setting_assignment" wa ON
-    w.dnd5e_setting_id = wa.dnd5e_setting_id
+         INNER JOIN "role_assignment" wa ON
+    w.dnd5e_setting_id = wa.scope_id
+         INNER JOIN "role" r ON
+            r.role_id = wa.role_id
+        AND r.role_subject = 'dnd5e_setting'
 WHERE wa.user_id = $1
 ORDER BY w.dnd5e_setting_id desc
 `
@@ -364,13 +368,18 @@ func (q *Queries) Dnd5eSettingFindById(ctx context.Context, dnd5eSettingID int64
 const dnd5eSettingFindByParams = `-- name: Dnd5eSettingFindByParams :many
 SELECT DISTINCT w.dnd5e_setting_id, w.created_by, w.created_at, w.version, w.is_active, w.common_access, w.user_tags, w.system_tags, w.name, w.module, w.description
 FROM "dnd5e_setting" w
-         LEFT OUTER JOIN "dnd5e_setting_assignment" wa ON
-        w.dnd5e_setting_id = wa.dnd5e_setting_id
-    AND wa.user_id = $1
+         LEFT OUTER JOIN "role_assignment" wa ON
+            w.dnd5e_setting_id = wa.scope_id
+        AND wa.user_id = $1
+        AND EXISTS(
+                    SELECT 1
+                    FROM "role" r
+                    WHERE r.role_id = wa.role_id
+                      AND r.role_subject = 'dnd5e_setting')
 WHERE (wa.user_id IS NOT NULL
     OR w.common_access IN ('anyuser', 'public')
-  )
-    AND w.name LIKE $2
+    )
+  AND w.name LIKE $2
 ORDER BY w.dnd5e_setting_id desc
 `
 
@@ -414,9 +423,44 @@ func (q *Queries) Dnd5eSettingFindByParams(ctx context.Context, arg Dnd5eSetting
 	return items, nil
 }
 
+const dnd5eSettingInitialAssignment = `-- name: Dnd5eSettingInitialAssignment :execrows
+insert into "role_assignment" (created_by, user_id, role_id, scope_id)
+SELECT $1,
+       $2,
+       (SELECT MIN(role_id)
+        FROM "role" r
+        WHERE r.scope_id IS NULL
+          AND r.role_subject = 'dnd5e_setting'
+          AND r.assign_on_create = true),
+       $3
+WHERE NOT EXISTS (
+    SELECT 1 FROM role_assignment ra
+    INNER JOIN "role" r ON r.role_id = ra.role_id
+    WHERE ra.user_id = $2
+  AND ra.scope_id = $3
+  AND r.scope_id IS NULL
+  AND r.assign_on_create = true
+  AND r.role_subject = 'dnd5e_setting'
+    )
+`
+
+type Dnd5eSettingInitialAssignmentParams struct {
+	CreatedBy      sql.NullInt64 `db:"created_by"`
+	UserID         int64         `db:"user_id"`
+	Dnd5eSettingID int64         `db:"dnd5e_setting_id"`
+}
+
+func (q *Queries) Dnd5eSettingInitialAssignment(ctx context.Context, arg Dnd5eSettingInitialAssignmentParams) (int64, error) {
+	result, err := q.exec(ctx, q.dnd5eSettingInitialAssignmentStmt, dnd5eSettingInitialAssignment, arg.CreatedBy, arg.UserID, arg.Dnd5eSettingID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const dnd5eSettingInsert = `-- name: Dnd5eSettingInsert :execrows
 insert into "dnd5e_setting" (dnd5e_setting_id, common_access, created_by, is_active, system_tags,
-                           user_tags, "name", module, description)
+                             user_tags, "name", module, description)
 VALUES ($1, $2, $3, $4,
         $5, $6, $7, $8, $9)
 `
@@ -454,12 +498,12 @@ func (q *Queries) Dnd5eSettingInsert(ctx context.Context, arg Dnd5eSettingInsert
 const dnd5eSettingUpdate = `-- name: Dnd5eSettingUpdate :execrows
 Update "dnd5e_setting" as s
 SET common_access = $1
-  ,is_active = $2
-  ,system_tags = $3
-  ,user_tags = $4
-  ,"name" = $5
-  ,module = $6
-  ,description = $7
+  , is_active     = $2
+  , system_tags   = $3
+  , user_tags     = $4
+  , "name"        = $5
+  , module        = $6
+  , description   = $7
 WHERE s.dnd5e_setting_id = $8
 `
 
@@ -484,37 +528,6 @@ func (q *Queries) Dnd5eSettingUpdate(ctx context.Context, arg Dnd5eSettingUpdate
 		arg.Module,
 		arg.Description,
 		arg.Dnd5eSettingID,
-	)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected()
-}
-
-const dnd5eSettingUpsertAssignment = `-- name: Dnd5eSettingUpsertAssignment :execrows
-insert into "dnd5e_setting_assignment" (created_by, user_id, dnd5e_setting_id, role_action)
-SELECT $1,
-       $2,
-       $3,
-       $4 WHERE NOT EXISTS (
-    SELECT 1 FROM dnd5e_setting_assignment
-    WHERE user_id = $2 AND dnd5e_setting_id = $3 AND role_action = $4
-)
-`
-
-type Dnd5eSettingUpsertAssignmentParams struct {
-	CreatedBy      sql.NullInt64 `db:"created_by"`
-	UserID         int64         `db:"user_id"`
-	Dnd5eSettingID int64         `db:"dnd5e_setting_id"`
-	RoleAction     string        `db:"role_action"`
-}
-
-func (q *Queries) Dnd5eSettingUpsertAssignment(ctx context.Context, arg Dnd5eSettingUpsertAssignmentParams) (int64, error) {
-	result, err := q.exec(ctx, q.dnd5eSettingUpsertAssignmentStmt, dnd5eSettingUpsertAssignment,
-		arg.CreatedBy,
-		arg.UserID,
-		arg.Dnd5eSettingID,
-		arg.RoleAction,
 	)
 	if err != nil {
 		return 0, err

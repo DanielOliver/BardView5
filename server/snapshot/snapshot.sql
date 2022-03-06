@@ -118,22 +118,6 @@ CREATE TABLE public.dnd5e_setting (
 ALTER TABLE public.dnd5e_setting OWNER TO postgres;
 
 --
--- Name: dnd5e_setting_assignment; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.dnd5e_setting_assignment (
-    created_by bigint,
-    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    version bigint DEFAULT 0 NOT NULL,
-    user_id bigint NOT NULL,
-    dnd5e_setting_id bigint NOT NULL,
-    role_action text NOT NULL
-);
-
-
-ALTER TABLE public.dnd5e_setting_assignment OWNER TO postgres;
-
---
 -- Name: dnd5e_size_category; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -149,6 +133,26 @@ CREATE TABLE public.dnd5e_size_category (
 ALTER TABLE public.dnd5e_size_category OWNER TO postgres;
 
 --
+-- Name: role; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.role (
+    role_id bigint NOT NULL,
+    name text NOT NULL,
+    created_by bigint,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    role_type text NOT NULL,
+    role_subject text NOT NULL,
+    scope_id bigint,
+    capabilities text[] NOT NULL,
+    assign_on_create boolean DEFAULT false NOT NULL,
+    assign_on_add boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public.role OWNER TO postgres;
+
+--
 -- Name: role_action; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -162,6 +166,22 @@ CREATE TABLE public.role_action (
 ALTER TABLE public.role_action OWNER TO postgres;
 
 --
+-- Name: role_assignment; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.role_assignment (
+    created_by bigint,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    version bigint DEFAULT 0 NOT NULL,
+    user_id bigint NOT NULL,
+    role_id bigint NOT NULL,
+    scope_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.role_assignment OWNER TO postgres;
+
+--
 -- Name: role_subject; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -172,6 +192,18 @@ CREATE TABLE public.role_subject (
 
 
 ALTER TABLE public.role_subject OWNER TO postgres;
+
+--
+-- Name: role_type; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.role_type (
+    name text NOT NULL,
+    created_at timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+
+ALTER TABLE public.role_type OWNER TO postgres;
 
 --
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: postgres
@@ -241,14 +273,6 @@ ALTER TABLE ONLY public.dnd5e_monster_type
 
 
 --
--- Name: dnd5e_setting_assignment dnd5e_setting_assignment_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_setting_assignment
-    ADD CONSTRAINT dnd5e_setting_assignment_pk PRIMARY KEY (user_id, dnd5e_setting_id);
-
-
---
 -- Name: dnd5e_setting dnd5e_setting_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -269,7 +293,23 @@ ALTER TABLE ONLY public.dnd5e_size_category
 --
 
 ALTER TABLE ONLY public.role_action
-    ADD CONSTRAINT role_action_pk PRIMARY KEY (name);
+    ADD CONSTRAINT role_action_pk PRIMARY KEY (name, role_subject);
+
+
+--
+-- Name: role_assignment role_assignment_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.role_assignment
+    ADD CONSTRAINT role_assignment_pk PRIMARY KEY (user_id, scope_id, role_id);
+
+
+--
+-- Name: role role_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.role
+    ADD CONSTRAINT role_pk PRIMARY KEY (role_id);
 
 
 --
@@ -278,6 +318,14 @@ ALTER TABLE ONLY public.role_action
 
 ALTER TABLE ONLY public.role_subject
     ADD CONSTRAINT role_subject_pk PRIMARY KEY (name);
+
+
+--
+-- Name: role_type role_type_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.role_type
+    ADD CONSTRAINT role_type_pk PRIMARY KEY (name);
 
 
 --
@@ -373,30 +421,6 @@ ALTER TABLE ONLY public.dnd5e_monster_type
 
 
 --
--- Name: dnd5e_setting_assignment fk_dnd5e_setting_assignment_role_action; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_setting_assignment
-    ADD CONSTRAINT fk_dnd5e_setting_assignment_role_action FOREIGN KEY (role_action) REFERENCES public.role_action(name);
-
-
---
--- Name: dnd5e_setting_assignment fk_dnd5e_setting_assignment_setting; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_setting_assignment
-    ADD CONSTRAINT fk_dnd5e_setting_assignment_setting FOREIGN KEY (dnd5e_setting_id) REFERENCES public.dnd5e_setting(dnd5e_setting_id);
-
-
---
--- Name: dnd5e_setting_assignment fk_dnd5e_setting_assignment_user; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dnd5e_setting_assignment
-    ADD CONSTRAINT fk_dnd5e_setting_assignment_user FOREIGN KEY (user_id) REFERENCES public."user"(user_id);
-
-
---
 -- Name: dnd5e_setting fk_dnd5e_setting_commonaccess; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -426,6 +450,46 @@ ALTER TABLE ONLY public.dnd5e_size_category
 
 ALTER TABLE ONLY public.role_action
     ADD CONSTRAINT fk_role_action_subject FOREIGN KEY (role_subject) REFERENCES public.role_subject(name);
+
+
+--
+-- Name: role fk_role_action_subject; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.role
+    ADD CONSTRAINT fk_role_action_subject FOREIGN KEY (role_subject) REFERENCES public.role_subject(name);
+
+
+--
+-- Name: role_assignment fk_role_assignment_role; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.role_assignment
+    ADD CONSTRAINT fk_role_assignment_role FOREIGN KEY (role_id) REFERENCES public.role(role_id);
+
+
+--
+-- Name: role_assignment fk_role_assignment_user; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.role_assignment
+    ADD CONSTRAINT fk_role_assignment_user FOREIGN KEY (user_id) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: role fk_role_createdby; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.role
+    ADD CONSTRAINT fk_role_createdby FOREIGN KEY (created_by) REFERENCES public."user"(user_id);
+
+
+--
+-- Name: role fk_role_type_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.role
+    ADD CONSTRAINT fk_role_type_fk FOREIGN KEY (role_type) REFERENCES public.role_type(name);
 
 
 --

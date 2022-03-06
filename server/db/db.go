@@ -46,14 +46,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.dnd5eSettingFindByParamsStmt, err = db.PrepareContext(ctx, dnd5eSettingFindByParams); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eSettingFindByParams: %w", err)
 	}
+	if q.dnd5eSettingInitialAssignmentStmt, err = db.PrepareContext(ctx, dnd5eSettingInitialAssignment); err != nil {
+		return nil, fmt.Errorf("error preparing query Dnd5eSettingInitialAssignment: %w", err)
+	}
 	if q.dnd5eSettingInsertStmt, err = db.PrepareContext(ctx, dnd5eSettingInsert); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eSettingInsert: %w", err)
 	}
 	if q.dnd5eSettingUpdateStmt, err = db.PrepareContext(ctx, dnd5eSettingUpdate); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eSettingUpdate: %w", err)
-	}
-	if q.dnd5eSettingUpsertAssignmentStmt, err = db.PrepareContext(ctx, dnd5eSettingUpsertAssignment); err != nil {
-		return nil, fmt.Errorf("error preparing query Dnd5eSettingUpsertAssignment: %w", err)
 	}
 	if q.dnd5eSizeCategoryFindAllStmt, err = db.PrepareContext(ctx, dnd5eSizeCategoryFindAll); err != nil {
 		return nil, fmt.Errorf("error preparing query Dnd5eSizeCategoryFindAll: %w", err)
@@ -118,6 +118,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing dnd5eSettingFindByParamsStmt: %w", cerr)
 		}
 	}
+	if q.dnd5eSettingInitialAssignmentStmt != nil {
+		if cerr := q.dnd5eSettingInitialAssignmentStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing dnd5eSettingInitialAssignmentStmt: %w", cerr)
+		}
+	}
 	if q.dnd5eSettingInsertStmt != nil {
 		if cerr := q.dnd5eSettingInsertStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing dnd5eSettingInsertStmt: %w", cerr)
@@ -126,11 +131,6 @@ func (q *Queries) Close() error {
 	if q.dnd5eSettingUpdateStmt != nil {
 		if cerr := q.dnd5eSettingUpdateStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing dnd5eSettingUpdateStmt: %w", cerr)
-		}
-	}
-	if q.dnd5eSettingUpsertAssignmentStmt != nil {
-		if cerr := q.dnd5eSettingUpsertAssignmentStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing dnd5eSettingUpsertAssignmentStmt: %w", cerr)
 		}
 	}
 	if q.dnd5eSizeCategoryFindAllStmt != nil {
@@ -200,47 +200,47 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                               DBTX
-	tx                               *sql.Tx
-	dnd5eLanguageFindAllStmt         *sql.Stmt
-	dnd5eMonsterFindByIdStmt         *sql.Stmt
-	dnd5eMonsterInsertStmt           *sql.Stmt
-	dnd5eMonstersFindBySettingStmt   *sql.Stmt
-	dnd5eSettingFindAssignmentStmt   *sql.Stmt
-	dnd5eSettingFindByAssignmentStmt *sql.Stmt
-	dnd5eSettingFindByIdStmt         *sql.Stmt
-	dnd5eSettingFindByParamsStmt     *sql.Stmt
-	dnd5eSettingInsertStmt           *sql.Stmt
-	dnd5eSettingUpdateStmt           *sql.Stmt
-	dnd5eSettingUpsertAssignmentStmt *sql.Stmt
-	dnd5eSizeCategoryFindAllStmt     *sql.Stmt
-	userFindByEmailStmt              *sql.Stmt
-	userFindByIdStmt                 *sql.Stmt
-	userFindByUuidStmt               *sql.Stmt
-	userInsertStmt                   *sql.Stmt
-	userUpdateStmt                   *sql.Stmt
+	db                                DBTX
+	tx                                *sql.Tx
+	dnd5eLanguageFindAllStmt          *sql.Stmt
+	dnd5eMonsterFindByIdStmt          *sql.Stmt
+	dnd5eMonsterInsertStmt            *sql.Stmt
+	dnd5eMonstersFindBySettingStmt    *sql.Stmt
+	dnd5eSettingFindAssignmentStmt    *sql.Stmt
+	dnd5eSettingFindByAssignmentStmt  *sql.Stmt
+	dnd5eSettingFindByIdStmt          *sql.Stmt
+	dnd5eSettingFindByParamsStmt      *sql.Stmt
+	dnd5eSettingInitialAssignmentStmt *sql.Stmt
+	dnd5eSettingInsertStmt            *sql.Stmt
+	dnd5eSettingUpdateStmt            *sql.Stmt
+	dnd5eSizeCategoryFindAllStmt      *sql.Stmt
+	userFindByEmailStmt               *sql.Stmt
+	userFindByIdStmt                  *sql.Stmt
+	userFindByUuidStmt                *sql.Stmt
+	userInsertStmt                    *sql.Stmt
+	userUpdateStmt                    *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                               tx,
-		tx:                               tx,
-		dnd5eLanguageFindAllStmt:         q.dnd5eLanguageFindAllStmt,
-		dnd5eMonsterFindByIdStmt:         q.dnd5eMonsterFindByIdStmt,
-		dnd5eMonsterInsertStmt:           q.dnd5eMonsterInsertStmt,
-		dnd5eMonstersFindBySettingStmt:   q.dnd5eMonstersFindBySettingStmt,
-		dnd5eSettingFindAssignmentStmt:   q.dnd5eSettingFindAssignmentStmt,
-		dnd5eSettingFindByAssignmentStmt: q.dnd5eSettingFindByAssignmentStmt,
-		dnd5eSettingFindByIdStmt:         q.dnd5eSettingFindByIdStmt,
-		dnd5eSettingFindByParamsStmt:     q.dnd5eSettingFindByParamsStmt,
-		dnd5eSettingInsertStmt:           q.dnd5eSettingInsertStmt,
-		dnd5eSettingUpdateStmt:           q.dnd5eSettingUpdateStmt,
-		dnd5eSettingUpsertAssignmentStmt: q.dnd5eSettingUpsertAssignmentStmt,
-		dnd5eSizeCategoryFindAllStmt:     q.dnd5eSizeCategoryFindAllStmt,
-		userFindByEmailStmt:              q.userFindByEmailStmt,
-		userFindByIdStmt:                 q.userFindByIdStmt,
-		userFindByUuidStmt:               q.userFindByUuidStmt,
-		userInsertStmt:                   q.userInsertStmt,
-		userUpdateStmt:                   q.userUpdateStmt,
+		db:                                tx,
+		tx:                                tx,
+		dnd5eLanguageFindAllStmt:          q.dnd5eLanguageFindAllStmt,
+		dnd5eMonsterFindByIdStmt:          q.dnd5eMonsterFindByIdStmt,
+		dnd5eMonsterInsertStmt:            q.dnd5eMonsterInsertStmt,
+		dnd5eMonstersFindBySettingStmt:    q.dnd5eMonstersFindBySettingStmt,
+		dnd5eSettingFindAssignmentStmt:    q.dnd5eSettingFindAssignmentStmt,
+		dnd5eSettingFindByAssignmentStmt:  q.dnd5eSettingFindByAssignmentStmt,
+		dnd5eSettingFindByIdStmt:          q.dnd5eSettingFindByIdStmt,
+		dnd5eSettingFindByParamsStmt:      q.dnd5eSettingFindByParamsStmt,
+		dnd5eSettingInitialAssignmentStmt: q.dnd5eSettingInitialAssignmentStmt,
+		dnd5eSettingInsertStmt:            q.dnd5eSettingInsertStmt,
+		dnd5eSettingUpdateStmt:            q.dnd5eSettingUpdateStmt,
+		dnd5eSizeCategoryFindAllStmt:      q.dnd5eSizeCategoryFindAllStmt,
+		userFindByEmailStmt:               q.userFindByEmailStmt,
+		userFindByIdStmt:                  q.userFindByIdStmt,
+		userFindByUuidStmt:                q.userFindByUuidStmt,
+		userInsertStmt:                    q.userInsertStmt,
+		userUpdateStmt:                    q.userUpdateStmt,
 	}
 }

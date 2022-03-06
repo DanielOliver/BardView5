@@ -5,6 +5,11 @@ create table "common_access"
     created_at timestamp without time zone default (now() at time zone 'utc') not null
 );
 
+INSERT INTO common_access (name)
+VALUES ('private'),
+       ('anyuser'),
+       ('public');
+
 create table "user"
 (
     user_id        bigint
@@ -42,30 +47,92 @@ create table "role_subject"
     created_at timestamp without time zone default (now() at time zone 'utc') not null
 );
 
+INSERT INTO role_subject (name)
+VALUES ('dnd5e_setting');
+
+create table "role_type"
+(
+    name       text
+        constraint role_type_pk primary key,
+    created_at timestamp without time zone default (now() at time zone 'utc') not null
+);
+
+INSERT INTO role_type (name)
+VALUES ('innate'),
+       ('custom');
+
 create table "role_action"
 (
-    name         text
-        constraint role_action_pk primary key,
+    name         text                                                           not null,
     role_subject text                                                           not null,
     created_at   timestamp without time zone default (now() at time zone 'utc') not null,
+
+    constraint role_action_pk primary key (name, role_subject),
 
     CONSTRAINT fk_role_action_subject
         FOREIGN KEY (role_subject)
             REFERENCES "role_subject" (name)
 );
 
-INSERT INTO role_subject (name)
-VALUES ('dnd5esetting');
-
 INSERT INTO role_action (name, role_subject)
-VALUES ('manage', 'dnd5esetting'),
-       ('owner', 'dnd5esetting'),
-       ('view', 'dnd5esetting');
+VALUES ('manage', 'dnd5e_setting'),
+       ('owner', 'dnd5e_setting'),
+       ('view', 'dnd5e_setting');
 
-INSERT INTO common_access (name)
-VALUES ('private'),
-       ('anyuser'),
-       ('public');
+create table "role"
+(
+    role_id          bigint
+        constraint role_pk
+            primary key,
+    name             text                                                           not null,
+    created_by       bigint                                                         null,
+    created_at       timestamp without time zone default (now() at time zone 'utc') not null,
+    role_type        text                                                           not null,
+    role_subject     text                                                           not null,
+    -- If populated, FK to a specific record.
+    scope_id         bigint                                                         null,
+    -- FK to role_action
+    capabilities     text[]                                                         not null,
+    assign_on_create boolean                     default (false)                    not null,
+    assign_on_add    boolean                     default (false)                    not null,
+
+    CONSTRAINT fk_role_createdby
+        FOREIGN KEY (created_by)
+            REFERENCES "user" (user_id),
+    CONSTRAINT fk_role_type_fk
+        FOREIGN KEY (role_type)
+            REFERENCES role_type (name),
+    CONSTRAINT fk_role_action_subject
+        FOREIGN KEY (role_subject)
+            REFERENCES "role_subject" (name)
+);
+
+INSERT INTO role (role_id, role_type, role_subject, scope_id, capabilities, name, assign_on_create, assign_on_add)
+VALUES (10, 'innate', 'dnd5e_setting', null, '{ "view", "manage", "owner" }', 'Owner', true, false),
+       (20, 'innate', 'dnd5e_setting', null, '{ "view", "manage", "owner" }', 'Admin', false, false),
+       (30, 'innate', 'dnd5e_setting', null, '{ "view" }', 'Viewer', false, true);
+
+create table "role_assignment"
+(
+    created_by   bigint null,
+    created_at   timestamp without time zone default (now() at time zone 'utc') not null,
+    version      bigint not null             default (0),
+    user_id      bigint not null,
+    role_id      bigint not null,
+    -- FK to a specific record, such as a setting. Defaults to this if not specified on Role.
+    -- COALESCE(role.scope_id, role_assignment.scope_id)
+    scope_id     bigint not null,
+
+    CONSTRAINT role_assignment_pk
+        PRIMARY KEY (user_id, scope_id, role_id),
+
+    CONSTRAINT fk_role_assignment_user
+        FOREIGN KEY (user_id)
+            REFERENCES "user" (user_id),
+    CONSTRAINT fk_role_assignment_role
+        FOREIGN KEY (role_id)
+            REFERENCES "role" (role_id)
+);
 
 create table "dnd5e_setting"
 (
@@ -89,32 +156,7 @@ create table "dnd5e_setting"
     CONSTRAINT fk_dnd5e_setting_commonaccess
         FOREIGN KEY (common_access)
             REFERENCES common_access (name)
-
 );
-
-create table "dnd5e_setting_assignment"
-(
-    created_by       bigint null,
-    created_at       timestamp without time zone default (now() at time zone 'utc') not null,
-    version          bigint not null             default (0),
-    user_id          bigint not null,
-    dnd5e_setting_id bigint not null,
-    role_action      text   not null,
-
-    CONSTRAINT dnd5e_setting_assignment_pk
-        PRIMARY KEY (user_id, dnd5e_setting_id),
-
-    CONSTRAINT fk_dnd5e_setting_assignment_user
-        FOREIGN KEY (user_id)
-            REFERENCES "user" (user_id),
-    CONSTRAINT fk_dnd5e_setting_assignment_setting
-        FOREIGN KEY (dnd5e_setting_id)
-            REFERENCES "dnd5e_setting" (dnd5e_setting_id),
-    CONSTRAINT fk_dnd5e_setting_assignment_role_action
-        FOREIGN KEY (role_action)
-            REFERENCES "role_action" (name)
-);
-
 
 create table "dnd5e_monster_type"
 (
@@ -145,9 +187,16 @@ create table "dnd5e_size_category"
             REFERENCES "user" (user_id)
 );
 
+INSERT INTO "dnd5e_size_category" (name, space)
+VALUES ('Tiny', '2½ by 2½ ft.'),
+       ('Small', '5 by 5 ft.'),
+       ('Medium', '5 by 5 ft.'),
+       ('Large', '10 by 10 ft.'),
+       ('Huge', '15 by 15 ft.'),
+       ('Gargantuan', '20 by 20 ft. or larger');
+
 create table "dnd5e_monster"
 (
-
     dnd5e_monster_id       bigint
         constraint dnd5e_monster_pk
             primary key,
@@ -196,7 +245,6 @@ create index dnd5e_monster_setting_name on dnd5e_monster (dnd5e_setting_id, name
 
 create table "dnd5e_language"
 (
-
     dnd5e_language_id bigint
         constraint dnd5e_language_pk
             primary key,
@@ -209,12 +257,3 @@ create table "dnd5e_language"
         FOREIGN KEY (created_by)
             REFERENCES "user" (user_id)
 );
-
-INSERT INTO "dnd5e_size_category" (name, space)
-VALUES ('Tiny', '2½ by 2½ ft.'),
-       ('Small', '5 by 5 ft.'),
-       ('Medium', '5 by 5 ft.'),
-       ('Large', '10 by 10 ft.'),
-       ('Huge', '15 by 15 ft.'),
-       ('Gargantuan', '20 by 20 ft. or larger');
-

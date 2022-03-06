@@ -71,15 +71,6 @@ type Dnd5eSetting struct {
 	Description    string         `db:"description"`
 }
 
-type Dnd5eSettingAssignment struct {
-	CreatedBy      sql.NullInt64 `db:"created_by"`
-	CreatedAt      time.Time     `db:"created_at"`
-	Version        int64         `db:"version"`
-	UserID         int64         `db:"user_id"`
-	Dnd5eSettingID int64         `db:"dnd5e_setting_id"`
-	RoleAction     string        `db:"role_action"`
-}
-
 type Dnd5eSizeCategory struct {
 	CreatedBy sql.NullInt64 `db:"created_by"`
 	CreatedAt time.Time     `db:"created_at"`
@@ -88,13 +79,40 @@ type Dnd5eSizeCategory struct {
 	Space     string        `db:"space"`
 }
 
+type Role struct {
+	RoleID         int64         `db:"role_id"`
+	Name           string        `db:"name"`
+	CreatedBy      sql.NullInt64 `db:"created_by"`
+	CreatedAt      time.Time     `db:"created_at"`
+	RoleType       string        `db:"role_type"`
+	RoleSubject    string        `db:"role_subject"`
+	ScopeID        sql.NullInt64 `db:"scope_id"`
+	Capabilities   []string      `db:"capabilities"`
+	AssignOnCreate bool          `db:"assign_on_create"`
+	AssignOnAdd    bool          `db:"assign_on_add"`
+}
+
 type RoleAction struct {
 	Name        string    `db:"name"`
 	RoleSubject string    `db:"role_subject"`
 	CreatedAt   time.Time `db:"created_at"`
 }
 
+type RoleAssignment struct {
+	CreatedBy sql.NullInt64 `db:"created_by"`
+	CreatedAt time.Time     `db:"created_at"`
+	Version   int64         `db:"version"`
+	UserID    int64         `db:"user_id"`
+	RoleID    int64         `db:"role_id"`
+	ScopeID   int64         `db:"scope_id"`
+}
+
 type RoleSubject struct {
+	Name      string    `db:"name"`
+	CreatedAt time.Time `db:"created_at"`
+}
+
+type RoleType struct {
 	Name      string    `db:"name"`
 	CreatedAt time.Time `db:"created_at"`
 }
