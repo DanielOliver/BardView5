@@ -83,7 +83,7 @@ A self-hosted Fifth Edition Dungeons & Dragons Campaign Management Tool.
 
 ### Prerequisites
 
-* Go 1.17
+* Go 1.18
 * [Mage](https://magefile.org/)
 * Docker
 * Docker Compose

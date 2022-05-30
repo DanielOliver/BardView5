@@ -1,0 +1,62 @@
+schema{
+    query: Query
+}
+
+type Query {
+    setting(id: ID!): Setting
+    assignedSettings: [Setting!]!
+    monster(id: ID!): Monster
+    monsterDescription(id: ID!): MonsterDescription
+}
+
+type Setting {
+    id: ID!
+    name: String!
+    commonAccess: CommonAccess!
+    active: Boolean!
+    module: String
+    description: String
+    version: Int
+    createdDate: String
+    monsters: [Monster!]!
+}
+
+enum MonsterDescriptionLevel {
+    Setting
+    Encounter
+}
+
+type MonsterDescription {
+    id: ID!
+    level: MonsterDescriptionLevel!
+    text: String!
+}
+
+type Monster {
+    id: ID!
+    name: String!
+    description: MonsterDescription!
+    monsterType: String
+    alignment: String
+    sizeCategory: String!
+    armorClass: Int
+    strengthScore: Int
+    intelligenceScore: Int
+    wisdomScore: Int
+    dexterityScore: Int
+    constitutionScore: Int
+    charismaScore: Int
+    hitPoints: Int
+    milliChallengeRating: Int
+    legendary: Boolean!
+    unique: Boolean!
+    setting: Setting!
+    version: Int
+    createdDate: String
+}
+
+enum CommonAccess {
+    Private
+    AnyUser
+    Public
+}
