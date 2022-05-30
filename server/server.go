@@ -3,18 +3,29 @@ package main
 import (
 	"fmt"
 	"github.com/dlmiddlecote/sqlstats"
+	"github.com/docker/distribution/context"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
+	"net/http"
 	"server/bardlog"
 	"server/bardlogic"
 	"server/bardmetric"
 	"server/bv5"
 )
 
+func WrapH(h http.Handler) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request.WithContext(context.WithValues(c.Request.Context(), map[string]interface{}{
+			bv5.Session:       bv5.SessionCriteria(c),
+			bardlog.KeyLogger: bardlog.GetLoggerFromContext(c),
+		})))
+	}
+}
+
 func registerRoutes(router *gin.Engine, b *bv5.BardView5) {
-	graphQlHandler := gin.WrapH(bv5.GraphqlHandler())
+	graphQlHandler := WrapH(bv5.GraphqlHandler(b))
 
 	grpV1 := router.Group("/api/v1")
 	{

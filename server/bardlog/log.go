@@ -1,6 +1,7 @@
 package bardlog
 
 import (
+	"context"
 	"github.com/docker/distribution/uuid"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -22,6 +23,13 @@ const (
 func GetLogger(c *gin.Context) zerolog.Logger {
 	if logger, exists := c.Get(KeyLogger); exists {
 		return logger.(zerolog.Logger)
+	}
+	return log.Logger
+}
+
+func GetLoggerFromContext(c context.Context) zerolog.Logger {
+	if logger, exists := c.Value(KeyLogger).(zerolog.Logger); exists {
+		return logger
 	}
 	return log.Logger
 }

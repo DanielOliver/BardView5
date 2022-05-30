@@ -1,6 +1,7 @@
 package bv5
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	bigcache "github.com/allegro/bigcache/v3"
@@ -38,6 +39,13 @@ type BardView5 struct {
 	Conf       *BardView5Configuration
 	sessions   *bardView5Sessions
 	DepKratos  KratosDep
+}
+
+type BardView5Graphql struct {
+	BardView5 *BardView5
+	Logger    zerolog.Logger
+	Session   SessionContext
+	Context   context.Context
 }
 
 type BardView5Http struct {
