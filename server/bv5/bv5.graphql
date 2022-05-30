@@ -4,21 +4,21 @@ schema{
 
 type Query {
     setting(id: ID!): Setting
-    assignedSettings: [Setting!]!
-    monster(id: ID!): Monster
-    monsterDescription(id: ID!): MonsterDescription
+#    assignedSettings: [Setting!]!
+#    monster(id: ID!): Monster
+#    monsterDescription(id: ID!): MonsterDescription
 }
 
 type Setting {
     id: ID!
     name: String!
-    commonAccess: CommonAccess!
-    active: Boolean!
-    module: String
-    description: String
-    version: Int
-    createdDate: String
-    monsters: [Monster!]!
+#    commonAccess: CommonAccess!
+#    active: Boolean!
+#    module: String
+#    description: String
+#    version: Int
+#    createdDate: String
+#    monsters: [Monster!]!
 }
 
 enum MonsterDescriptionLevel {
