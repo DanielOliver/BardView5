@@ -12,13 +12,13 @@ type Query {
 type Setting {
     id: ID!
     name: String!
-#    commonAccess: CommonAccess!
-#    active: Boolean!
-#    module: String
-#    description: String
-#    version: Int
-#    createdDate: String
-#    monsters: [Monster!]!
+    commonAccess: CommonAccess!
+    active: Boolean!
+    module: String
+    description: String!
+    version: String!
+    createdDate: String!
+    monsters: [Monster!]!
 }
 
 enum MonsterDescriptionLevel {
@@ -35,28 +35,28 @@ type MonsterDescription {
 type Monster {
     id: ID!
     name: String!
-    description: MonsterDescription!
+#    description: MonsterDescription!
     monsterType: String
-    alignment: String
-    sizeCategory: String!
-    armorClass: Int
-    strengthScore: Int
-    intelligenceScore: Int
-    wisdomScore: Int
-    dexterityScore: Int
-    constitutionScore: Int
-    charismaScore: Int
-    hitPoints: Int
-    milliChallengeRating: Int
-    legendary: Boolean!
-    unique: Boolean!
-    setting: Setting!
-    version: Int
-    createdDate: String
+#    alignment: String
+#    sizeCategory: String!
+#    armorClass: Int
+#    strengthScore: Int
+#    intelligenceScore: Int
+#    wisdomScore: Int
+#    dexterityScore: Int
+#    constitutionScore: Int
+#    charismaScore: Int
+#    hitPoints: Int
+#    milliChallengeRating: Int
+#    legendary: Boolean!
+#    unique: Boolean!
+#    setting: Setting!
+#    version: Int
+#    createdDate: String
 }
 
 enum CommonAccess {
-    Private
-    AnyUser
-    Public
+    private
+    anyuser
+    public
 }

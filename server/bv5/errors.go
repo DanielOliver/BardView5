@@ -2,6 +2,7 @@ package bv5
 
 import (
 	"fmt"
+	"github.com/graph-gophers/graphql-go"
 	"net/http"
 )
 
@@ -45,6 +46,18 @@ func (s *SessionError) WriteToContext(b *BardView5Http) {
 	b.Logger.Err(s).Msg("SessionError")
 	status := http.StatusUnauthorized
 	b.Context.AbortWithStatus(status)
+}
+
+type GraphqlError struct {
+	msg        string
+	Object     string
+	Id         string
+	IsInternal bool
+	ErrorType  ErrorType
+}
+
+func (s *GraphqlError) Error() string {
+	return s.msg
 }
 
 type CrudError struct {
@@ -182,5 +195,15 @@ func ErrHttpDepInit(relative string, httpType DepHttpType) *HttpError {
 		Dependency: httpType,
 		Relative:   relative,
 		ErrorType:  ErrTInit,
+	}
+}
+
+func ErrNotFoundGq(obj string, id graphql.ID) *GraphqlError {
+	return &GraphqlError{
+		msg:        fmt.Sprintf("Not Found: %s, %s", obj, id),
+		Object:     obj,
+		Id:         string(id),
+		IsInternal: false,
+		ErrorType:  ErrTNotFound,
 	}
 }

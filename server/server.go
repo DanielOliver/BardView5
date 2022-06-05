@@ -27,6 +27,8 @@ func WrapH(h http.Handler) gin.HandlerFunc {
 func registerRoutes(router *gin.Engine, b *bv5.BardView5) {
 	graphQlHandler := WrapH(bv5.GraphqlHandler(b))
 
+	router.GET("/api/query", graphQlHandler)
+	router.POST("/api/query", graphQlHandler)
 	grpV1 := router.Group("/api/v1")
 	{
 		grpUsers := grpV1.Group("/users")
@@ -54,8 +56,6 @@ func registerRoutes(router *gin.Engine, b *bv5.BardView5) {
 			//}
 		}
 		grpV1.GET("/session", b.ApiGetWhoAmI)
-		grpV1.GET("/query", graphQlHandler)
-		grpV1.POST("/query", graphQlHandler)
 	}
 }
 

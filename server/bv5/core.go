@@ -41,6 +41,14 @@ type BardView5 struct {
 	DepKratos  KratosDep
 }
 
+type WebRequest interface {
+	Bv5() *BardView5
+	L() *zerolog.Logger
+	S() *SessionContext
+	C() context.Context
+	Q() db.Querier
+}
+
 type BardView5Graphql struct {
 	BardView5 *BardView5
 	Logger    zerolog.Logger
@@ -48,11 +56,51 @@ type BardView5Graphql struct {
 	Context   context.Context
 }
 
+func (b *BardView5Graphql) Bv5() *BardView5 {
+	return b.BardView5
+}
+
+func (b *BardView5Graphql) L() *zerolog.Logger {
+	return &b.Logger
+}
+
+func (b *BardView5Graphql) S() *SessionContext {
+	return &b.Session
+}
+
+func (b *BardView5Graphql) C() context.Context {
+	return b.Context
+}
+
+func (b *BardView5Graphql) Q() db.Querier {
+	return b.BardView5.querier
+}
+
 type BardView5Http struct {
 	BardView5 *BardView5
 	Logger    zerolog.Logger
 	Session   SessionContext
 	Context   *gin.Context
+}
+
+func (b *BardView5Http) Bv5() *BardView5 {
+	return b.BardView5
+}
+
+func (b *BardView5Http) L() *zerolog.Logger {
+	return &b.Logger
+}
+
+func (b *BardView5Http) S() *SessionContext {
+	return &b.Session
+}
+
+func (b *BardView5Http) C() context.Context {
+	return b.Context
+}
+
+func (b *BardView5Http) Q() db.Querier {
+	return b.BardView5.querier
 }
 
 type BardView5InitConfig struct {
@@ -157,4 +205,8 @@ func (b *BardView5Http) GenDnd5eSetting() *snowflake.Node {
 }
 func (b *BardView5Http) GenDnd5eMonster() *snowflake.Node {
 	return b.BardView5.generators.dnd5eMonsterNode
+}
+
+func (b *BardView5Graphql) Querier() db.Querier {
+	return b.BardView5.querier
 }
