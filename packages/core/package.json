@@ -20,7 +20,12 @@
   "homepage": "https://github.com/DanielOliver/BardView5#readme",
   "dependencies": {
     "@types/marked": "^4.0.8",
+    "glob": "^8.0.3",
     "gray-matter": "^4.0.3",
-    "marked": "^4.2.5"
+    "marked": "^4.2.5",
+    "short-uuid": "^4.2.2"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.0.0"
   }
 }
