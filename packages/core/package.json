@@ -1,0 +1,25 @@
+{
+  "name": "@bv5/core",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "rm -rf dist/* && tsc -p tsconfig.pkg.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanielOliver/BardView5.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DanielOliver/BardView5/issues"
+  },
+  "homepage": "https://github.com/DanielOliver/BardView5#readme",
+  "dependencies": {
+    "@types/marked": "^4.0.8",
+    "marked": "^4.2.5"
+  }
+}
