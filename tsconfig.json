@@ -3,5 +3,5 @@
   "compilerOptions": {
     "baseUrl": "./"
   },
-  "include": ["./packages/*/**.ts", "packages/core/dnd5e/objects.ts"]
+  "include": ["./packages/*/**.ts"]
 }
