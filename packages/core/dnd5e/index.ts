@@ -1,5 +1,4 @@
 import matter from "gray-matter";
-import { Bv5Obj } from "./classes";
 
 export interface IMarkdown<T> {
   content: string;
