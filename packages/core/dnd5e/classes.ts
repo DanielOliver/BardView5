@@ -1,6 +1,7 @@
 export interface Bv5Obj {
   id: string;
   t: string;
+  c?: string;
 }
 
 export interface ICreatureTypeOptions {
