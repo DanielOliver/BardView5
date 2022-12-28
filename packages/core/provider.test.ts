@@ -6,9 +6,9 @@ describe("FileProvider", () => {
   const provider = new Bv5ProviderFileSystem("test_out");
 
   beforeAll(() => {
-    const entries = provider.getEntries("Creature");
+    const entries = provider.getEntries("Creature").as();
     if (entries.ok) {
-      entries.success.forEach((entry) => {
+      entries.value.forEach((entry) => {
         provider.removeEntry({
           id: entry.id,
           t: entry.t,
@@ -36,12 +36,12 @@ describe("FileProvider", () => {
       fail(entrySave.err);
     }
 
-    const entrySearch2 = provider.getEntry(entryId);
+    const entrySearch2 = provider.getEntry(entryId).as();
     if (!entrySearch2.ok) {
       fail(entrySearch2.err);
     }
-    expect(entrySearch2.success.id).toBe(entryId);
-    expect(entrySearch2.success.t).toBe("Creature");
-    expect(entrySearch2.success.c).toBeUndefined();
+    expect(entrySearch2.value.id).toBe(entryId);
+    expect(entrySearch2.value.t).toBe("Creature");
+    expect(entrySearch2.value.c).toBeUndefined();
   });
 });

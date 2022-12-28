@@ -1,31 +1,47 @@
-// export interface Result<TSuccess, TError> {
-//   ok: boolean;
-//   success?: TSuccess;
-//   err?: TError;
-// }
-
-export type Result<TSuccess, TError> =
+export type Res<TSuccess, TError> =
   | {
       ok: true;
-      success: TSuccess;
+      value: TSuccess;
     }
   | {
       ok: false;
-      err: TError;
+      err?: TError;
     };
+
+export class Result<TSuccess, TError> {
+  constructor(
+    public readonly ok: boolean,
+    public readonly value?: TSuccess,
+    public readonly err?: TError
+  ) {}
+
+  map<TNext>(callback: (v: TSuccess) => TNext): Result<TNext, TError> {
+    if ((!this.ok && !!this.err) || !this.value) {
+      return new Result<TNext, TError>(false, undefined, this.err);
+    }
+    return new Result<TNext, TError>(true, callback(this.value), undefined);
+  }
+
+  as(): Res<TSuccess, TError> {
+    if (this.ok && this.value) {
+      return {
+        ok: true,
+        value: this.value,
+      };
+    }
+    return {
+      ok: false,
+      err: this.err,
+    };
+  }
+}
 
 export function Ok<TSuccess, TError>(
   value: TSuccess
 ): Result<TSuccess, TError> {
-  return {
-    ok: true,
-    success: value,
-  };
+  return new Result<TSuccess, TError>(true, value, undefined);
 }
 
 export function Err<TSuccess, TError>(value: TError): Result<TSuccess, TError> {
-  return {
-    ok: false,
-    err: value,
-  };
+  return new Result<TSuccess, TError>(false, undefined, value);
 }

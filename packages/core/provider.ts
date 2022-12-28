@@ -3,7 +3,7 @@ import { Bv5Obj } from "./dnd5e/classes";
 import { extractData } from "./dnd5e/index";
 import { Err, Ok, Result } from "./result";
 import glob from "glob";
-import { mkdirSync, readFileSync, writeFileSync, rmSync, rm } from "fs";
+import { mkdirSync, readFileSync, writeFileSync, rmSync } from "fs";
 
 export interface IBv5Provider {
   removeEntry(item: Bv5Obj): Result<number, string>;
@@ -21,7 +21,6 @@ export class Bv5ProviderFileSystem implements IBv5Provider {
   removeEntry(item: Bv5Obj): Result<number, string> {
     try {
       const fullPath = path.join(this._fullPath, item.t, item.id + ".json");
-      //   console.log("Fullpath", fullPath);
       rmSync(fullPath);
       return Ok(1);
     } catch (error) {
