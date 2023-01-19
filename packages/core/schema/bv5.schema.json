@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Bv5",
+    "description": "A bardview5 object",
+    "type": "object",
+    "properties": {
+        "id": {
+            "description": "A simple ID to reference by",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^([-0-9.a-zA-Z]+[/])*[-0-9.a-zA-Z]+$"
+        },
+        "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+        }
+    },
+    "required": [
+        "id",
+        "name"
+    ]
+}

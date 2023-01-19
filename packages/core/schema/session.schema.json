@@ -1,0 +1,28 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Session",
+    "description": "A session",
+    "type": "object",
+    "properties": {
+        "id": {
+            "description": "A simple ID to reference by",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^([-0-9.a-zA-Z]+[/])*[-0-9.a-zA-Z]+$"
+        },
+        "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+        },
+        "date": {
+            "type": "string",
+            "format": "date"
+        }
+    },
+    "required": [
+        "id",
+        "name"
+    ]
+}

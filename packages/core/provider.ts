@@ -1,6 +1,6 @@
 import path from "path";
-import { Bv5Obj } from "./dnd5e/classes";
-import { extractData } from "./dnd5e/index";
+import { Bv5Obj } from "./open/classes";
+import { extractData } from "./open/index";
 import { Err, Ok, Result } from "./result";
 import glob from "glob";
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from "fs";
