@@ -1,15 +1,16 @@
 import path from "path";
-import { Bv5Obj } from "./open/classes";
+import { Bv5 } from "./open/classes";
 import { extractData } from "./open/index";
 import { Err, Ok, Result } from "./result";
 import glob from "glob";
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from "fs";
 
 export interface IBv5Provider {
-  removeEntry(item: Bv5Obj): Result<number, string>;
-  saveEntry(item: Bv5Obj): Result<number, string>;
-  getEntry(id: string): Result<Bv5Obj, string>;
-  getEntries(t: string): Result<Bv5Obj[], string>;
+  removeEntry(item: Bv5): Result<number, string>;
+  saveEntry(item: Bv5): Result<number, string>;
+  getEntry(id: string): Result<Bv5, string>;
+  getEntryFromPath(file: string): Result<Bv5, string>;
+  getEntries(t: string): Result<Bv5[], string>;
 }
 
 export class Bv5ProviderFileSystem implements IBv5Provider {
@@ -18,21 +19,17 @@ export class Bv5ProviderFileSystem implements IBv5Provider {
   constructor(location: string) {
     this._fullPath = path.resolve(location);
   }
-  removeEntry(item: Bv5Obj): Result<number, string> {
+  removeEntry(item: Bv5): Result<number, string> {
     try {
-      const fullPath = path.join(this._fullPath, item.t, item.id + ".json");
+      const fullPath = path.join(this._fullPath, item.id + ".json");
       rmSync(fullPath);
       return Ok(1);
     } catch (error) {
       return Err(`${error}`);
     }
   }
-  saveEntry(item: Bv5Obj): Result<number, string> {
-    const savePath = path.join(
-      this._fullPath,
-      item.t.toLowerCase(),
-      item.id + ".json"
-    );
+  saveEntry(item: Bv5): Result<number, string> {
+    const savePath = path.join(this._fullPath, item.id + ".json");
     try {
       mkdirSync(path.dirname(savePath), { recursive: true });
       writeFileSync(savePath, JSON.stringify(item, null, 2));
@@ -41,7 +38,7 @@ export class Bv5ProviderFileSystem implements IBv5Provider {
       return Err(`Failed to write file at ${savePath}; because ${error}`);
     }
   }
-  getEntry(id: string): Result<Bv5Obj, "404" | string> {
+  getEntry(id: string): Result<Bv5, "404" | string> {
     try {
       const files = glob.sync(id + ".@(json|md)", {
         matchBase: true,
@@ -60,11 +57,11 @@ export class Bv5ProviderFileSystem implements IBv5Provider {
         return Ok({
           id: json.id,
           t: json.t,
-          c: json.c,
+          name: json.name,
         });
       }
       if (ext === ".md") {
-        return Ok(extractData<Bv5Obj>(fileContents));
+        return Ok(extractData<Bv5>(fileContents));
       }
 
       return Err(`Unknown file extension ${ext}`);
@@ -72,18 +69,59 @@ export class Bv5ProviderFileSystem implements IBv5Provider {
       return Err("Failed!");
     }
   }
-  getEntries(t: string): Result<Bv5Obj[], string> {
-    const files = glob.sync(t.toLowerCase() + "/**/" + "*.@(json|md)", {
+  getEntryFromPath(file: string): Result<Bv5, "404" | string> {
+    try {
+      if (!path.isAbsolute(file)) {
+        file = path.join(this._fullPath, file);
+      }
+
+      const fileContents = readFileSync(file, "utf-8");
+      const ext = path.extname(file);
+      if (ext === ".json") {
+        const json = JSON.parse(fileContents);
+        return Ok({
+          id: json.id,
+          t: json.t,
+          name: json.name,
+        });
+      }
+      if (ext === ".md") {
+        return Ok(extractData<Bv5>(fileContents));
+      }
+
+      return Err(`Unknown file extension ${ext}`);
+    } catch (error) {
+      return Err("Failed!");
+    }
+  }
+  getEntries(t: string): Result<Bv5[], string> {
+    let globPath = "**/" + "*.@(json|md)";
+    if (t.trim().length > 0 && !t.trim().startsWith("/")) {
+      globPath = t.toLowerCase() + "/**/" + "*.@(json|md)";
+    }
+    const files = glob.sync(globPath, {
       matchBase: true,
       absolute: true,
       cwd: this._fullPath,
     });
 
-    return Ok(
-      files.map((value) => ({
-        id: path.parse(value).name,
-        t: t,
-      }))
-    );
+    const failures: string[] = [];
+    const successes: Bv5[] = [];
+    files.forEach((filePath) => {
+      this.getEntryFromPath(filePath).chain(
+        (value) => {
+          successes.push(value);
+        },
+        (err) => {
+          failures.push(`Failure loading entry ${path} with ${err}`);
+        }
+      );
+    });
+
+    if (failures.length > 0) {
+      return Err(failures.join("; "));
+    }
+
+    return Ok(successes);
   }
 }

@@ -34,6 +34,14 @@ export class Result<TSuccess, TError> {
       err: this.err,
     };
   }
+
+  chain(callback: (v: TSuccess) => void, fail?: (e: TError) => void) {
+    if (this.ok && this.value) {
+      callback(this.value);
+    } else if (fail && this.err) {
+      fail(this.err);
+    }
+  }
 }
 
 export function Ok<TSuccess, TError>(

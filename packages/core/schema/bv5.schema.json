@@ -15,10 +15,17 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 200
+        },
+        "t": {
+            "description": "Type of object",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
         }
     },
     "required": [
         "id",
-        "name"
+        "name",
+        "t"
     ]
 }

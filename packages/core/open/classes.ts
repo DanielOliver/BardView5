@@ -1,5 +1,6 @@
 export interface Bv5 {
   id: string;
+  t: string;
   name: string;
 }
 
@@ -7,12 +8,6 @@ export interface Bv5Session {
   id: string;
   name: string;
   date?: string;
-}
-
-export interface Bv5Obj {
-  id: string;
-  t: string;
-  c?: string;
 }
 
 export interface ICreatureTypeOptions {
